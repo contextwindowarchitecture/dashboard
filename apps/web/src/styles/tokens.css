@@ -1,0 +1,122 @@
+/* The dashboard's tokens (STYLE.md 2 and 9). The first two blocks are the CWA website's custom
+ * properties, carried verbatim from STYLE.md 2; a test holds them to it. Nothing below them names a
+ * colour: the dashboard's sizes, then every generated shadcn token set from the website's. This
+ * file is loaded after globals.css, and its html:root and html[data-theme] selectors outrank the
+ * generated :root block, so the website's values win. Prettier leaves this file alone, so the
+ * block stays byte for byte. */
+
+:root {
+  --sans: 'Space Grotesk', Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --pill: 999px;
+  --bg: oklch(0.985 0.004 90);
+  --surface: oklch(0.955 0.005 90);
+  --fg: oklch(0.20 0.010 80);
+  --muted: oklch(0.52 0.010 80);
+  --line: oklch(0.885 0.006 90);
+  --accent: oklch(0.55 0.20 38);
+  --accent-soft: oklch(0.94 0.035 45);
+  --p-gov: oklch(0.55 0.17 38);
+  --p-state: oklch(0.53 0.14 250);
+  --p-evid: oklch(0.52 0.13 155);
+  --p-inter: oklch(0.54 0.15 310);
+}
+html[data-theme="dark"] {
+  --bg: oklch(0.175 0.008 80);
+  --surface: oklch(0.215 0.008 80);
+  --fg: oklch(0.955 0.004 90);
+  --muted: oklch(0.68 0.010 85);
+  --line: oklch(0.305 0.008 80);
+  --accent: oklch(0.74 0.17 45);
+  --accent-soft: oklch(0.30 0.045 45);
+  --p-gov: oklch(0.76 0.15 45);
+  --p-state: oklch(0.76 0.12 250);
+  --p-evid: oklch(0.76 0.13 155);
+  --p-inter: oklch(0.76 0.13 310);
+}
+
+/* The dashboard's own tokens (STYLE.md 2): density in one place, no colour. */
+:root {
+  --fs: 15px;
+  --fs-sm: 14px;
+  --fs-label: 11px;
+  --fs-kicker: 12px;
+  --fs-mono: 12.5px;
+  --fs-title: 16px;
+  --fs-h3: 22px;
+  --fs-lede: 18px;
+  --control: 36px;
+  --control-sm: 30px;
+  --mast-h: 68px;
+  --sidebar-w: 240px;
+  --sidebar-w-icon: 56px;
+}
+
+/* shadcn's tokens from the website's (STYLE.md 9), in both themes, so a generated primitive that
+ * uses only shadcn's tokens is already in the site's colours. */
+html:root {
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--bg);
+  --card-foreground: var(--fg);
+  --popover: var(--bg);
+  --popover-foreground: var(--fg);
+  --primary: var(--accent);
+  --primary-foreground: var(--bg);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--fg);
+  --muted: var(--surface);
+  --muted-foreground: var(--muted);
+  --accent: var(--accent-soft);
+  --accent-foreground: var(--fg);
+  --destructive: var(--accent);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--accent);
+  --chart-1: var(--p-gov);
+  --chart-2: var(--p-state);
+  --chart-3: var(--p-evid);
+  --chart-4: var(--p-inter);
+  --radius: 0;
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--fg);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--bg);
+  --sidebar-accent: var(--accent-soft);
+  --sidebar-accent-foreground: var(--fg);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--accent);
+}
+html[data-theme="dark"] {
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--bg);
+  --card-foreground: var(--fg);
+  --popover: var(--bg);
+  --popover-foreground: var(--fg);
+  --primary: var(--accent);
+  --primary-foreground: var(--bg);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--fg);
+  --muted: var(--surface);
+  --muted-foreground: var(--muted);
+  --accent: var(--accent-soft);
+  --accent-foreground: var(--fg);
+  --destructive: var(--accent);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--accent);
+  --chart-1: var(--p-gov);
+  --chart-2: var(--p-state);
+  --chart-3: var(--p-evid);
+  --chart-4: var(--p-inter);
+  --radius: 0;
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--fg);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--bg);
+  --sidebar-accent: var(--accent-soft);
+  --sidebar-accent-foreground: var(--fg);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--accent);
+}

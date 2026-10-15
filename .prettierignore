@@ -2,3 +2,4 @@ pnpm-lock.yaml
 packages/contract/vendor/
 **/generated/
 *.md
+apps/web/src/styles/tokens.css
