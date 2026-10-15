@@ -1,0 +1,32 @@
+{
+  "name": "@cwa-dashboard/telemetry",
+  "private": true,
+  "version": "0.0.0",
+  "description": "The dashboard's telemetry envelope: the event, index, session and fleet schemas at v1, with their generated types and validators",
+  "type": "module",
+  "exports": {
+    "./types": "./generated/types.ts",
+    "./validators": {
+      "types": "./generated/validators.d.ts",
+      "default": "./generated/validators.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@cwa-dashboard/contract": "workspace:*",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.2",
+    "json-schema-to-typescript": "16.0.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}
