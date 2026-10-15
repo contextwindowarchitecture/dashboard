@@ -16,7 +16,8 @@
     "format": "prettier --write --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude .",
     "format:check": "prettier --check --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude .",
     "vendor": "node packages/contract/scripts/vendor-contract.mjs",
-    "vendor:check": "node packages/contract/scripts/vendor-contract.mjs --check"
+    "vendor:check": "node packages/contract/scripts/vendor-contract.mjs --check",
+    "generate": "pnpm -r generate"
   },
   "devDependencies": {
     "prettier": "3.9.9"
