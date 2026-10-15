@@ -1,0 +1,16 @@
+.claude
+.codex
+.mcp.json
+.serena
+.taskmaster
+docs/plans
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+.env.local
+.env.*.local
