@@ -1,0 +1,87 @@
+# Started by hand only, like the organisation's other repositories: no push or schedule triggers.
+name: ci
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the dashboard
+        uses: actions/checkout@v4
+        with:
+          path: dashboard
+
+      - name: Read the locked specification commit
+        id: lock
+        run: echo "commit=$(node -p "require('./dashboard/packages/contract/vendor/cwa.lock.json').spec_commit")" >> "$GITHUB_OUTPUT"
+
+      # The vendor check compares the copy with the specification at the locked commit.
+      - name: Check out the specification at the locked commit
+        uses: actions/checkout@v4
+        with:
+          repository: contextwindowarchitecture/contextwindowarchitecture
+          ref: ${{ steps.lock.outputs.commit }}
+          path: contextwindowarchitecture
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: dashboard/package.json
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: dashboard/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: dashboard
+        run: pnpm install --frozen-lockfile
+
+      - name: Vendor check
+        working-directory: dashboard
+        run: pnpm vendor:check ../contextwindowarchitecture
+
+      - name: Generated files are current
+        working-directory: dashboard
+        run: pnpm generate --check
+
+      - name: Format
+        working-directory: dashboard
+        run: pnpm format:check
+
+      - name: Lint
+        working-directory: dashboard
+        run: pnpm lint
+
+      - name: Typecheck
+        working-directory: dashboard
+        run: pnpm typecheck
+
+      - name: Test
+        working-directory: dashboard
+        env:
+          CWA_SPEC_CHECKOUT: ${{ github.workspace }}/contextwindowarchitecture
+        run: pnpm test
+
+      - name: Build
+        working-directory: dashboard
+        run: pnpm build
+
+      - name: Bundle budgets
+        working-directory: dashboard
+        run: pnpm --filter web budgets
+
+      - name: Install Playwright's browser
+        working-directory: dashboard/apps/web
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Browser tests
+        working-directory: dashboard
+        run: pnpm --filter web test:e2e

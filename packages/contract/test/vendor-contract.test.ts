@@ -16,7 +16,9 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
 const packageRoot = resolve(import.meta.dirname, "..")
 const script = join(packageRoot, "scripts/vendor-contract.mjs")
-const sibling = resolve(packageRoot, "../../../../contextwindowarchitecture")
+// The specification checkout: $CWA_SPEC_CHECKOUT (as CI sets it), else the one beside the repository.
+const sibling =
+  process.env["CWA_SPEC_CHECKOUT"] ?? resolve(packageRoot, "../../../../contextwindowarchitecture")
 
 // The fixture checkouts are real git repositories with a config of their own, so neither the
 // developer's global hooks nor commit signing reach them, and the tests run the same in CI.
