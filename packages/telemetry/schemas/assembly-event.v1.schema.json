@@ -17,7 +17,9 @@
     "timings_ms"
   ],
   "properties": {
-    "$schema": { "const": "cwa-dashboard/assembly-event/v1" },
+    "$schema": {
+      "const": "cwa-dashboard/assembly-event/v1"
+    },
     "event_id": {
       "description": "A ULID: unique, and sortable by the time the wrapper minted it.",
       "type": "string",
@@ -34,8 +36,12 @@
       "additionalProperties": false,
       "required": ["name"],
       "properties": {
-        "name": { "$ref": "#/$defs/nonblank" },
-        "instance": { "$ref": "#/$defs/nonblank" },
+        "name": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "instance": {
+          "$ref": "#/$defs/nonblank"
+        },
         "environment": {
           "description": "The deployment environment; demo traffic says demo.",
           "$ref": "#/$defs/nonblank"
@@ -48,9 +54,15 @@
       "additionalProperties": false,
       "required": ["language", "name", "version"],
       "properties": {
-        "language": { "enum": ["python", "typescript", "go", "rust"] },
-        "name": { "$ref": "#/$defs/nonblank" },
-        "version": { "$ref": "#/$defs/nonblank" }
+        "language": {
+          "enum": ["python", "typescript", "go", "rust"]
+        },
+        "name": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "version": {
+          "$ref": "#/$defs/nonblank"
+        }
       }
     },
     "contract": {
@@ -59,9 +71,17 @@
       "additionalProperties": false,
       "required": ["repository", "commit", "lock_sha256"],
       "properties": {
-        "repository": { "type": "string", "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$" },
-        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-        "lock_sha256": { "$ref": "#/$defs/sha256" }
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "lock_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
     "session": {
@@ -70,8 +90,13 @@
       "additionalProperties": false,
       "required": ["id", "turn_index"],
       "properties": {
-        "id": { "$ref": "#/$defs/nonblank" },
-        "turn_index": { "type": "integer", "minimum": 0 }
+        "id": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "turn_index": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "redaction_mode": {
@@ -96,21 +121,31 @@
       "additionalProperties": false,
       "required": ["hash", "bytes"],
       "properties": {
-        "hash": { "$ref": "#/$defs/sha256" },
-        "bytes": { "type": "integer", "minimum": 0 }
+        "hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "prefix": {
-      "description": "The SHA-256 of the payload's leading bytes through the last placement before the first slot that changes every turn, and that slot's predecessor in through_slot. The wrapper's measurement, compared across a session's turns; not the provider's cache.",
+      "description": "Not emitted by any wrapper: no wrapper can find where an occurrence's rendering lies in the payload without the renderer's knowledge (docs/otel-semantic-conventions.md, Prefix). docs/rfc-rendered-digests.md (RFC-D2) proposes trace-level digests instead; if the specification adopts them, this field is removed before v1 is first published.",
       "type": "object",
       "additionalProperties": false,
       "required": ["sha256", "through_slot", "bytes"],
       "properties": {
-        "sha256": { "$ref": "#/$defs/sha256" },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
         "through_slot": {
           "$ref": "https://contextwindowarchitecture.io/schema/context_item.schema.json#/properties/slot"
         },
-        "bytes": { "type": "integer", "minimum": 0 }
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "rejection": {
@@ -119,7 +154,13 @@
       "additionalProperties": false,
       "required": ["problems", "snapshot"],
       "properties": {
-        "problems": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonblank" } },
+        "problems": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonblank"
+          }
+        },
         "snapshot": {
           "description": "What the application submitted, with bodies as the redaction mode leaves them."
         }
@@ -130,7 +171,12 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["total"],
-      "properties": { "total": { "type": "number", "minimum": 0 } }
+      "properties": {
+        "total": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
     },
     "otel": {
       "description": "The OpenTelemetry span the wrapper recorded the call in.",
@@ -138,8 +184,14 @@
       "additionalProperties": false,
       "required": ["trace_id", "span_id"],
       "properties": {
-        "trace_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
-        "span_id": { "type": "string", "pattern": "^[0-9a-f]{16}$" }
+        "trace_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "span_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$"
+        }
       }
     },
     "vault": {
@@ -148,76 +200,177 @@
       "additionalProperties": false,
       "required": ["base"],
       "properties": {
-        "base": { "type": "string", "format": "uri" },
-        "kms_key_id": { "$ref": "#/$defs/nonblank" }
+        "base": {
+          "type": "string",
+          "format": "uri"
+        },
+        "kms_key_id": {
+          "$ref": "#/$defs/nonblank"
+        }
       }
     }
   },
   "allOf": [
     {
-      "if": { "properties": { "outcome": { "const": "assembled" } } },
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "assembled"
+          }
+        }
+      },
       "then": {
         "required": ["snapshot", "trace", "payload"],
         "properties": {
-          "trace": { "properties": { "refused": { "properties": { "bool": { "const": false } } } } }
+          "trace": {
+            "properties": {
+              "refused": {
+                "properties": {
+                  "bool": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
         },
-        "not": { "required": ["rejection"] }
+        "not": {
+          "required": ["rejection"]
+        }
       }
     },
     {
-      "if": { "properties": { "outcome": { "const": "refused" } } },
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "refused"
+          }
+        }
+      },
       "then": {
         "required": ["snapshot", "trace"],
         "properties": {
-          "trace": { "properties": { "refused": { "properties": { "bool": { "const": true } } } } }
+          "trace": {
+            "properties": {
+              "refused": {
+                "properties": {
+                  "bool": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
         },
         "not": {
           "anyOf": [
-            { "required": ["payload"] },
-            { "required": ["prefix"] },
-            { "required": ["rejection"] }
+            {
+              "required": ["payload"]
+            },
+            {
+              "required": ["prefix"]
+            },
+            {
+              "required": ["rejection"]
+            }
           ]
         }
       }
     },
     {
-      "if": { "properties": { "outcome": { "const": "rejected" } } },
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "rejected"
+          }
+        }
+      },
       "then": {
         "required": ["rejection"],
         "not": {
           "anyOf": [
-            { "required": ["snapshot"] },
-            { "required": ["trace"] },
-            { "required": ["payload"] },
-            { "required": ["prefix"] }
+            {
+              "required": ["snapshot"]
+            },
+            {
+              "required": ["trace"]
+            },
+            {
+              "required": ["payload"]
+            },
+            {
+              "required": ["prefix"]
+            }
           ]
         }
       }
     },
     {
-      "if": { "properties": { "redaction_mode": { "const": "full" } } },
+      "if": {
+        "properties": {
+          "redaction_mode": {
+            "const": "full"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "snapshot": { "$ref": "#/$defs/fullBodies" },
-          "rejection": { "properties": { "snapshot": { "$ref": "#/$defs/fullBodies" } } }
+          "snapshot": {
+            "$ref": "#/$defs/fullBodies"
+          },
+          "rejection": {
+            "properties": {
+              "snapshot": {
+                "$ref": "#/$defs/fullBodies"
+              }
+            }
+          }
         }
       }
     },
     {
-      "if": { "properties": { "redaction_mode": { "const": "digest_only" } } },
+      "if": {
+        "properties": {
+          "redaction_mode": {
+            "const": "digest_only"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "snapshot": { "$ref": "#/$defs/digestOnlyBodies" },
-          "rejection": { "properties": { "snapshot": { "$ref": "#/$defs/digestOnlyBodies" } } }
+          "snapshot": {
+            "$ref": "#/$defs/digestOnlyBodies"
+          },
+          "rejection": {
+            "properties": {
+              "snapshot": {
+                "$ref": "#/$defs/digestOnlyBodies"
+              }
+            }
+          }
         }
       }
     },
     {
-      "if": { "properties": { "redaction_mode": { "const": "pii_scrubbed" } } },
+      "if": {
+        "properties": {
+          "redaction_mode": {
+            "const": "pii_scrubbed"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "snapshot": { "$ref": "#/$defs/piiScrubbedBodies" },
-          "rejection": { "properties": { "snapshot": { "$ref": "#/$defs/piiScrubbedBodies" } } }
+          "snapshot": {
+            "$ref": "#/$defs/piiScrubbedBodies"
+          },
+          "rejection": {
+            "properties": {
+              "snapshot": {
+                "$ref": "#/$defs/piiScrubbedBodies"
+              }
+            }
+          }
         }
       }
     }
@@ -229,12 +382,20 @@
       "minLength": 1,
       "pattern": "[^\\t\\n\\v\\f\\r \\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]"
     },
-    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "tokenCounts": {
       "description": "The original body's token count under the snapshot's tokenizer, keyed by its id; empty when the body was not a string.",
       "type": "object",
-      "propertyNames": { "$ref": "#/$defs/nonblank" },
-      "additionalProperties": { "type": "integer", "minimum": 0 }
+      "propertyNames": {
+        "$ref": "#/$defs/nonblank"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
     },
     "digestOnlyBody": {
       "description": "A body under digest_only: the SHA-256 of the original (its UTF-8 bytes when a string, else its RFC 8785 serialization) and its token count.",
@@ -242,9 +403,15 @@
       "additionalProperties": false,
       "required": ["redacted", "content_sha256", "token_counts"],
       "properties": {
-        "redacted": { "const": "digest_only" },
-        "content_sha256": { "$ref": "#/$defs/sha256" },
-        "token_counts": { "$ref": "#/$defs/tokenCounts" }
+        "redacted": {
+          "const": "digest_only"
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "token_counts": {
+          "$ref": "#/$defs/tokenCounts"
+        }
       }
     },
     "piiScrubbedBody": {
@@ -253,10 +420,18 @@
       "additionalProperties": false,
       "required": ["redacted", "text", "content_sha256", "token_counts"],
       "properties": {
-        "redacted": { "const": "pii_scrubbed" },
-        "text": { "type": "string" },
-        "content_sha256": { "$ref": "#/$defs/sha256" },
-        "token_counts": { "$ref": "#/$defs/tokenCounts" }
+        "redacted": {
+          "const": "pii_scrubbed"
+        },
+        "text": {
+          "type": "string"
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "token_counts": {
+          "$ref": "#/$defs/tokenCounts"
+        }
       }
     },
     "notRedacted": {
@@ -264,7 +439,11 @@
       "not": {
         "type": "object",
         "required": ["redacted"],
-        "properties": { "redacted": { "enum": ["digest_only", "pii_scrubbed"] } }
+        "properties": {
+          "redacted": {
+            "enum": ["digest_only", "pii_scrubbed"]
+          }
+        }
       }
     },
     "fullBodies": {
@@ -275,9 +454,17 @@
               "items": {
                 "items": {
                   "properties": {
-                    "body": { "$ref": "#/$defs/notRedacted" },
+                    "body": {
+                      "$ref": "#/$defs/notRedacted"
+                    },
                     "variants": {
-                      "items": { "properties": { "body": { "$ref": "#/$defs/notRedacted" } } }
+                      "items": {
+                        "properties": {
+                          "body": {
+                            "$ref": "#/$defs/notRedacted"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -295,9 +482,17 @@
               "items": {
                 "items": {
                   "properties": {
-                    "body": { "$ref": "#/$defs/digestOnlyBody" },
+                    "body": {
+                      "$ref": "#/$defs/digestOnlyBody"
+                    },
                     "variants": {
-                      "items": { "properties": { "body": { "$ref": "#/$defs/digestOnlyBody" } } }
+                      "items": {
+                        "properties": {
+                          "body": {
+                            "$ref": "#/$defs/digestOnlyBody"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -315,9 +510,17 @@
               "items": {
                 "items": {
                   "properties": {
-                    "body": { "$ref": "#/$defs/piiScrubbedBody" },
+                    "body": {
+                      "$ref": "#/$defs/piiScrubbedBody"
+                    },
                     "variants": {
-                      "items": { "properties": { "body": { "$ref": "#/$defs/piiScrubbedBody" } } }
+                      "items": {
+                        "properties": {
+                          "body": {
+                            "$ref": "#/$defs/piiScrubbedBody"
+                          }
+                        }
+                      }
                     }
                   }
                 }

@@ -55,7 +55,7 @@ One row per event field. A field path uses dots between properties and `[]` for 
 | `gen_ai.cwa.excluded.reason_codes` | `trace.excluded[].reason` | string[] | The distinct codes, in `contract/reasons.json` order |
 | `gen_ai.cwa.payload.sha256` | `payload.hash` | string | Equal to `trace.result.hash`; the payload itself is never emitted |
 | `gen_ai.cwa.payload.bytes` | `payload.bytes` | int | The payload's length in UTF-8 bytes |
-| `gen_ai.cwa.prefix.sha256` | `prefix.sha256` | string | See Prefix |
+| `gen_ai.cwa.prefix.sha256` | `prefix.sha256` | string | Not emitted; see Prefix |
 | `gen_ai.cwa.prefix.through_slot` | `prefix.through_slot` | string | |
 | `gen_ai.cwa.prefix.bytes` | `prefix.bytes` | int | |
 | `gen_ai.cwa.rejection.problems` | `rejection.problems` | string[] | The assembler's checks in words; only when rejected |
@@ -86,11 +86,7 @@ From Phase 2 a route may also deposit original bodies in a content-addressed vau
 
 ## Prefix
 
-`prefix` lets the dashboard measure whether a route's leading payload stays stable from turn to turn, which is what makes provider prompt caching work. It is the wrapper's measurement, not the provider's cache.
-
-The prefix is the payload's bytes from the start through the end of the last placement in the profile's `placement[]` that comes before the first placement of a slot that changes every turn: `interaction.history`, `evidence.tool_results` or `interaction.query`. `prefix.through_slot` names the last slot included, `prefix.bytes` its length in UTF-8 bytes, and `prefix.sha256` the lowercase SHA-256 of those bytes. A refused or rejected event has no payload and no prefix; nor does an assembled one whose first placement is already a per-turn slot.
-
-A wrapper may define the prefix differently for a renderer whose byte boundaries it knows better, as long as `through_slot` names where it stopped.
+`prefix` was meant to let the dashboard measure whether a route's leading payload stays stable from turn to turn, which is what makes provider prompt caching work. **Wrappers do not emit it.** Finding where an occurrence's rendering lies in the payload is the renderer's knowledge, and under `cwa-messages/v1` the payload's leading bytes are not even the request's leading content (RFC 8785 orders its members `messages`, `system`, `tools`). `docs/rfc-rendered-digests.md` (RFC-D2) proposes instead that the specification's trace carry a digest of each included occurrence's rendered text, from which prefix stability follows with no renderer knowledge in any wrapper. If it is adopted, `prefix` is removed from the envelope before v1 is first published; until then the dashboard shows prefix stability as "Not available".
 
 ## Contract lock
 

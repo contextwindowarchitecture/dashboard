@@ -72,7 +72,7 @@ export type CWADashboardAssemblyEvent = {
     bytes: number
   }
   /**
-   * The SHA-256 of the payload's leading bytes through the last placement before the first slot that changes every turn, and that slot's predecessor in through_slot. The wrapper's measurement, compared across a session's turns; not the provider's cache.
+   * Not emitted by any wrapper: no wrapper can find where an occurrence's rendering lies in the payload without the renderer's knowledge (docs/otel-semantic-conventions.md, Prefix). docs/rfc-rendered-digests.md (RFC-D2) proposes trace-level digests instead; if the specification adopts them, this field is removed before v1 is first published.
    */
   prefix?: {
     sha256: Sha256
