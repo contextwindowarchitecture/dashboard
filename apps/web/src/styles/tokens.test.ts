@@ -1,9 +1,10 @@
-import { readdirSync, readFileSync, statSync } from "node:fs"
-import { join, relative, resolve } from "node:path"
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
 import { contrast, hexToSrgb8, oklchToSrgb8 } from "../test/color"
+import { sourceFiles } from "../test/source-files"
 
 const web = resolve(import.meta.dirname, "../..")
 const style = readFileSync(resolve(web, "../../STYLE.md"), "utf8")
@@ -167,16 +168,9 @@ describe("tokens.css sets shadcn's tokens from the website's", () => {
 })
 
 // STYLE.md 3 and 9: no literal colour and no palette class outside tokens.css. The generated
-// stylesheet and primitives are kept as generated and restyled through tokens.css.
+// stylesheet is kept as generated and restyled through tokens.css.
 describe("src/ names no colour of its own", () => {
-  const src = resolve(web, "src")
-  const exempt = new Set(["styles/tokens.css", "styles/globals.css", "test/color.ts"])
-  const files = (dir: string): string[] =>
-    readdirSync(dir).flatMap((name) => {
-      const path = join(dir, name)
-      if (statSync(path).isDirectory()) return name === "ui" ? [] : files(path)
-      return /\.(ts|tsx|css)$/.test(name) && !name.endsWith(".test.ts") ? [path] : []
-    })
+  const exempt = new Set(["styles/tokens.css", "styles/globals.css"])
   const PALETTE =
     "slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose"
   const forbidden = [
@@ -189,14 +183,12 @@ describe("src/ names no colour of its own", () => {
   ]
 
   it("finds the files it checks", () => {
-    expect(files(src).map((path) => relative(src, path))).toContain("main.tsx")
+    expect(sourceFiles().map((file) => file.name)).toContain("main.tsx")
   })
 
   it("has no colour literal or palette class", () => {
-    for (const path of files(src)) {
-      const name = relative(src, path)
+    for (const { name, text } of sourceFiles()) {
       if (exempt.has(name)) continue
-      const text = readFileSync(path, "utf8")
       for (const pattern of forbidden) expect(text.match(pattern), `${name}: ${pattern}`).toBeNull()
     }
   })
