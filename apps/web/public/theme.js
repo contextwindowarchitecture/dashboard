@@ -5,7 +5,7 @@
   var theme = "light"
   try {
     if (window.localStorage.getItem("cwa-theme") === "dark") theme = "dark"
-  } catch (error) {
+  } catch {
     // Storage can be unavailable (privacy settings, sandboxed frames); the default stands.
   }
   document.documentElement.setAttribute("data-theme", theme)
