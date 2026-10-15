@@ -23,10 +23,9 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import Ajv2020 from "ajv/dist/2020.js"
-import standaloneCode from "ajv/dist/standalone/index.js"
-import addFormats from "ajv-formats"
 import { compile } from "json-schema-to-typescript"
+
+import { standaloneValidators } from "./standalone.mjs"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const VENDOR = join(ROOT, "vendor/cwa")
@@ -99,53 +98,14 @@ async function generateTypes() {
 
 // --- validators ----------------------------------------------------------------------------------
 
-// The standalone code reaches its runtime helpers through require(), which an ES module cannot:
-// ajv-formats' format table and Ajv's own helpers under ajv/dist/runtime/ (ucs2length, equal).
-// Each becomes an ES import; any other require() left in the output fails the generation rather
-// than the bundle. The runtime helpers are CommonJS with the function on exports.default: Node's
-// default import is the exports object and the bundler's is the function, so each import is read
-// as `.default ?? itself`.
-function esmImports(code) {
-  const imports = []
-  code = code.replace(/require\("ajv-formats\/dist\/formats"\)\.fullFormats/g, () => {
-    if (!imports.includes(FORMATS)) imports.unshift(FORMATS)
-    return "fullFormats"
-  })
-  code = code.replace(/require\("ajv\/dist\/runtime\/([a-z0-9]+)"\)\.default/g, (_, helper) => {
-    const line = `import ${helper}Module from "ajv/dist/runtime/${helper}.js"\nconst ${helper} = ${helper}Module.default ?? ${helper}Module`
-    if (!imports.includes(line)) imports.push(line)
-    return helper
-  })
-  return { code, imports }
-}
-const FORMATS = 'import { fullFormats } from "ajv-formats/dist/formats.js"'
-
 function generateValidators() {
-  // The options the assemblers validate with: every error, strict mode, formats asserted. Strict
-  // types and strict required are off because the published schemas use `properties` and
-  // `required` inside `if` without restating `type`.
-  const ajv = new Ajv2020({
-    code: { source: true, esm: true, optimize: 2 },
-    allErrors: true,
-    strict: true,
-    strictTypes: false,
-    strictRequired: false,
-  })
-  addFormats(ajv)
-  for (const { schema } of schemas) ajv.addSchema(schema)
-
   const names = Object.fromEntries(
     schemas.map(({ file, schema }) => [`validate${typeName(file)}`, schema.$id]),
   )
-  const { code: rewritten, imports } = esmImports(standaloneCode(ajv, names))
-  const leftover = rewritten.match(/require\([^)]*\)/g)
-  if (leftover) {
-    throw new Error(
-      `the standalone code still requires ${[...new Set(leftover)].join(", ")}; teach generate.mjs about it`,
-    )
-  }
-  const code = rewritten.replace(/^"use strict";?/, "")
-  const js = `${BANNER}\n${imports.join("\n")}\n${code}\n`
+  const js = `${BANNER}\n${standaloneValidators(
+    schemas.map(({ schema }) => schema),
+    names,
+  )}`
 
   const dts = [
     BANNER,

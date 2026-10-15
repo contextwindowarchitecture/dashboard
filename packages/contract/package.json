@@ -12,7 +12,9 @@
     },
     "./data": "./generated/data.ts",
     "./registry": "./generated/registry.ts",
-    "./implementations": "./generated/implementations.ts"
+    "./implementations": "./generated/implementations.ts",
+    "./scripts/standalone.mjs": "./scripts/standalone.mjs",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "generate": "node scripts/generate.mjs",
