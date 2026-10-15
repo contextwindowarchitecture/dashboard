@@ -1,0 +1,7 @@
+{
+  "$comment": "Gzipped kilobytes (dashboard-plan.md 11; docs/design/project-profile.md). Initial: what index.html loads. Lazy: any other chunk. Worker: a chunk named *.worker-*.js.",
+  "initialJsKb": 400,
+  "initialCssKb": 20,
+  "lazyChunkKb": 40,
+  "workerKb": 120
+}

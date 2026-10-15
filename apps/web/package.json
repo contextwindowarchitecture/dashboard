@@ -11,7 +11,8 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "lint": "eslint .",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "budgets": "node scripts/check-budgets.mjs"
   },
   "dependencies": {
     "@cwa-dashboard/contract": "workspace:*",
