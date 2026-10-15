@@ -1,0 +1,22 @@
+{
+  "name": "cwa-dashboard",
+  "private": true,
+  "version": "0.0.0",
+  "description": "The observability and audit plane for Context Window Architecture assemblies",
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "build": "pnpm -r build",
+    "format": "prettier --write --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude .",
+    "format:check": "prettier --check --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude ."
+  },
+  "devDependencies": {
+    "prettier": "3.9.9"
+  }
+}

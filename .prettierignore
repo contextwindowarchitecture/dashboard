@@ -1,0 +1,4 @@
+pnpm-lock.yaml
+packages/contract/vendor/
+**/generated/
+*.md
