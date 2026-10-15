@@ -47,7 +47,13 @@ export default tseslint.config(
   },
   {
     // Node tooling: scripts, tests of scripts, and configuration files.
-    files: ["**/scripts/**/*.{js,mjs,ts}", "**/test/**/*.ts", "**/*.config.{js,ts}"],
+    files: [
+      "**/scripts/**/*.{js,mjs,ts}",
+      "**/test/**/*.ts",
+      "**/*.config.{js,ts}",
+      "apps/web/dev/**/*.ts",
+      "apps/web/e2e/**/*.ts",
+    ],
     languageOptions: { globals: globals.node },
   },
   prettier,
