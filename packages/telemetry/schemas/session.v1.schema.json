@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contextwindowarchitecture.io/schema/dashboard/session.v1.schema.json",
+  "title": "CWA dashboard session",
+  "description": "One conversation's turns in order, one row per event, with the tokens each plane took, the turn's compressions and budget omissions, and the prefix hash, for the session page. Derived from the session's events; the contract has no sessions, the wrapper assigns them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "session_id", "route", "service", "profile", "turns", "prefix_stability"],
+  "properties": {
+    "$schema": {
+      "const": "cwa-dashboard/session/v1"
+    },
+    "session_id": {
+      "$ref": "#/$defs/nonblank"
+    },
+    "route": {
+      "$ref": "https://contextwindowarchitecture.io/schema/route_policy.schema.json#/properties/route"
+    },
+    "service": {
+      "$ref": "#/$defs/nonblank"
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "$ref": "https://contextwindowarchitecture.io/schema/profile.schema.json#/properties/id"
+        },
+        "version": {
+          "$ref": "https://contextwindowarchitecture.io/schema/profile.schema.json#/properties/version"
+        }
+      }
+    },
+    "turns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/turn"
+      }
+    },
+    "prefix_stability": {
+      "description": "Of the consecutive pairs of assembled turns that both carry a prefix hash (total), how many have equal hashes (matched).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["matched", "total"],
+      "properties": {
+        "matched": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "[^\\t\\n\\v\\f\\r \\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]"
+    },
+    "turn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["turn_index", "event_id", "outcome"],
+      "properties": {
+        "turn_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "event_id": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "outcome": {
+          "enum": ["assembled", "refused", "rejected"]
+        },
+        "input_tokens": {
+          "description": "trace.result.input_tokens.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "by_plane": {
+          "description": "The included tokens of each plane, by the short plane names of contract/slot-defaults.json; all zero for a refusal, whose trace includes nothing.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gov", "state", "evid", "inter"],
+          "properties": {
+            "gov": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "state": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "evid": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "inter": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "compressed_count": {
+          "description": "The trace's compressed rows.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "over_budget_count": {
+          "description": "The trace's excluded rows with reason over_budget.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "refused_reason": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "prefix_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "enum": ["assembled", "refused"]
+              }
+            }
+          },
+          "then": {
+            "required": ["by_plane", "compressed_count", "over_budget_count"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "assembled"
+              }
+            }
+          },
+          "then": {
+            "required": ["input_tokens"],
+            "not": {
+              "required": ["refused_reason"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "refused"
+              }
+            }
+          },
+          "then": {
+            "required": ["refused_reason"],
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["input_tokens"]
+                },
+                {
+                  "required": ["prefix_sha256"]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "rejected"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["input_tokens"]
+                },
+                {
+                  "required": ["by_plane"]
+                },
+                {
+                  "required": ["prefix_sha256"]
+                },
+                {
+                  "required": ["refused_reason"]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contextwindowarchitecture.io/schema/dashboard/events-index.v1.schema.json",
+  "title": "CWA dashboard events index",
+  "description": "The events of one time window, newest first, one row per event with what the stream lists and filters by, and the facet counts over them. Derived from the events by the generator or the ingest service, never from a directory listing. The current window is index.json; older windows close into index/<day>.json and are listed in windows.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "generated_at", "window", "events", "facets"],
+  "properties": {
+    "$schema": {
+      "const": "cwa-dashboard/events-index/v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window": {
+      "description": "The span of recorded_at this index covers.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    },
+    "facets": {
+      "description": "Counts of the window's events by each filter's values.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "language", "route", "reason", "service"],
+      "properties": {
+        "outcome": {
+          "description": "By outcome.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "language": {
+          "description": "By assembler language.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "route": {
+          "description": "By route; rejected events have none.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "reason": {
+          "description": "Events whose trace records each reason code, refusals included.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "service": {
+          "description": "By service.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "windows": {
+      "description": "The closed windows, newest first.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["day", "path", "events"],
+        "properties": {
+          "day": {
+            "type": "string",
+            "format": "date"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^index/[0-9]{4}-[0-9]{2}-[0-9]{2}\\.json$"
+          },
+          "events": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "[^\\t\\n\\v\\f\\r \\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]"
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "recorded_at",
+        "service",
+        "language",
+        "redaction_mode",
+        "outcome",
+        "reason_codes",
+        "total_ms"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "service": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "language": {
+          "enum": ["python", "typescript", "go", "rust"]
+        },
+        "redaction_mode": {
+          "enum": ["full", "pii_scrubbed", "digest_only"]
+        },
+        "route": {
+          "$ref": "https://contextwindowarchitecture.io/schema/route_policy.schema.json#/properties/route"
+        },
+        "route_policy_version": {
+          "$ref": "https://contextwindowarchitecture.io/schema/route_policy.schema.json#/properties/version"
+        },
+        "profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "version"],
+          "properties": {
+            "id": {
+              "$ref": "https://contextwindowarchitecture.io/schema/profile.schema.json#/properties/id"
+            },
+            "version": {
+              "$ref": "https://contextwindowarchitecture.io/schema/profile.schema.json#/properties/version"
+            }
+          }
+        },
+        "outcome": {
+          "enum": ["assembled", "refused", "rejected"]
+        },
+        "refused_reason": {
+          "description": "The refusal's code.",
+          "$ref": "#/$defs/nonblank"
+        },
+        "reason_codes": {
+          "description": "The distinct codes of the trace's excluded rows, in the order contract/reasons.json lists them.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonblank"
+          }
+        },
+        "input_tokens": {
+          "description": "trace.result.input_tokens.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "budget_input": {
+          "description": "budget.input.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "problem_count": {
+          "description": "How many problems rejected the snapshot.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "session": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "turn_index"],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/nonblank"
+            },
+            "turn_index": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "total_ms": {
+          "description": "The wrapper's timings_ms.total.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "enum": ["assembled", "refused"]
+              }
+            }
+          },
+          "then": {
+            "required": ["route", "route_policy_version", "profile", "budget_input"],
+            "not": {
+              "required": ["problem_count"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "assembled"
+              }
+            }
+          },
+          "then": {
+            "required": ["input_tokens"],
+            "not": {
+              "required": ["refused_reason"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "refused"
+              }
+            }
+          },
+          "then": {
+            "required": ["refused_reason"],
+            "not": {
+              "required": ["input_tokens"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "rejected"
+              }
+            }
+          },
+          "then": {
+            "required": ["problem_count"],
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["input_tokens"]
+                },
+                {
+                  "required": ["refused_reason"]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

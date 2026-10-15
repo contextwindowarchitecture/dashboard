@@ -58,11 +58,18 @@ const contractType = (file) =>
     .join("")
 
 // Replaces every $ref into the contract's schemas with the matching contract type, as a tsType:
-// a whole schema by its name, a property by indexed access (ContextItem["slot"]).
+// a whole schema by its name, a property by indexed access (ContextItem["slot"]); and a $ref to
+// the schema's own nonblank string with string.
 function withContractTypes(node, used) {
   if (Array.isArray(node)) return node.map((child) => withContractTypes(child, used))
   if (node === null || typeof node !== "object") return node
   const ref = node.$ref
+  // Every schema declares its own nonblank string; typed inline, the shared file declares no
+  // Nonblank alias per schema.
+  if (ref === "#/$defs/nonblank") {
+    const rest = Object.fromEntries(Object.entries(node).filter(([key]) => key !== "$ref"))
+    return { ...rest, tsType: "string" }
+  }
   if (typeof ref === "string" && ref.startsWith(CONTRACT_BASE)) {
     const [file, pointer = ""] = ref.slice(CONTRACT_BASE.length).split("#")
     const type = contractType(file)

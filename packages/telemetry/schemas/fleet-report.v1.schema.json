@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contextwindowarchitecture.io/schema/dashboard/fleet-report.v1.schema.json",
+  "title": "CWA dashboard fleet report",
+  "description": "The deployment's assemblers and services: each implementation's published conformance report and the contract it ran against, and each service's assembler, contract lock, routes and the wrapper's measured latency.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "generated_at", "contract", "implementations", "services"],
+  "properties": {
+    "$schema": {
+      "const": "cwa-dashboard/fleet-report/v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contract": {
+      "description": "The contract the dashboard's vendored lock pins, which services are compared with.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "implementations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["language", "name", "version", "source", "report"],
+        "properties": {
+          "language": {
+            "enum": ["python", "typescript", "go", "rust"]
+          },
+          "name": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "version": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["repository", "commit", "dirty"],
+            "properties": {
+              "repository": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$"
+              },
+              "commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "dirty": {
+                "type": "boolean"
+              }
+            }
+          },
+          "report": {
+            "$ref": "https://contextwindowarchitecture.io/schema/conformance_report.schema.json"
+          },
+          "tokenizers": {
+            "description": "The tokenizer ids the implementation provides, where it says; absent means not known.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/nonblank"
+            }
+          },
+          "renderers": {
+            "description": "The renderer ids the implementation provides, where it says; absent means not known.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/nonblank"
+            }
+          }
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "language",
+          "assembler_version",
+          "contract_lock_sha256",
+          "routes",
+          "latency_ms"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "language": {
+            "enum": ["python", "typescript", "go", "rust"]
+          },
+          "assembler_version": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "contract_lock_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "routes": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "https://contextwindowarchitecture.io/schema/route_policy.schema.json#/properties/route"
+            }
+          },
+          "latency_ms": {
+            "description": "Percentiles of the wrapper's timings_ms.total over the service's events, with the number of events; no percentile without a sample.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["samples"],
+            "properties": {
+              "samples": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "p50": {
+                "type": "number",
+                "minimum": 0
+              },
+              "p95": {
+                "type": "number",
+                "minimum": 0
+              },
+              "p99": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "if": {
+              "properties": {
+                "samples": {
+                  "const": 0
+                }
+              }
+            },
+            "then": {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": ["p50"]
+                  },
+                  {
+                    "required": ["p95"]
+                  },
+                  {
+                    "required": ["p99"]
+                  }
+                ]
+              }
+            },
+            "else": {
+              "required": ["p50", "p95", "p99"]
+            }
+          },
+          "throughput_rps": {
+            "description": "Requests per second, when the deployment measures it.",
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "[^\\t\\n\\v\\f\\r \\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]"
+    }
+  }
+}
