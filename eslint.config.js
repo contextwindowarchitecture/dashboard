@@ -32,6 +32,15 @@ export default tseslint.config(
     },
   },
   {
+    // The generated shadcn primitives stay as generated (AGENTS.md): they export their variants
+    // beside their components, and use-mobile sets state synchronously in its effect.
+    files: ["apps/web/src/components/ui/**/*.tsx", "apps/web/src/hooks/use-mobile.ts"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
+  {
     // Plain browser scripts served as files (the pre-paint theme script).
     files: ["apps/web/public/**/*.js"],
     languageOptions: { sourceType: "script", globals: globals.browser },
