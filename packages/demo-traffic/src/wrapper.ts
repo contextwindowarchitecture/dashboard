@@ -78,13 +78,55 @@ export function record(snapshot: unknown, recording: Recording): AssemblyEventV1
   if (trace.refused.bool || payload === null) {
     return { ...envelope, outcome: "refused", snapshot: redacted as never, trace }
   }
+  const renderer = isRecord(snapshot) ? snapshot["renderer"] : undefined
+  const parts = typeof renderer === "string" ? payloadParts(renderer, payload) : undefined
   return {
     ...envelope,
     outcome: "assembled",
     snapshot: redacted as never,
     trace,
-    payload: { hash: sha256(payload), bytes: payload.length },
+    payload: {
+      hash: sha256(payload),
+      bytes: payload.length,
+      ...(parts === undefined ? {} : { parts }),
+    },
   }
+}
+
+// --- payload parts -------------------------------------------------------------------------------
+
+type Part = NonNullable<NonNullable<AssemblyEventV1["payload"]>["parts"]>[number]
+
+/**
+ * The parts a renderer's published payload format delimits, in request order (system, tools, then
+ * the user content), each by its text's digest and size (docs/otel-semantic-conventions.md, Payload
+ * parts). Read from the payload as published; nothing is rendered. Undefined for a format that
+ * delimits none, as fixture-xml/v1's single text.
+ */
+export function payloadParts(renderer: string, payload: Uint8Array): Part[] | undefined {
+  if (renderer !== "cwa-messages/v1" && renderer !== "cwa-message-blocks/v1") return undefined
+  type Entry = { id: string; text: string }
+  const request = JSON.parse(Buffer.from(payload).toString("utf8")) as {
+    system: Entry[]
+    tools: Entry[]
+    messages: { content: string | Entry[] }[]
+  }
+  const part = (section: Part["section"], text: string, id?: string): Part => ({
+    section,
+    ...(id === undefined ? {} : { id }),
+    sha256: sha256(text),
+    bytes: Buffer.byteLength(text, "utf8"),
+  })
+  const content = request.messages.flatMap((message) =>
+    typeof message.content === "string"
+      ? [part("content", message.content)]
+      : message.content.map((entry) => part("content", entry.text, entry.id)),
+  )
+  return [
+    ...request.system.map((entry) => part("system", entry.text, entry.id)),
+    ...request.tools.map((entry) => part("tools", entry.text, entry.id)),
+    ...content,
+  ]
 }
 
 // --- redaction -----------------------------------------------------------------------------------

@@ -45,7 +45,7 @@ describe("record: an assembly event from one assemble() call", () => {
       expect(event.trace?.result, id).toEqual(expected.result)
       if (event.outcome === "assembled") {
         const payload = readFileSync(join(vendor, `conformance/cases/${id}/expected.payload.txt`))
-        expect(event.payload, id).toEqual({ hash: sha256(payload), bytes: payload.length })
+        expect(event.payload, id).toMatchObject({ hash: sha256(payload), bytes: payload.length })
       }
     }
   })
@@ -84,6 +84,87 @@ describe("record: an assembly event from one assemble() call", () => {
     const before = structuredClone(snapshot)
     record(snapshot, { ...RECORDING, redaction: { mode: "digest_only" } })
     expect(snapshot).toEqual(before)
+  })
+})
+
+describe("record: payload parts", () => {
+  // The oracle is the trace and the profile, not the payload: a part renders an included
+  // occurrence, and the profile says whether its slot's wrap is system, tools or xml.
+  type Snapshot = { renderer: string; profile: { placement: { slot: string; wrap: string }[] } }
+  type Trace = { included: { slot: string; item_id: string }[] }
+  const section = (wrap: string) => (wrap === "system" || wrap === "tools" ? wrap : "content")
+  // included[] follows placement order, and every placement of a slot renders the slot's included
+  // items, so a run of k adjacent placements of one slot has k equal runs of rows, in order.
+  function wraps(snapshot: Snapshot, rows: Trace["included"]) {
+    const result: { id: string; section: string }[] = []
+    const placements = snapshot.profile.placement
+    let next = 0
+    for (let p = 0; p < placements.length;) {
+      const slot = placements[p]!.slot
+      let k = 1
+      while (placements[p + k]?.slot === slot) k += 1
+      let run = 0
+      while (rows[next + run]?.slot === slot) run += 1
+      for (let i = 0; i < run; i += 1) {
+        const placement = placements[p + Math.floor(i / (run / k))]!
+        result.push({ id: rows[next + i]!.item_id, section: section(placement.wrap) })
+      }
+      next += run
+      p += k
+    }
+    expect(next).toBe(rows.length)
+    return result
+  }
+
+  it("lists the parts each published format delimits, in request order, matching the trace", () => {
+    const seen = new Set<string>()
+    for (const id of dirs("conformance/cases")) {
+      const snapshot = read(`conformance/cases/${id}/snapshot.json`) as Snapshot
+      const event = record(snapshot, RECORDING)
+      if (event.outcome !== "assembled") continue
+      seen.add(snapshot.renderer)
+      const parts = event.payload!.parts
+      const included = wraps(snapshot, (event.trace as unknown as Trace).included)
+      const inSection = (name: string) =>
+        included.filter((row) => row.section === name).map((row) => row.id)
+      const ids = (name: string) =>
+        parts!.filter((part) => part.section === name).map((part) => part.id)
+      if (snapshot.renderer === "fixture-xml/v1") {
+        expect(parts, id).toBeUndefined()
+        continue
+      }
+      expect(
+        parts!.map((part) => part.section),
+        id,
+      ).toEqual([
+        ...inSection("system").map(() => "system"),
+        ...inSection("tools").map(() => "tools"),
+        ...(snapshot.renderer === "cwa-messages/v1"
+          ? ["content"]
+          : inSection("content").map(() => "content")),
+      ])
+      expect(ids("system"), id).toEqual(inSection("system"))
+      expect(ids("tools"), id).toEqual(inSection("tools"))
+      expect(ids("content"), id).toEqual(
+        snapshot.renderer === "cwa-messages/v1" ? [undefined] : inSection("content"),
+      )
+      const total = parts!.reduce((sum, part) => sum + part.bytes, 0)
+      expect(total, id).toBeLessThanOrEqual(event.payload!.bytes)
+    }
+    expect([...seen].sort()).toEqual(["cwa-message-blocks/v1", "cwa-messages/v1", "fixture-xml/v1"])
+  })
+
+  it("digests each part's text, the same under every redaction mode", () => {
+    const snapshot = read("conformance/cases/blocks-render/snapshot.json")
+    const payload = JSON.parse(
+      readFileSync(join(vendor, "conformance/cases/blocks-render/expected.payload.txt"), "utf8"),
+    ) as { system: { text: string }[] }
+    const event = record(snapshot, RECORDING)
+    const first = event.payload!.parts![0]!
+    expect(first.sha256).toBe(sha256(payload.system[0]!.text))
+    expect(first.bytes).toBe(Buffer.byteLength(payload.system[0]!.text))
+    const digested = record(snapshot, { ...RECORDING, redaction: { mode: "digest_only" } })
+    expect(digested.payload!.parts).toEqual(event.payload!.parts)
   })
 })
 
