@@ -1,0 +1,54 @@
+# Project profile
+
+What this repository actually chose, line by line, with the section of the working plan (`docs/plans/dashboard-plan.md`, local) or of `STYLE.md` each answers to. Started at DP-0 (2026-10-15); every phase's "as built" updates the lines it touches. A line that says "not yet" names the phase that settles it.
+
+## Decisions and requirements
+
+The maintainer's decisions of 2026-10-15 (plan section 0):
+
+| # | Decision | Record |
+| --- | --- | --- |
+| D1 | Phase 1 is the web app, the vendored contract, the telemetry envelope, the demo-traffic generator and the deployment; the query API, ClickHouse, the OpenTelemetry collector and the language wrappers are Phase 2, created when built | ADR-0001 |
+| D2 | Phase 1 reads a static event tree behind an `EventSource` interface | ADR-0001 |
+| D3 | Charts are D3 geometry rendered as React SVG; no chart library without a measurement and an ADR | ADR-0002 |
+| D4 | The organisation's working conventions: Conventional Commits, DCO sign-off, GPG signing, a commit per green step, never push, no attribution | `AGENTS.md` |
+| D5 | The TypeScript assembler is pinned to a tag and built by this repository | ADR-0003 |
+| D6 | The prototype's "R-25" proposal is RFC-D1 | ADR-0004 |
+| D7 | The published contract is the only vocabulary | `AGENTS.md`; the vocabulary test |
+| D8 | Redaction stays available destructively at the wrapper, and a route may opt into a content-addressed vault from Phase 2 | not yet: DP-1 (the envelope reserves `vault`) |
+| D9 | A minimal ingest service ships in Phase 1 | not yet: DP-6 |
+| D10 | The first wrapper is TypeScript, extracted from the generator | not yet: Phase 2 |
+| D11 | Hosting on the organisation's OpenShift cluster and quay.io, at `dashboard.contextwindowarchitecture.io`, demo traffic only | not yet: DP-6 |
+| D12 | Sandbox replay runs the real assembler server-side, never in the browser | not yet: ADR-0005 at DP-5 |
+
+Two added requirements: **R-DASH-1**, item metadata is visible for every item in every redaction mode, and **R-DASH-2**, redaction is switched outside the dashboard and the dashboard names the switch. Both are tested from DP-2.
+
+## The profile
+
+- **Baseline**: `STYLE.md`, the CWA website's style guide at website commit `47c6ef4`, applied to this app; `AGENTS.md`.
+- **Contract**: `packages/contract/vendor/cwa/`, 325 files of `contextwindowarchitecture/contextwindowarchitecture` at `16de4be` (clean), pinned by SHA-256 in `vendor/cwa.lock.json`. `pnpm vendor <checkout>` re-vendors; `pnpm vendor:check` fails on drift between the lock, the copy and the checkout at the locked commit. Generated types, standalone validators and the contract data as typed modules live in `packages/contract/generated/`; `pnpm generate --check` fails when they are stale.
+- **Application type and primary user tasks**: a read-only observability and audit plane for CWA assemblies (plan 1).
+- **Framework and routing**: Vite 8.3.3 with `@vitejs/plugin-react` 6.1.2, React 19.3.0, client-side only. Routing: not yet (DP-2, React Router in data mode).
+- **Runtime and package manager**: Node 24 (`engines.node >= 24`, developed on 24.20.0), pnpm 12.3.4 through `packageManager`, `saveExact` in the workspace, exact versions in every `package.json`. Packages: `@cwa-dashboard/contract`, `@cwa-dashboard/web` (`pnpm --filter web` matches without the scope).
+- **TypeScript**: 6.0.3 in every package, strict with `noUncheckedIndexedAccess`, `erasableSyntaxOnly`, `verbatimModuleSyntax`. Not 7.0.2, although `latest` and both packages typecheck under it: typescript-eslint 8.71 accepts `typescript <6.1.0` and needs the compiler API 7 no longer exports. The maintainer chose one version everywhere over 7 beside a 6 for linting (2026-10-15); revisit when typescript-eslint supports 7.
+- **shadcn**: preset `nova` on the Radix base (`style: "radix-nova"`), base colour neutral, CSS variables, Lucide; initialised with the CLI at 4.21.4, the `shadcn` dependency and later `add`s at 4.21.5. Primitives generated at DP-0: sidebar, sheet, breadcrumb, dropdown-menu, select, tooltip, button, badge, card, table, alert, input, separator, skeleton, tabs, checkbox, slider, dialog, scroll-area, with `hooks/use-mobile.ts`. Kept as generated: ESLint exempts them from `react-refresh/only-export-components` and `react-hooks/set-state-in-effect`, Prettier ignores them. Their `data-slot` restyles (STYLE.md 6) land with the first component that uses each, checked in the browser.
+- **Tailwind and tokens**: Tailwind 4.3.3 through `@tailwindcss/vite`. `src/styles/globals.css` is the generated stylesheet with three changes: the two font families replace Geist, and the `dark` variant follows `data-theme`. `src/styles/tokens.css` (STYLE.md 2, 9) carries the website's block verbatim, the dashboard's size tokens and every shadcn token set from the website's in `html:root` and `html[data-theme="dark"]`; it loads after `globals.css`, and Prettier leaves it alone. shadcn's `destructive` takes `--accent`.
+- **Fonts**: `@fontsource-variable/space-grotesk` 5.3.0 and `@fontsource/ibm-plex-mono` 5.3.0 (400, 500, 600), from packages because the policy serves fonts from the app's origin only (STYLE.md 2).
+- **Remote data ownership and cache policy**: not yet (DP-2; plan 9).
+- **Identity, tenant isolation and permissions**: none in Phase 1 (plan 11).
+- **Forms and validation**: documents through the generated standalone validators (built); URL state with Zod (DP-2).
+- **Charts, data volume and worker thresholds**: not yet (DP-2 onward; plan 8, 9).
+- **Locale, timezone and windows**: the plan's defaults (section 16): UTC with the viewer's zone on hover, the newest 24 hours by default. Not yet built.
+- **Theme**: `data-theme` on `<html>`, `localStorage["cwa-theme"]` (the website's key), light by default, applied before the first paint by `public/theme.js`, a file because the policy allows no inline script; `prefers-color-scheme` is not consulted (STYLE.md 3). The toggle and the sidebar's persisted state: not yet (DP-2).
+- **Supported browsers and devices**: not yet decided (DP-7). The browser tests run Chromium.
+- **Content Security Policy**: defined once in `apps/web/dev/csp.ts` (`script-src 'self'`, no inline script, no eval) and sent by the dev and preview servers; the deployment's headers are held to it at DP-6.
+- **Accessibility**: axe (`wcag2a`, `wcag2aa`, `wcag22aa`) in the Playwright smoke test, in both themes; no horizontal scroll at 400px. Manual checks: none yet (DP-7).
+- **Performance budgets**: `apps/web/budgets.json`, gzipped: initial JS 400 kB, initial CSS 20 kB, 40 kB per lazy chunk, 120 kB per worker (plan 11, to be measured at DP-7). `pnpm --filter web budgets` also fails on `eval` or `new Function` in any chunk. At DP-0 the placeholder app is 66.5 kB of initial JS and 13.4 kB of initial CSS, mostly font faces.
+- **Motion**: GSAP 3.15.0 and `@gsap/react` 2.1.2, set up once in `src/lib/motion.ts` with STYLE.md 7's durations and the site's ease (through GSAP's `CustomEase`); an import test keeps GSAP inside `lib/motion` and `lib/motion` inside the three choreographies (none yet). The illustration player: not yet added (DP-6).
+- **Tests and CI**: Vitest 5.0.3 (jsdom 30.1.2, Testing Library), Playwright 1.63.0 with `@axe-core/playwright` 4.13.0. CI (`.github/workflows/ci.yml`) is started by hand, like the organisation's other repositories, and runs install, the vendor check against the specification at the locked commit, `generate --check`, format, lint, typecheck, test, build, budgets and the browser tests.
+- **Approved libraries and why**: React and React DOM (the app); Vite, its React plugin, Tailwind and its Vite plugin (build and styling); shadcn with `radix-ui`, `class-variance-authority`, `cn`, `lucide-react` and `tw-animate-css` (the generated primitives); the two font packages (STYLE.md 2); GSAP and `@gsap/react` (STYLE.md 7, ADR-0002); Ajv and `ajv-formats` (the generated validators' runtime); `json-schema-to-typescript` (type generation); ESLint with typescript-eslint, the React hooks and refresh plugins, `eslint-config-prettier` and `globals`; Prettier; Vitest, jsdom and Testing Library; Playwright and axe.
+- **Exceptions and linked decisions**: ADR-0001 to ADR-0004 (`docs/adr/`).
+
+## Not run, by phase
+
+- **DP-0**: CI has not run on GitHub; its steps were run locally one by one. No manual accessibility or browser-matrix checks.
