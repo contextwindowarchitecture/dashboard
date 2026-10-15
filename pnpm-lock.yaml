@@ -113,6 +113,22 @@ importers:
         specifier: 3.9.9
         version: 3.9.9
 
+  apps/web:
+    dependencies:
+      '@cwa-dashboard/contract':
+        specifier: workspace:*
+        version: link:../../packages/contract
+    devDependencies:
+      '@types/node':
+        specifier: 24.9.2
+        version: 24.9.2
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 5.0.3
+        version: 5.0.3(@types/node@24.9.2)(vite@8.3.4(@types/node@24.9.2))
+
   packages/contract:
     dependencies:
       ajv:
