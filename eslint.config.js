@@ -53,6 +53,7 @@ export default tseslint.config(
       "**/test/**/*.ts",
       "**/*.config.{js,ts}",
       "apps/web/dev/**/*.ts",
+      "packages/assembler/index.js",
       "apps/web/e2e/**/*.ts",
     ],
     languageOptions: { globals: globals.node },
