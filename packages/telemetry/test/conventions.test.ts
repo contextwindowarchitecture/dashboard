@@ -106,7 +106,11 @@ describe("docs/otel-semantic-conventions.md", () => {
 
   it("maps every envelope field, one attribute each", () => {
     const mapped = table.map((row) => row.field)
-    for (const leaf of envelopeLeaves(event)) expect(mapped, leaf).toContain(leaf)
+    // An array of objects maps through its items' fields: payload.parts as payload.parts[].sha256.
+    for (const leaf of envelopeLeaves(event)) {
+      const covered = mapped.some((field) => field === leaf || field.startsWith(`${leaf}[].`))
+      expect(covered, leaf).toBe(true)
+    }
     const attributes = table.map((row) => row.attribute)
     expect(new Set(attributes).size).toBe(attributes.length)
   })
@@ -122,7 +126,17 @@ describe("docs/otel-semantic-conventions.md", () => {
   it("types each attribute as OpenTelemetry can carry it", () => {
     for (const { attribute, type } of table) {
       expect(
-        ["string", "int", "double", "string[]", "timestamp", "duration", "trace id", "span id"],
+        [
+          "string",
+          "int",
+          "double",
+          "string[]",
+          "int[]",
+          "timestamp",
+          "duration",
+          "trace id",
+          "span id",
+        ],
         attribute,
       ).toContain(type)
     }

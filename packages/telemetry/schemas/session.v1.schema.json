@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contextwindowarchitecture.io/schema/dashboard/session.v1.schema.json",
   "title": "CWA dashboard session",
-  "description": "One conversation's turns in order, one row per event, with the tokens each plane took, the turn's compressions and budget omissions, and the prefix hash, for the session page. Derived from the session's events; the contract has no sessions, the wrapper assigns them.",
+  "description": "One conversation's turns in order, one row per event, with the tokens each plane took, the turn's compressions and budget omissions, and how many of its payload's parts it reused from the turn before, for the session page. Derived from the session's events; the contract has no sessions, the wrapper assigns them.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["$schema", "session_id", "route", "service", "profile", "turns", "prefix_stability"],
+  "required": ["$schema", "session_id", "route", "service", "profile", "turns", "part_reuse"],
   "properties": {
     "$schema": {
       "const": "cwa-dashboard/session/v1"
@@ -39,17 +39,21 @@
         "$ref": "#/$defs/turn"
       }
     },
-    "prefix_stability": {
-      "description": "Of the consecutive pairs of assembled turns that both carry a prefix hash (total), how many have equal hashes (matched).",
+    "part_reuse": {
+      "description": "Over the turns compared with the assembled turn before them, both with payload parts: how many leading parts they reused, of how many parts they had. All zero when no turn could be compared, which the page reads as not available.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["matched", "total"],
+      "required": ["compared_turns", "reused_parts", "parts"],
       "properties": {
-        "matched": {
+        "compared_turns": {
           "type": "integer",
           "minimum": 0
         },
-        "total": {
+        "reused_parts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parts": {
           "type": "integer",
           "minimum": 0
         }
@@ -120,9 +124,15 @@
         "refused_reason": {
           "$ref": "#/$defs/nonblank"
         },
-        "prefix_sha256": {
-          "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+        "parts": {
+          "description": "How many parts the turn's payload format delimits (payload.parts).",
+          "type": "integer",
+          "minimum": 0
+        },
+        "reused_parts": {
+          "description": "How many of those parts, from the first, equal the previous assembled turn's in section, id and digest. Absent for the first assembled turn, or when either turn's payload has no parts.",
+          "type": "integer",
+          "minimum": 0
         }
       },
       "allOf": [
@@ -169,7 +179,7 @@
                   "required": ["input_tokens"]
                 },
                 {
-                  "required": ["prefix_sha256"]
+                  "required": ["parts"]
                 }
               ]
             }
@@ -193,16 +203,19 @@
                   "required": ["by_plane"]
                 },
                 {
-                  "required": ["prefix_sha256"]
+                  "required": ["refused_reason"]
                 },
                 {
-                  "required": ["refused_reason"]
+                  "required": ["parts"]
                 }
               ]
             }
           }
         }
-      ]
+      ],
+      "dependentRequired": {
+        "reused_parts": ["parts"]
+      }
     }
   }
 }

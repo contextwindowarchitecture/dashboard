@@ -157,7 +157,7 @@ const session = {
       by_plane: { gov: 420, state: 60, evid: 210, inter: 90 },
       compressed_count: 0,
       over_budget_count: 0,
-      prefix_sha256: "a".repeat(64),
+      parts: 5,
     },
     {
       turn_index: 1,
@@ -170,7 +170,7 @@ const session = {
     },
     { turn_index: 2, event_id: "01JA2B3C4D5E6F7G8H9JKMNPQT", outcome: "rejected" },
   ],
-  prefix_stability: { matched: 0, total: 0 },
+  part_reuse: { compared_turns: 0, reused_parts: 0, parts: 0 },
 }
 
 describe("session v1", () => {
@@ -186,7 +186,7 @@ describe("session v1", () => {
       "service",
       "profile",
       "turns",
-      "prefix_stability",
+      "part_reuse",
     ])
   })
 
@@ -218,11 +218,23 @@ describe("session v1", () => {
     expect(schema.$defs.turn.properties.by_plane.required.sort()).toEqual(planes.sort())
   })
 
-  it("never claims more prefix matches than it compared", () => {
-    expectValid(validateSessionV1, { ...session, prefix_stability: { matched: 1, total: 1 } })
-    expect(validateSessionV1({ ...session, prefix_stability: { matched: -1, total: 1 } })).toBe(
-      false,
-    )
+  it("records part reuse only beside a part count, and never a negative one", () => {
+    const reused = clone(session)
+    ;(reused.turns[0] as Doc)["reused_parts"] = 3
+    expectValid(validateSessionV1, reused)
+    const withoutCount = clone(session)
+    delete (withoutCount.turns[0] as Doc)["parts"]
+    ;(withoutCount.turns[0] as Doc)["reused_parts"] = 3
+    expect(validateSessionV1(withoutCount)).toBe(false)
+    expect(
+      validateSessionV1({
+        ...session,
+        part_reuse: { compared_turns: 1, reused_parts: -1, parts: 4 },
+      }),
+    ).toBe(false)
+    const refusedWithParts = clone(session)
+    ;(refusedWithParts.turns[1] as Doc)["parts"] = 2
+    expect(validateSessionV1(refusedWithParts)).toBe(false)
   })
 })
 

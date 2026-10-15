@@ -10,7 +10,7 @@ flowchart LR
   S --> W["wrapper: time the call"]
   W --> A["assemble(snapshot)"]
   A --> T[trace + payload]
-  T --> W2["wrapper: redact bodies, hash the prefix, build the event"]
+  T --> W2["wrapper: redact bodies, digest the payload parts, build the event"]
   W2 --> E["assembly event v1"]
   W2 --> SP["span: gen_ai.cwa.* attributes"]
   E -->|Phase 1| I["POST /events (apps/ingest)"]
@@ -55,9 +55,10 @@ One row per event field. A field path uses dots between properties and `[]` for 
 | `gen_ai.cwa.excluded.reason_codes` | `trace.excluded[].reason` | string[] | The distinct codes, in `contract/reasons.json` order |
 | `gen_ai.cwa.payload.sha256` | `payload.hash` | string | Equal to `trace.result.hash`; the payload itself is never emitted |
 | `gen_ai.cwa.payload.bytes` | `payload.bytes` | int | The payload's length in UTF-8 bytes |
-| `gen_ai.cwa.prefix.sha256` | `prefix.sha256` | string | Not emitted; see Prefix |
-| `gen_ai.cwa.prefix.through_slot` | `prefix.through_slot` | string | |
-| `gen_ai.cwa.prefix.bytes` | `prefix.bytes` | int | |
+| `gen_ai.cwa.payload.part.sections` | `payload.parts[].section` | string[] | See Payload parts; one entry per part, in request order |
+| `gen_ai.cwa.payload.part.ids` | `payload.parts[].id` | string[] | An empty string for a part with no id |
+| `gen_ai.cwa.payload.part.sha256` | `payload.parts[].sha256` | string[] | |
+| `gen_ai.cwa.payload.part.bytes` | `payload.parts[].bytes` | int[] | |
 | `gen_ai.cwa.rejection.problems` | `rejection.problems` | string[] | The assembler's checks in words; only when rejected |
 | `gen_ai.cwa.vault.base` | `vault.base` | string | Phase 2 |
 | `gen_ai.cwa.vault.kms_key_id` | `vault.kms_key_id` | string | Phase 2 |
@@ -84,9 +85,21 @@ Bodies can carry personal data; everything else about an item cannot be hidden, 
 
 From Phase 2 a route may also deposit original bodies in a content-addressed vault (`vault`), so that revealing a body becomes an access decision rather than a data loss.
 
-## Prefix
+## Payload parts
 
-`prefix` was meant to let the dashboard measure whether a route's leading payload stays stable from turn to turn, which is what makes provider prompt caching work. **Wrappers do not emit it.** Finding where an occurrence's rendering lies in the payload is the renderer's knowledge, and under `cwa-messages/v1` the payload's leading bytes are not even the request's leading content (RFC 8785 orders its members `messages`, `system`, `tools`). `docs/rfc-rendered-digests.md` (RFC-D2) proposes instead that the specification's trace carry a digest of each included occurrence's rendered text, from which prefix stability follows with no renderer knowledge in any wrapper. If it is adopted, `prefix` is removed from the envelope before v1 is first published; until then the dashboard shows prefix stability as "Not available".
+Placement decides how much of one call's payload the next call repeats, which is what provider prompt caches reuse. A wrapper records what it can see of that without the renderer's knowledge: the parts the renderer's published payload format delimits, each by its SHA-256 and its size, in request order (`payload.parts`). It reads them from the payload, as it reads the trace, and renders nothing.
+
+| Renderer | Parts | What the dashboard can say |
+| --- | --- | --- |
+| `cwa-message-blocks/v1` | every `system`, `tools` and user-content entry, each with its item's `id` | how many leading occurrences each turn reused, and which one changed first |
+| `cwa-messages/v1` | every `system` and `tools` entry with its `id`, then the user message's `content` as one part with no id | whether the governance entries were reused, and whether the user message was, as a whole |
+| `fixture-xml/v1` | none: the payload is one undelimited text | not available |
+
+The request order is `system`, then `tools`, then the user content, whatever order the payload's JSON members take. A part's `sha256` is the SHA-256 of its text's UTF-8 bytes and `bytes` that text's length; a part's text is the entry's `text`, or for the one-part content of `cwa-messages/v1`, the message's `content`. Under a redaction mode the parts are still the rendered text's digests, which the payload hash already covers.
+
+The session document compares each assembled turn's parts with the previous assembled turn's, in order, by section, id and digest, and counts the leading parts that are equal (`reused_parts`); a turn or a predecessor with no parts is not compared. This is the wrapper's view of the payload, not the provider's cache, and the page says so.
+
+`docs/rfc-rendered-digests.md` (RFC-D2) proposes that the specification's trace carry a digest for every included occurrence under every renderer, which would make this uniform across renderers and fixed by the conformance cases.
 
 ## Contract lock
 

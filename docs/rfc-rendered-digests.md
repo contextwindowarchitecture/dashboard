@@ -8,11 +8,11 @@
 
 Placement decides how much of one call's payload the next call repeats, which is what provider prompt caches reuse. The specification already says so: section 5 ties placement to prompt caches, and section 6.1's "Cache reuse" test (R-7) asks that two consecutive turns of a frozen conversation under a cache-ordered profile render the same leading bytes through the last turn the earlier call held. The conformance README adds that `cwa-message-blocks/v1` gives one entry per occurrence so that a cache breakpoint marked on one call still exists on the next.
 
-Nothing outside an assembler can observe this. A trace says which occurrences were placed and their token counts, but not what was rendered. To tell whether turn 4 kept turn 3's leading content, something must know where each occurrence's rendering lies in the payload, and that is the renderer's knowledge. A wrapper that recovers it reimplements the renderer, in each of four languages, and can disagree with it.
+Outside an assembler, this is observable only as far as a renderer's published payload format delimits what it rendered. `cwa-message-blocks/v1` delimits every occurrence: each `system`, `tools` and user-content entry is an `{id, text}` object, so a wrapper can digest each and compare turns occurrence by occurrence. `cwa-messages/v1` delimits its `system` and `tools` entries but writes the user message as one string, so history, evidence, state and the query can be compared only as a whole. `fixture-xml/v1` delimits nothing. A wrapper that wants more than its renderer's format gives would have to find each occurrence's rendering in the payload itself, which reimplements the renderer, in each of four languages, and can disagree with it.
 
-Byte ranges of the payload, the obvious answer, do not work for every published renderer. `cwa-messages/v1` writes the RFC 8785 serialization of `{"system", "tools", "messages"}`, and RFC 8785 sorts members, so the payload's bytes run `messages`, `system`, `tools`: its leading bytes are the user message, history and query included, not the system text a provider would cache first. A range would also cut through JSON escapes.
+Byte ranges of the payload, the obvious way to give every renderer boundaries, do not work for every published renderer. `cwa-messages/v1` writes the RFC 8785 serialization of `{"system", "tools", "messages"}`, and RFC 8785 sorts members, so the payload's bytes run `messages`, `system`, `tools`: its leading bytes are the user message, history and query included, not the system text a provider would cache first. A range would also cut through JSON escapes.
 
-The dashboard (`contextwindowarchitecture/dashboard`) meets this as its session page's "prefix stability" and its guardrail for redundant re-reading (failure mode 06), and cannot show either today.
+The dashboard (`contextwindowarchitecture/dashboard`) meets this as its session page's part reuse and its guardrail for redundant re-reading (failure mode 06). Today it can show them fully for routes rendered with `cwa-message-blocks/v1`, for the governance entries and the user message as a whole under `cwa-messages/v1`, and not at all under `fixture-xml/v1`; its wrappers record the parts each format delimits (`payload.parts` in its telemetry conventions).
 
 ## Proposal
 
@@ -52,6 +52,7 @@ From two consecutive traces alone, with no payload and no renderer:
 | One digest per placement | A growing history changes its placement's digest every turn, hiding the reuse of the earlier turns |
 | A prefix hash in the trace | Needs the specification to choose where "static" ends, which is a deployment's or a provider's question, not the assembler's |
 | The wrapper keeps the previous payload and compares | Puts session state in every wrapper, says how many bytes matched but not where content changed, and is still blind to member order |
+| Every route renders with `cwa-message-blocks/v1` | The renderer is each route's choice, and an optional one; observability should not dictate it |
 | The wrapper re-renders to find boundaries | Reimplements the renderers in every language |
 
 ## Cost
@@ -62,7 +63,7 @@ From two consecutive traces alone, with no payload and no renderer:
 
 ## For the dashboard, if adopted
 
-Session prefix stability and guardrail 06 are computed from consecutive traces, by the generator or the ingest service, and the session page shows how many leading occurrences each turn kept and which one changed. The telemetry envelope's `prefix` field, which no wrapper can fill correctly today, would be removed before the envelope's v1 is first published, and nothing in a wrapper needs to know about rendering. Until then, demo events carry no prefix and the dashboard shows prefix stability as "Not available".
+Part reuse and guardrail 06 would be computed from consecutive traces, by the generator or the ingest service, the same way for every renderer: how many leading occurrences each turn kept and which one changed. The wrappers would no longer need to read the payload's format at all. Until then, they record `payload.parts` where the format delimits them, and the dashboard says, route by route, how much it can see.
 
 ## Open questions
 

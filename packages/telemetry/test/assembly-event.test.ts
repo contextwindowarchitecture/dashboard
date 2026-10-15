@@ -154,14 +154,43 @@ describe("assembly-event v1: the outcomes", () => {
     expectInvalid({ ...assembled(), session: { id: "s-1", turn_index: -1 } })
     expectValid({ ...assembled(), session: { id: "s-1", turn_index: 0 } })
     expectValid({ ...assembled(), otel: { trace_id: "c".repeat(32), span_id: "d".repeat(16) } })
-    expectValid({
-      ...assembled(),
-      prefix: { sha256: "e".repeat(64), through_slot: "governance.output_contract", bytes: 120 },
-    })
     expectInvalid({
       ...assembled(),
-      prefix: { sha256: "e".repeat(64), through_slot: "evidence.web", bytes: 120 },
+      prefix: { sha256: "e".repeat(64), through_slot: "governance.instructions", bytes: 1 },
     })
+  })
+})
+
+describe("assembly-event v1: payload parts", () => {
+  const part = (section: string, id?: string) => ({
+    section,
+    ...(id === undefined ? {} : { id }),
+    sha256: "e".repeat(64),
+    bytes: 12,
+  })
+  const withParts = (parts: unknown[]) => {
+    const event = assembled()
+    event["payload"] = { ...(event["payload"] as Event), parts }
+    return event
+  }
+
+  it("accepts the parts a payload's published format delimits, in request order", () => {
+    expectValid(
+      withParts([
+        part("system", "policy:v12"),
+        part("tools", "cap:refund"),
+        part("content", "kb:1"),
+      ]),
+    )
+    expectValid(withParts([part("system", "policy:v12"), part("content")]))
+    expectValid(withParts([]))
+  })
+
+  it("holds each part to its section, digest and size", () => {
+    expectInvalid(withParts([part("messages", "x")]))
+    expectInvalid(withParts([{ ...part("system", "a"), sha256: "short" }]))
+    expectInvalid(withParts([{ ...part("system", "a"), bytes: -1 }]))
+    expectInvalid(withParts([{ section: "system", id: "a", sha256: "e".repeat(64) }]))
   })
 })
 

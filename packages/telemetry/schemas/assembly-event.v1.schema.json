@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contextwindowarchitecture.io/schema/dashboard/assembly-event.v1.schema.json",
   "title": "CWA dashboard assembly event",
-  "description": "One assemble() call, as the wrapper around a conformant assembler records it: the frozen snapshot and the trace the assembler returned, inside this envelope. The snapshot and the trace are the published shapes and validate against the vendored contract's schemas; the envelope adds what the contract does not have: the service, the assembler, the contract lock, the session and turn, the redaction mode, the payload's hash and size, the prefix hash and the wrapper's timing. A rejected snapshot has no trace, and what was submitted is kept under rejection.snapshot, since it may break the snapshot schema.",
+  "description": "One assemble() call, as the wrapper around a conformant assembler records it: the frozen snapshot and the trace the assembler returned, inside this envelope. The snapshot and the trace are the published shapes and validate against the vendored contract's schemas; the envelope adds what the contract does not have: the service, the assembler, the contract lock, the session and turn, the redaction mode, the payload's hash, size and parts, and the wrapper's timing. A rejected snapshot has no trace, and what was submitted is kept under rejection.snapshot, since it may break the snapshot schema.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -116,7 +116,7 @@
       "$ref": "https://contextwindowarchitecture.io/schema/trace.schema.json"
     },
     "payload": {
-      "description": "The rendered payload's SHA-256 (equal to trace.result.hash) and its length in UTF-8 bytes. Present only when assembled; the payload itself is never emitted.",
+      "description": "The rendered payload's SHA-256 (equal to trace.result.hash), its length in UTF-8 bytes, and the parts its published format delimits. Present only when assembled; the payload itself is never emitted.",
       "type": "object",
       "additionalProperties": false,
       "required": ["hash", "bytes"],
@@ -127,24 +127,34 @@
         "bytes": {
           "type": "integer",
           "minimum": 0
-        }
-      }
-    },
-    "prefix": {
-      "description": "Not emitted by any wrapper: no wrapper can find where an occurrence's rendering lies in the payload without the renderer's knowledge (docs/otel-semantic-conventions.md, Prefix). docs/rfc-rendered-digests.md (RFC-D2) proposes trace-level digests instead; if the specification adopts them, this field is removed before v1 is first published.",
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["sha256", "through_slot", "bytes"],
-      "properties": {
-        "sha256": {
-          "$ref": "#/$defs/sha256"
         },
-        "through_slot": {
-          "$ref": "https://contextwindowarchitecture.io/schema/context_item.schema.json#/properties/slot"
-        },
-        "bytes": {
-          "type": "integer",
-          "minimum": 0
+        "parts": {
+          "description": "The parts the renderer's published payload format delimits, in request order, each by its digest: under cwa-message-blocks/v1 every system, tools and user-content entry; under cwa-messages/v1 every system and tools entry, then the user message's content as one part with no id. Absent when the format delimits none, as under fixture-xml/v1. Comparing consecutive turns' parts shows how much leading content a call reused (docs/otel-semantic-conventions.md, Payload parts).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["section", "sha256", "bytes"],
+            "properties": {
+              "section": {
+                "description": "Where the part sits in the request.",
+                "enum": ["system", "tools", "content"]
+              },
+              "id": {
+                "description": "The id of the item the part renders; absent for a part that holds several.",
+                "$ref": "#/$defs/nonblank"
+              },
+              "sha256": {
+                "description": "The SHA-256 of the part's text in UTF-8.",
+                "$ref": "#/$defs/sha256"
+              },
+              "bytes": {
+                "description": "The length of the part's text in UTF-8 bytes.",
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
         }
       }
     },
@@ -268,9 +278,6 @@
               "required": ["payload"]
             },
             {
-              "required": ["prefix"]
-            },
-            {
               "required": ["rejection"]
             }
           ]
@@ -297,9 +304,6 @@
             },
             {
               "required": ["payload"]
-            },
-            {
-              "required": ["prefix"]
             }
           ]
         }
