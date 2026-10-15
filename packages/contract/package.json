@@ -1,0 +1,16 @@
+{
+  "name": "@cwa-dashboard/contract",
+  "private": true,
+  "version": "0.0.0",
+  "description": "The CWA contract vendored at a pinned commit, with its generated types, validators and data",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.2",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}
