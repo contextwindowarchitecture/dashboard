@@ -14,3 +14,7 @@ playwright-report/
 playwright/.cache/
 .env.local
 .env.*.local
+
+# The prototype that preceded the repository: a local reference only, never committed
+prototype.md
+prototype.tsx

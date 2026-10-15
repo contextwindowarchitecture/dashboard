@@ -13,8 +13,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "build": "pnpm -r build",
-    "format": "prettier --write --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude .",
-    "format:check": "prettier --check --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "vendor": "node packages/contract/scripts/vendor-contract.mjs",
     "vendor:check": "node packages/contract/scripts/vendor-contract.mjs --check",
     "generate": "pnpm -r generate"

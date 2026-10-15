@@ -84,4 +84,4 @@ Node 24, pnpm 12, exact versions in every `package.json`; adding a package needs
   - Breaking changes (an event schema, a URL or a configuration change existing wrappers or deployments depend on): `!` after the scope, plus a `BREAKING CHANGE:` footer.
 - Sign off every commit (`git commit -s`). The Developer Certificate of Origin is required, and a commit hook rejects commits without it. The person committing owns the commit: no `Co-Authored-By` trailers, and never a sentence about AI assistance or any other attribution in the message. The body explains the change and nothing else.
 - Commits are GPG-signed by the global git config. Never bypass signing or hooks (`--no-gpg-sign`, `--no-verify`); if either fails, stop and ask.
-- Never commit `docs/plans/`, `node_modules/`, `dist/`, real traffic or secrets. Check `git status` before committing.
+- Never commit `docs/plans/`, `node_modules/`, `dist/`, real traffic, secrets, or the prototype that preceded this repository (`prototype.md`, `prototype.tsx`, kept locally to compare the concept with what gets built). Check `git status` before committing.
