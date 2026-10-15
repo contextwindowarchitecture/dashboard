@@ -7,6 +7,7 @@ docs/plans
 node_modules/
 dist/
 build/
+.build/
 *.tsbuildinfo
 coverage/
 test-results/

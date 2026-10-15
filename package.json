@@ -17,7 +17,9 @@
     "format:check": "prettier --check .",
     "vendor": "node packages/contract/scripts/vendor-contract.mjs",
     "vendor:check": "node packages/contract/scripts/vendor-contract.mjs --check",
-    "generate": "pnpm -r generate"
+    "generate": "pnpm -r generate",
+    "postinstall": "node packages/assembler/scripts/build.mjs",
+    "build:assembler": "node packages/assembler/scripts/build.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

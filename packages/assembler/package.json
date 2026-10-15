@@ -1,0 +1,25 @@
+{
+  "name": "@cwa-dashboard/assembler",
+  "private": true,
+  "version": "0.0.0",
+  "description": "The TypeScript assembler at the pinned tag, built by this repository (ADR-0003)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build:assembler": "node scripts/build.mjs",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.2",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}
