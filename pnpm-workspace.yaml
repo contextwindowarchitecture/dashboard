@@ -1,3 +1,6 @@
 packages:
   - apps/*
   - packages/*
+
+# Every package.json pins exact versions (AGENTS.md, Commands).
+saveExact: true
