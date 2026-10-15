@@ -1,0 +1,22 @@
+{
+  "name": "@cwa-dashboard/demo-traffic",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Demo traffic: authored scenarios and the vendored conformance cases run through the pinned assembler into an event tree",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@cwa-dashboard/assembler": "workspace:*",
+    "@cwa-dashboard/contract": "workspace:*",
+    "@cwa-dashboard/telemetry": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.2",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}
