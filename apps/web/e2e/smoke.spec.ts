@@ -256,3 +256,24 @@ test("a session opens from the list, selects a turn, and reads in both themes an
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
 })
+
+// STYLE.md 7, Play the session: the lazily loaded choreography loads under the policy and plays a
+// session to its last turn, the firsts' markers appearing, in both motion preferences.
+test("a session plays to its last turn, in both motion preferences", async ({ page }) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+    await page.goto("/sessions/refund-7")
+    const player = page.getByRole("group", { name: "Session player" })
+    await player.getByRole("group", { name: "Speed" }).getByRole("button", { name: "2×" }).click()
+    await player.getByRole("button", { name: "Play" }).click()
+    await expect(page).toHaveURL(/[?&]turn=0/)
+    await expect(page).toHaveURL(/[?&]turn=4/)
+    await expect(player.getByRole("button", { name: "Play" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    )
+    await expect(page.getByRole("list", { name: "Markers" })).toContainText("first compressed")
+    await expect(player.getByRole("status")).toContainText("Turn 4 · step 5 of 5")
+    await expectAccessible(page)
+  }
+})

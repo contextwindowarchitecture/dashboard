@@ -2,8 +2,8 @@
 // beneath, and the selected turn's detail, read from its event. The turn is in the URL; with none,
 // or one the session does not have, the last turn is shown.
 
-import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
-import type { ReactNode } from "react"
+import type { AssemblyEventV1, SessionV1 } from "@cwa-dashboard/telemetry/types"
+import { lazy, Suspense, useRef, type ReactNode } from "react"
 import { Link, useParams, useSearchParams } from "react-router"
 
 import { TurnTimeline } from "../../../components/charts/turn-timeline"
@@ -16,6 +16,9 @@ import { regionOf } from "../../../data/region"
 import { formatCount, NOT_AVAILABLE } from "../../../lib/format"
 import { selectedTurn, sessionModel, type SessionModel, type Turn } from "../model/session"
 import { SessionPlayer } from "./session-player"
+import { usePlayer } from "./use-player"
+
+const SessionPlayerMotion = lazy(() => import("./session-player-motion"))
 
 const PLANES = ["gov", "state", "evid", "inter"] as const
 const count = (value: number | undefined) =>
@@ -220,6 +223,49 @@ function TurnDetail({ turn }: { readonly turn: Turn }) {
   )
 }
 
+function SessionBody({
+  session,
+  model,
+  turn,
+  go,
+}: {
+  readonly session: SessionV1
+  readonly model: SessionModel
+  readonly turn: Turn
+  readonly go: (turn: number) => void
+}) {
+  const player = usePlayer(model, turn, go)
+  const scope = useRef<HTMLDivElement>(null)
+  return (
+    <div data-slot="content">
+      <Facts session={session} model={model} />
+      <div data-slot="session-layout">
+        <div data-slot="panel" data-padded="" ref={scope}>
+          <SessionPlayer player={player} turn={turn} />
+          <TurnTimeline
+            model={model}
+            selected={turn.turn}
+            reached={player.played ? turn.turn : undefined}
+          />
+          {player.played ? (
+            <Suspense fallback={null}>
+              <SessionPlayerMotion
+                scope={scope}
+                turn={turn.turn}
+                playing={player.playing}
+                speed={player.speed}
+                onAdvance={player.advance}
+              />
+            </Suspense>
+          ) : null}
+          <TurnTable model={model} selected={turn.turn} />
+        </div>
+        <TurnDetail turn={turn} />
+      </div>
+    </div>
+  )
+}
+
 export function SessionView() {
   const { sessionId = "" } = useParams()
   const [search, setSearch] = useSearchParams()
@@ -235,19 +281,16 @@ export function SessionView() {
         {(session) => {
           const model = sessionModel(session)
           const turn = selectedTurn(model, search.get("turn"))
-          return (
-            <div data-slot="content">
-              <Facts session={session} model={model} />
-              <div data-slot="session-layout">
-                <div data-slot="panel" data-padded="">
-                  {turn ? <SessionPlayer model={model} turn={turn} go={go} /> : null}
-                  <TurnTimeline model={model} selected={turn?.turn} />
-                  <TurnTable model={model} selected={turn?.turn} />
-                </div>
-                {turn ? <TurnDetail turn={turn} /> : null}
-              </div>
-            </div>
-          )
+          // The schema gives every session a turn; the player's state belongs to one session.
+          return turn ? (
+            <SessionBody
+              key={session.session_id}
+              session={session}
+              model={model}
+              turn={turn}
+              go={go}
+            />
+          ) : null
         }}
       </DataRegion>
     </DashboardPage>

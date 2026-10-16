@@ -310,6 +310,8 @@ a:hover {
   color: var(--fg);
   border-color: var(--fg);
 }
+/* A pressed segment is the inverse pill: you are here (STYLE.md 2, 6). */
+[data-slot="ghost-button"][aria-pressed="true"],
 [data-slot="inverse-button"],
 [data-slot="inverse-button"]:hover {
   background: var(--fg);
@@ -902,6 +904,11 @@ a:hover {
 [data-slot="walk-controls"] [aria-disabled="true"] {
   opacity: 0.45;
   cursor: default;
+}
+[data-slot="segmented"] {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 /* The scrubber (STYLE.md 7): a square ink thumb on a hairline track. */
 [data-slot="scrubber"] {

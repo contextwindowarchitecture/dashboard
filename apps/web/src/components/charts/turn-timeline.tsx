@@ -45,13 +45,19 @@ function timelineSummary(model: SessionModel) {
 export function TurnTimeline({
   model,
   selected,
+  reached,
 }: {
   readonly model: SessionModel
   readonly selected: number | undefined
+  /** While a session is played: the turn reached, after which nothing is drawn yet. */
+  readonly reached?: number | undefined
 }) {
   const id = useId()
   const [ref, width] = useWidth<HTMLDivElement>(640)
   const g = turnTimeline(model, { width, height: HEIGHT })
+  const shown = (turn: number) => reached === undefined || turn <= reached
+  const bars = g.bars.filter((bar) => shown(bar.turn))
+  const markers = g.markers.filter((marker) => shown(marker.turn))
   const M = TIMELINE_MARGIN
   return (
     <figure data-slot="turn-timeline" aria-labelledby={`${id}-title`}>
@@ -88,7 +94,7 @@ export function TurnTimeline({
             ))}
           </g>
           <g aria-hidden="true">
-            {g.bars.map((bar) => (
+            {bars.map((bar) => (
               <g key={bar.turn} data-turn={bar.turn} data-kind={bar.kind}>
                 {bar.kind === "refused" ? (
                   <rect
@@ -154,17 +160,17 @@ export function TurnTimeline({
             </g>
           ) : null}
           <g aria-hidden="true">
-            {g.markers.map((marker) => (
-              <g key={marker.kind} data-marker={marker.kind}>
+            {markers.map((marker) => (
+              <g key={marker.kind} data-marker={marker.kind} data-marker-turn={marker.turn}>
                 <path d={`M${marker.x - 4} ${M.top - 12}h8l-4 6z`} />
               </g>
             ))}
           </g>
         </svg>
       </div>
-      {g.markers.length > 0 ? (
+      {markers.length > 0 ? (
         <ul data-slot="chart-legend" aria-label="Markers">
-          {g.markers.map((marker) => (
+          {markers.map((marker) => (
             <li key={marker.kind} data-marker={marker.kind}>
               <svg aria-hidden="true" width="10" height="8" viewBox="0 0 10 8">
                 <path d="M1 1h8l-4 6z" />
