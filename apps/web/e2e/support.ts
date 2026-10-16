@@ -23,10 +23,16 @@ export const test = base.extend<{ pageErrors: string[] }>({
 
 export { expect }
 
-export async function expectAccessible(page: Page) {
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
-    .analyze()
+/**
+ * Axe at WCAG 2.2 AA. Under forced colours the system's palette sets every contrast, and axe's
+ * colour-contrast rule reads colours Chromium does not draw there (the GitHub pill's authored
+ * paper-on-ink, where the computed style and the screen hold LinkText on Canvas), so that one rule
+ * is left out of a forced-colours run.
+ */
+export async function expectAccessible(page: Page, options: { forcedColors?: boolean } = {}) {
+  const builder = new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag22aa"])
+  if (options.forcedColors) builder.disableRules(["color-contrast"])
+  const results = await builder.analyze()
   expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([])
 }
 

@@ -1,7 +1,7 @@
 // The accessibility pass (dashboard-plan.md DP-7, 10.1): the skip link, the keyboard on the stream's
-// rows and its filters, focus restored when a sheet or a list closes, and the sidebar's three
-// states. Axe runs in the smoke test on every page type; zoom is the visual pass's widths (1280px at
-// 200% is 640px). A screen reader run is manual and is not here.
+// rows and its filters, focus restored when a sheet or a list closes, the sidebar's three states,
+// and forced colours. Axe runs in the smoke test on every page type; zoom is the visual pass's widths
+// (1280px at 200% is 640px). A screen reader run is manual and is not here.
 
 import type { Page } from "@playwright/test"
 
@@ -110,4 +110,29 @@ test("the sidebar collapses to its icons on a desktop, every link still named", 
   await expect(page.getByRole("heading", { level: 1, name: "Sessions" })).toBeFocused()
   await menu.click()
   await expect(menu).toHaveAttribute("aria-expanded", "true")
+})
+
+test("in forced colours the budget bar keeps its planes, and the inspector passes axe", async ({
+  page,
+}) => {
+  await page.emulateMedia({ forcedColors: "active" })
+  await page.goto("/traces?outcome=assembled&session=refund-7")
+  await page
+    .getByRole("table", { name: "Trace stream" })
+    .getByRole("row")
+    .nth(1)
+    .getByRole("link")
+    .click()
+  await page.getByRole("figure", { name: /Budget/ }).waitFor()
+  const colours = await page.evaluate(() => {
+    const canvas = getComputedStyle(document.body).backgroundColor
+    const segments = [
+      ...document.querySelectorAll('[data-slot="budget-bar"] > [data-segment]:not([data-ghost])'),
+    ].map((segment) => getComputedStyle(segment).backgroundColor)
+    return { canvas, segments }
+  })
+  expect(colours.segments.length).toBeGreaterThan(2)
+  for (const colour of colours.segments) expect(colour).not.toBe(colours.canvas)
+  expect(new Set(colours.segments).size).toBe(colours.segments.length)
+  await expectAccessible(page, { forcedColors: true })
 })

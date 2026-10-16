@@ -1301,6 +1301,17 @@ a:hover {
   background: var(--surface);
   border-left: 1px dashed var(--fg);
 }
+/* Forced colours paint every background the system's Canvas, which would blank the bar and the plane
+   swatches: they keep their own colours, and the track an outline in the system's text colour. */
+@media (forced-colors: active) {
+  [data-slot="budget-track"],
+  [data-plane] {
+    forced-color-adjust: none;
+  }
+  [data-slot="budget-track"] {
+    outline: 1px solid CanvasText;
+  }
+}
 /* The turn timeline (STYLE.md 6, Charts): planes as fills, the budget as a dashed ink rule, a refusal
    hatched in the accent at 50%, the selected turn outlined in ink, each first a marker by shape. */
 [data-slot="session-layout"] {
