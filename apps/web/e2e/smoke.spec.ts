@@ -272,7 +272,7 @@ test("a session plays to its last turn, in both motion preferences", async ({ pa
 
 test("the registry's pages read in both themes and at a phone's width", async ({ page }) => {
   await page.goto("/registry/policies")
-  await expect(page.getByRole("region", { name: "Drift" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "Drift", exact: true })).toBeVisible()
   await page
     .getByRole("table", { name: "Route policies" })
     .getByRole("link", { name: "support-chat illustrative/v1" })

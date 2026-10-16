@@ -761,11 +761,12 @@ a:hover {
 }
 /* In a table an identifier stays whole, so the columns are sized to it and a table wider than its
    panel scrolls in its region; it breaks only if one id is wider than the panel itself. */
-[data-slot="table-cell"][data-mono] {
+:is(td, th)[data-mono],
+:is(td, th) [data-mono] {
   overflow-wrap: break-word;
 }
 /* A chip in a table stays on one line for the same reason. */
-[data-slot="table-cell"] [data-slot="badge"] {
+:is(td, th) [data-slot="badge"] {
   flex-wrap: nowrap;
 }
 [data-slot="cell-note"] {
@@ -1592,6 +1593,8 @@ section[aria-labelledby="guardrails-title"] [data-slot="card-grid"] {
 }
 [data-slot="scroll-region"] {
   overflow-x: auto;
+  /* Never wider than where it sits, even where items keep their own width (a note's start). */
+  max-width: 100%;
 }
 [data-slot="scroll-region"] > [data-slot="chart-table"][data-wide] {
   width: 100%;

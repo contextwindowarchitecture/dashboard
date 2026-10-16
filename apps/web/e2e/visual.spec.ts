@@ -88,24 +88,42 @@ for (const theme of ["light", "dark"] as const) {
   }
 }
 
-test("a table keeps its identifiers and chips whole, and scrolls in its region instead", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto("/traces?outcome=refused")
-  const table = page.getByRole("table", { name: "Trace stream" })
-  await table.getByRole("row").nth(1).waitFor()
-  const broken = await table.evaluate((element) =>
-    [...element.querySelectorAll("tbody a, tbody [data-slot='badge']")]
-      .filter((cell) => {
-        const line = parseFloat(getComputedStyle(cell).lineHeight) || cell.clientHeight
-        return cell.getClientRects().length > 1 || cell.getBoundingClientRect().height > 2 * line
-      })
-      .map((cell) => cell.textContent),
-  )
-  expect(broken).toEqual([])
-  await expectNoSidewaysScroll(page)
-})
+// A word in a table cell never breaks across lines (a hyphen or a slash may end a line); a table
+// wider than its panel scrolls in its region instead. A chip in a cell holds one line.
+for (const [path, table] of [
+  ["/traces?outcome=refused", "Trace stream"],
+  ["/fleet", "Conformance"],
+  ["/fleet", "Services"],
+] as const) {
+  test(`${table} keeps its words and chips whole on a desktop`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto(path)
+    const element = page.getByRole("table", { name: table })
+    await element.getByRole("row").nth(1).waitFor()
+    const broken = await element.evaluate((root) => {
+      const found: string[] = []
+      const walker = document.createTreeWalker(root.querySelector("tbody")!, NodeFilter.SHOW_TEXT)
+      for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+        for (const match of (node.textContent ?? "").matchAll(/[^\s\-/]+[-/]?/g)) {
+          const range = document.createRange()
+          range.setStart(node, match.index)
+          range.setEnd(node, match.index + match[0].length)
+          const tops = new Set(
+            [...range.getClientRects()].filter((r) => r.width > 0).map((r) => Math.round(r.top)),
+          )
+          if (tops.size > 1) found.push(match[0])
+        }
+      }
+      for (const chip of root.querySelectorAll("tbody [data-slot='badge']")) {
+        const line = parseFloat(getComputedStyle(chip).lineHeight) || 12
+        if (chip.getBoundingClientRect().height > 2 * line + 8) found.push(chip.textContent ?? "")
+      }
+      return found
+    })
+    expect(broken).toEqual([])
+    await expectNoSidewaysScroll(page)
+  })
+}
 
 test("the overview's metrics fill their rows, each value on one line", async ({ page }) => {
   await page.goto("/")

@@ -28,26 +28,28 @@ export function DriftNote({ drift }: { readonly drift: readonly Drift[] }) {
         such content: a change needs a new version (R-20).
       </p>
       {/* A table, so no link sits in running text on the note's tint (axe, link-in-text-block). */}
-      <table aria-label="Drifted events" data-slot="chart-table">
-        <thead>
-          <tr>
-            <th scope="col">Event</th>
-            <th scope="col">Service</th>
-            <th scope="col">Drifted</th>
-          </tr>
-        </thead>
-        <tbody>
-          {drift.map((d) => (
-            <tr key={`${d.event_id}-${d.kind}`}>
-              <td data-mono="">
-                <Link to={`/traces/${d.event_id}`}>{d.event_id}</Link>
-              </td>
-              <td data-mono="">{d.service}</td>
-              <td data-mono="">{d.kind === "route_policy" ? "route policy" : "profile"}</td>
+      <div role="region" aria-label="Drifted events table" tabIndex={0} data-slot="scroll-region">
+        <table aria-label="Drifted events" data-slot="chart-table">
+          <thead>
+            <tr>
+              <th scope="col">Event</th>
+              <th scope="col">Service</th>
+              <th scope="col">Drifted</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {drift.map((d) => (
+              <tr key={`${d.event_id}-${d.kind}`}>
+                <td data-mono="">
+                  <Link to={`/traces/${d.event_id}`}>{d.event_id}</Link>
+                </td>
+                <td data-mono="">{d.service}</td>
+                <td data-mono="">{d.kind === "route_policy" ? "route policy" : "profile"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   )
 }
