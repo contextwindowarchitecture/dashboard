@@ -131,6 +131,13 @@ test("the inspector opens an assembled, a refused and a rejected event from the 
     await expect(page.getByRole("region", { name: "Outcome" })).toContainText(words)
     await expect(page.getByRole("heading", { level: 1 })).toBeFocused()
     await expectAccessible(page)
+    for (const tab of ["Excluded", "Conflicts", "Context", "Raw"]) {
+      const trigger = page.getByRole("tab", { name: tab })
+      if ((await trigger.count()) === 0) continue
+      await trigger.click()
+      await expect(page.getByRole("tabpanel", { name: tab })).toBeVisible()
+      await expectAccessible(page)
+    }
   }
 })
 

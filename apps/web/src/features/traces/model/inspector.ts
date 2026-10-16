@@ -327,3 +327,49 @@ export function excludedByStage(event: AssemblyEventV1): StageGroup[] {
     groups.has(stage) ? [{ stage, rows: groups.get(stage)! }] : [],
   )
 }
+
+export interface ConflictCard {
+  readonly group_id: string
+  readonly kind: string
+  readonly members: { readonly id: string; readonly producer: Producer | undefined }[]
+  readonly resolution: string
+  readonly decided_by: string
+  readonly winner: string | undefined
+  /** For a fact group: the fact, and the route's precedence for it. */
+  readonly fact: string | undefined
+  readonly precedence: readonly string[] | undefined
+  /** For an instruction group: what the route does when it has no unique supported resolution. */
+  readonly onUnresolved: string | undefined
+}
+
+/** The trace's conflict groups, each with the route's rule that applied to it (R-11). */
+export function conflictCards(event: AssemblyEventV1): ConflictCard[] {
+  const snapshot = event.snapshot
+  const { producerOf } = candidates(snapshot)
+  const declared = new Map(
+    (snapshot?.conflicts ?? []).map((group) => [group.id, group as unknown as Raw]),
+  )
+  const policy = (snapshot?.route_policy ?? {}) as unknown as Raw
+  const facts = (isRecord(policy["facts"]) ? policy["facts"] : {}) as Record<string, Raw>
+  return (event.trace?.conflicts ?? []).map((conflict) => {
+    const fact = text(declared.get(conflict.group_id)?.["fact"])
+    const precedence =
+      fact && Array.isArray(facts[fact]?.["precedence"])
+        ? (facts[fact]!["precedence"] as string[])
+        : undefined
+    return {
+      group_id: conflict.group_id,
+      kind: conflict.kind,
+      members: conflict.items.map((id) => ({ id, producer: producerOf(id) })),
+      resolution: conflict.resolution,
+      decided_by: conflict.decided_by,
+      winner: conflict.winner,
+      fact,
+      precedence,
+      onUnresolved:
+        conflict.kind === "instruction"
+          ? (text(policy["on_unresolved_instruction"]) ?? "refuse")
+          : undefined,
+    }
+  })
+}

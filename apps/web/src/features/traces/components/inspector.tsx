@@ -15,10 +15,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui
 import { useEvent } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import { formatCount, formatInstant, formatMs } from "../../../lib/format"
+import { ConflictsTab } from "./conflicts-tab"
+import { ExcludedTab } from "./excluded-tab"
 import { ItemsTab } from "./items-tab"
 
 const TABS = [
   { id: "items", label: "Items", needsTrace: true },
+  { id: "excluded", label: "Excluded", needsTrace: true },
+  { id: "conflicts", label: "Conflicts", needsTrace: true },
   { id: "context", label: "Context", needsTrace: true },
   { id: "raw", label: "Raw", needsTrace: false },
 ] as const
@@ -211,6 +215,12 @@ function EventView({ event }: { readonly event: AssemblyEventV1 }) {
           <>
             <TabsContent value="items">
               <ItemsTab event={event} />
+            </TabsContent>
+            <TabsContent value="excluded">
+              <ExcludedTab event={event} />
+            </TabsContent>
+            <TabsContent value="conflicts">
+              <ConflictsTab event={event} />
             </TabsContent>
             <TabsContent value="context">
               <ContextTab event={event} />

@@ -5,7 +5,8 @@
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
 import type { ReactNode } from "react"
 
-import { planeStyle, SlotBadge } from "../../../components/dashboard/slot-badge"
+import { SlotBadge } from "../../../components/dashboard/slot-badge"
+import { planeStyle } from "../../../lib/plane"
 import { Badge } from "../../../components/ui/badge"
 import { formatCount, formatInstant, formatTokens } from "../../../lib/format"
 import { type Body, type ItemRow, joinItems } from "../model/inspector"
@@ -108,9 +109,18 @@ function BodyView({
   }
 }
 
-function Item({ row, route }: { readonly row: ItemRow; readonly route: string }) {
+function Item({
+  row,
+  route,
+  anchor,
+}: {
+  readonly row: ItemRow
+  readonly route: string
+  readonly anchor: boolean
+}) {
   return (
     <li
+      id={anchor ? `item-${row.item_id}` : undefined}
       data-slot="item-row"
       data-compressed={row.compressed ? "" : undefined}
       style={planeStyle(row.slot)}
@@ -188,8 +198,14 @@ export function ItemsTab({ event }: { readonly event: AssemblyEventV1 }) {
   }
   return (
     <ol data-slot="item-list" aria-label="Included items">
-      {rows.map((row) => (
-        <Item key={row.index} row={row} route={route} />
+      {rows.map((row, i) => (
+        // An item placed twice is linked to at its first occurrence.
+        <Item
+          key={row.index}
+          row={row}
+          route={route}
+          anchor={rows.findIndex((r) => r.item_id === row.item_id) === i}
+        />
       ))}
     </ol>
   )

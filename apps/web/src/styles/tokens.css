@@ -862,3 +862,62 @@ a:hover {
   margin-top: 8px;
   display: block;
 }
+
+/* --- Excluded rows and conflict cards (STYLE.md 3, Outcomes; 5, Grid recipes) -------------------- */
+
+[data-slot="stage-groups"] {
+  display: grid;
+  gap: 24px;
+}
+[data-slot="stage-groups"] h3[data-label] {
+  margin: 0 0 8px;
+}
+[data-slot="excluded-row"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 5px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 10px 14px;
+}
+[data-slot="excluded-row"][data-producer] {
+  border-style: dashed;
+  opacity: 0.7;
+}
+[data-excluded] {
+  text-decoration: line-through;
+}
+[data-slot="reason-text"] {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  max-width: 70ch;
+}
+[data-slot="card-grid"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+[data-slot="card"] {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  justify-items: start;
+  background: var(--bg);
+  padding: 12px 14px;
+}
+[data-slot="card-line"] {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  overflow-wrap: anywhere;
+}
+[data-slot="members"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+}
