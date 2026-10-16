@@ -676,6 +676,11 @@ a:hover {
   font-size: var(--fs-label);
   color: var(--muted);
 }
+/* Inside the content's padding a status line takes none of its own, so it starts where the title does. */
+[data-slot="content"] [data-slot="status-region"] {
+  padding-left: 0;
+  padding-right: 0;
+}
 /* A part holding a path (a lock's repository) breaks anywhere rather than push the page sideways. */
 [data-slot="status-region"] > * {
   min-width: 0;

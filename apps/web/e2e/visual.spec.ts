@@ -59,15 +59,25 @@ for (const theme of ["light", "dark"] as const) {
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme)
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
       await page.waitForLoadState("networkidle")
-      // The page's gutter: no table or scrolling region starts left of the title.
+      // The page's gutter: no table or scrolling region starts left of the title, and a status
+      // line's text starts where the title does.
       await page.setViewportSize({ width: 1440, height: 900 })
       const outside = await page.evaluate(() => {
         const gutter = document.querySelector("h1")!.getBoundingClientRect().left
-        return [...document.querySelectorAll("main table, main [data-slot='scroll-region']")]
+        const regions = [
+          ...document.querySelectorAll("main table, main [data-slot='scroll-region']"),
+        ]
           .filter((element) => element.getBoundingClientRect().left < gutter - 1)
           .map((element) => element.getAttribute("aria-label") ?? element.tagName)
+        const statuses = [...document.querySelectorAll("main [data-slot='status-region']")]
+          .filter((element) => {
+            const text = element.firstElementChild ?? element
+            return Math.abs(text.getBoundingClientRect().left - gutter) > 1
+          })
+          .map((element) => element.getAttribute("aria-label") ?? "status")
+        return [...regions, ...statuses]
       })
-      expect(outside, "tables outside the page's gutter").toEqual([])
+      expect(outside, "tables and status lines off the page's gutter").toEqual([])
       for (const width of WIDTHS) {
         await test.step(`${width}px`, async () => {
           await page.setViewportSize({ width, height: 900 })

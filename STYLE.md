@@ -224,7 +224,7 @@ Dashboard pages are full width inside the sidebar: the tables need it. Narrative
 | Page gutter | `32px`, tightened to `20px` below 900px |
 | Page header | `padding: 32px 32px 24px`: kicker, h1, lede, the mono meta row, actions on the right |
 | Filter bar | `padding: 0 32px 16px`, controls in a row that wraps, `gap: 10px` |
-| Status region | `padding: 0 32px 16px`, the source badge and the window as mono muted; each part `min-width: 0; overflow-wrap: anywhere`, since one can hold a repository path |
+| Status region | `padding: 0 32px 16px` (none at the sides inside the content's padding, so it starts where the title does), the source badge and the window as mono muted; each part `min-width: 0; overflow-wrap: anywhere`, since one can hold a repository path |
 | Metric grid | `margin: 0 32px 24px`, a hairline grid of `repeat(3, minmax(0, 1fr))`: the overview's six metrics fill every row, and a cell is wide enough for a reason code at the metric size |
 | Content | `padding: 0 32px 32px`, a column of panels with `gap: 24px`; a two-column page is `minmax(0, 1fr) minmax(360px, 420px)` with `gap: 24px` |
 | Panel header | `padding: 12px 18px`, 1px `--line` bottom border, sticky at the masthead's bottom inside a scrolling panel |
