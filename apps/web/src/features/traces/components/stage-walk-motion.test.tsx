@@ -37,8 +37,9 @@ function prefer(reduce: boolean) {
 
 const original = window.matchMedia
 beforeEach(() => {
-  // GSAP's clock, twenty times as fast, so a played walk takes test time, not reading time.
-  gsap.globalTimeline.timeScale(20)
+  // GSAP's clock, four times as fast: a turn of 150ms, slow enough that a waitFor polling every
+  // 50ms sees each stage, fast enough that a played walk takes test time, not reading time.
+  gsap.globalTimeline.timeScale(4)
 })
 afterEach(() => {
   gsap.globalTimeline.timeScale(1)
@@ -84,10 +85,14 @@ describe("the played stage walk", () => {
     prefer(false)
     const user = userEvent.setup()
     const { all, current, button } = await openWalk()
+    // Nearly stopped while the controls are pressed, then far faster than a turn once paused.
+    gsap.globalTimeline.timeScale(0.001)
     await user.click(button("Play"))
     await user.click(button("Pause"))
+    gsap.globalTimeline.timeScale(1000)
     await act(() => new Promise((resolve) => setTimeout(resolve, 100)))
     expect(current()).toEqual([all[0]])
+    gsap.globalTimeline.timeScale(0.001)
     await user.click(button("Play"))
     await user.click(button("Step forward"))
     expect(button("Play")).toHaveAttribute("aria-pressed", "false")
