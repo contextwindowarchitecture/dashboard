@@ -18,7 +18,7 @@ The maintainer's decisions of 2026-10-15 (plan section 0):
 | D8 | Redaction stays available destructively at the wrapper, and a route may opt into a content-addressed vault from Phase 2 | not yet: DP-1 (the envelope reserves `vault`) |
 | D9 | A minimal ingest service ships in Phase 1 | `apps/ingest`: `POST /events` (EVENTS_DIR, INGEST_TOKEN) and `POST /replay` (ADR-0005) |
 | D10 | The first wrapper is TypeScript, extracted from the generator | not yet: Phase 2 |
-| D11 | Hosting on the organisation's OpenShift cluster and quay.io, at `dashboard.contextwindowarchitecture.io`, demo traffic only | `deploy/` (Kustomize base and prod overlay, the two images, `publish.sh`, `deploy/README.md`); not yet applied to the cluster |
+| D11 | Hosting on the organisation's OpenShift cluster and quay.io, at `dashboard.contextwindowarchitecture.io`, demo traffic only | `deploy/`; live at https://dashboard.contextwindowarchitecture.io since 2026-10-16, images `24f9dbd2beb9` (linux/amd64, private on Quay, pulled with `dashboard-pull`), Let's Encrypt through cert-manager, the demo tree published |
 | D12 | Sandbox replay runs the real assembler server-side, never in the browser | ADR-0005 |
 
 Two added requirements: **R-DASH-1**, item metadata is visible for every item in every redaction mode, and **R-DASH-2**, redaction is switched outside the dashboard and the dashboard names the switch. Both are tested from DP-2.

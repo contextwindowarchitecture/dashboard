@@ -29,14 +29,22 @@ if [ -z "$pod" ]; then
 fi
 
 copy() {
-  # Files land owned by the pod's user, whatever they were here.
-  tar -C "$tree" -cf - "$@" | oc -n "$ns" exec -i "$pod" -- tar -C /srv/data --no-same-owner --no-same-permissions -xf -
+  # The tree's entries by name, never `.`: the volume's root is not the pod user's, so tar there must not try to
+  # set its mode or times. Files land owned by the pod's user, with the time they land, and no extended attributes
+  # (macOS's tar would carry its own, which GNU tar does not know).
+  tar -C "$tree" --no-xattrs -cf - "$@" |
+    oc -n "$ns" exec -i "$pod" -- tar -C /srv/data --no-same-owner --no-same-permissions --no-overwrite-dir -m -xf -
 }
 
+entries=()
+for entry in events sessions fleet.json; do
+  if [ -e "$tree/$entry" ]; then entries+=("$entry"); fi
+done
+
 echo "publish: $tree into $ns/$pod"
-copy --exclude=./events/index.json --exclude=./events/index .
-if [ -d "$tree/events/index" ]; then copy ./events/index; fi
-copy ./events/index.json
+copy --exclude=events/index.json --exclude=events/index "${entries[@]}"
+if [ -d "$tree/events/index" ]; then copy events/index; fi
+copy events/index.json
 
 oc -n "$ns" rollout restart deployment/dashboard-ingest
 oc -n "$ns" rollout status deployment/dashboard-ingest
