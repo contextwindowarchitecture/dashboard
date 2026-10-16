@@ -1,7 +1,8 @@
 // The visual pass (dashboard-plan.md DP-7, 10.1; STYLE.md 11): every page type, in both themes, at a
 // phone (375px), at 1280px under 200% zoom (640px), at a small laptop (1024px) and at a desktop
-// (1440px), with no sideways scroll once its data has arrived. The long content (a 400-row trace, a
-// 60-turn session) is the performance tests' (e2e-perf/); the style tests are unit tests.
+// (1440px), with no sideways scroll once its data has arrived, and every table inside the page's
+// gutter. The long content (a 400-row trace, a 60-turn session) is the performance tests'
+// (e2e-perf/); the style tests are unit tests.
 
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
@@ -58,6 +59,15 @@ for (const theme of ["light", "dark"] as const) {
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme)
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
       await page.waitForLoadState("networkidle")
+      // The page's gutter: no table or scrolling region starts left of the title.
+      await page.setViewportSize({ width: 1440, height: 900 })
+      const outside = await page.evaluate(() => {
+        const gutter = document.querySelector("h1")!.getBoundingClientRect().left
+        return [...document.querySelectorAll("main table, main [data-slot='scroll-region']")]
+          .filter((element) => element.getBoundingClientRect().left < gutter - 1)
+          .map((element) => element.getAttribute("aria-label") ?? element.tagName)
+      })
+      expect(outside, "tables outside the page's gutter").toEqual([])
       for (const width of WIDTHS) {
         await test.step(`${width}px`, async () => {
           await page.setViewportSize({ width, height: 900 })

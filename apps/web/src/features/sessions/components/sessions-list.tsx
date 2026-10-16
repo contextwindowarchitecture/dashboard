@@ -70,28 +70,30 @@ export function SessionsList() {
       }}
     >
       {(index) => (
-        <div role="region" aria-label="Sessions" tabIndex={0} data-slot="scroll-region">
-          <table aria-label="Sessions" data-slot="chart-table" data-wide="">
-            <thead>
-              <tr>
-                <th scope="col">Session</th>
-                <th scope="col">Route</th>
-                <th scope="col">Service</th>
-                <th scope="col" data-numeric="">
-                  Turns
-                </th>
-                <th scope="col">Outcomes</th>
-                <th scope="col">First inflection</th>
-                <th scope="col">Part reuse</th>
-                <th scope="col">Last recorded</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessionRows(index.events).map((row) => (
-                <Row key={row.id} row={row} />
-              ))}
-            </tbody>
-          </table>
+        <div data-slot="content">
+          <div role="region" aria-label="Sessions" tabIndex={0} data-slot="scroll-region">
+            <table aria-label="Sessions" data-slot="chart-table" data-wide="">
+              <thead>
+                <tr>
+                  <th scope="col">Session</th>
+                  <th scope="col">Route</th>
+                  <th scope="col">Service</th>
+                  <th scope="col" data-numeric="">
+                    Turns
+                  </th>
+                  <th scope="col">Outcomes</th>
+                  <th scope="col">First inflection</th>
+                  <th scope="col">Part reuse</th>
+                  <th scope="col">Last recorded</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sessionRows(index.events).map((row) => (
+                  <Row key={row.id} row={row} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </DataRegion>
