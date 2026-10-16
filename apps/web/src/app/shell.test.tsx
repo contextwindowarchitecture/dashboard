@@ -40,11 +40,6 @@ describe("the shell", () => {
     expect(within(crumbs).getByText("Traces")).toHaveAttribute("aria-current", "page")
   })
 
-  it("sends the home page to the trace stream until the overview lands", async () => {
-    const { router } = renderApp("/")
-    await waitFor(() => expect(router.state.location.pathname).toBe("/traces"))
-  })
-
   it("answers an unknown address with a page that says so", async () => {
     renderApp("/nowhere")
     expect(

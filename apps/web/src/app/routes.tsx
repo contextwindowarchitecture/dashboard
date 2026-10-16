@@ -1,11 +1,12 @@
 // The routes (dashboard-plan.md 6). Each route's handle names its document title and its crumb;
 // record pages name them from their params.
 
-import { Navigate, type Params, type RouteObject } from "react-router"
+import type { Params, RouteObject } from "react-router"
 
 import { Shell } from "../components/layout/shell"
 import { InspectorPage } from "./pages/inspector"
 import { NotFoundPage } from "./pages/not-found"
+import { OverviewPage } from "./pages/overview"
 import { TracesPage } from "./pages/traces"
 
 export interface RouteHandle {
@@ -27,7 +28,7 @@ export const ROUTES: RouteObject[] = [
   {
     element: <Shell />,
     children: [
-      { index: true, element: <Navigate to="/traces" replace /> },
+      { index: true, element: <OverviewPage />, handle: handle("Overview") },
       {
         path: "traces",
         handle: handle("Traces", () => "Traces"),

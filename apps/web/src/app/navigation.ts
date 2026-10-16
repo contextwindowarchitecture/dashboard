@@ -2,7 +2,7 @@
 // under which an item is the current page. Only pages that exist are listed; each is added here when
 // it lands.
 
-import { ListTree, type LucideIcon } from "lucide-react"
+import { LayoutDashboard, ListTree, type LucideIcon } from "lucide-react"
 import { matchPath } from "react-router"
 
 export interface NavItem {
@@ -25,6 +25,7 @@ export const NAVIGATION: readonly NavGroup[] = [
     id: "observe",
     label: "Observe",
     items: [
+      { id: "overview", label: "Overview", to: "/", icon: LayoutDashboard, patterns: ["/"] },
       {
         id: "traces",
         label: "Traces",

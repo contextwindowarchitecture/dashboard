@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { formatCount, formatInstant, formatMs, formatTokens, NOT_AVAILABLE } from "./format"
+import {
+  formatCount,
+  formatInstant,
+  formatMs,
+  formatPercent,
+  formatTokens,
+  NOT_AVAILABLE,
+} from "./format"
 
 describe("format", () => {
   it("writes counts and tokens with the unit, in en-US", () => {
@@ -19,6 +26,12 @@ describe("format", () => {
   it("writes instants in UTC, to the second", () => {
     expect(formatInstant("2026-10-15T09:30:00.123Z")).toBe("2026-10-15 09:30:00Z")
     expect(formatInstant("2026-10-15T11:30:00+02:00")).toBe("2026-10-15 09:30:00Z")
+  })
+
+  it("writes a rate as a percentage to one decimal", () => {
+    expect(formatPercent(0.1234)).toBe("12.3%")
+    expect(formatPercent(0)).toBe("0.0%")
+    expect(formatPercent(undefined)).toBe(NOT_AVAILABLE)
   })
 
   it("says Not available, never 0, for a value it does not have", () => {

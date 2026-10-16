@@ -30,3 +30,10 @@ export function formatInstant(value: string | null | undefined): string {
   if (!Number.isFinite(time)) return NOT_AVAILABLE
   return `${new Date(time).toISOString().slice(0, 19).replace("T", " ")}Z`
 }
+
+/** A rate between 0 and 1 as a percentage to one decimal: "12.3%". */
+export function formatPercent(value: number | null | undefined): string {
+  return known(value)
+    ? `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value * 100)}%`
+    : NOT_AVAILABLE
+}

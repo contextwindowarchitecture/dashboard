@@ -45,10 +45,9 @@ test("the app loads under the production policy, in the light theme by default",
   const policy = response?.headers()["content-security-policy"] ?? ""
   expect(policy).toContain("script-src 'self';")
   expect(policy).not.toContain("unsafe-eval")
-  await expect(page).toHaveURL(/\/traces$/)
-  await expect(page).toHaveTitle("Trace stream — CWA dashboard")
+  await expect(page).toHaveTitle("Overview — CWA dashboard")
   await expect(page.getByRole("main")).toHaveCount(1)
-  await expect(page.getByRole("heading", { level: 1, name: "Trace stream" })).toBeVisible()
+  await expect(page.getByRole("heading", { level: 1, name: "Overview" })).toBeVisible()
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light")
   // The website's paper, from tokens.css, wins over the generated stylesheet's white.
   expect(await bodyBackground(page)).toBe("oklch(0.985 0.004 90)")
@@ -162,4 +161,21 @@ test("the inspector shows bodies in each redaction mode, and passes axe with the
     for (const summary of await items.locator("summary").all()) await summary.click()
     await expectAccessible(page)
   }
+})
+
+test("the overview sums the window and reads in both themes and at a phone's width", async ({
+  page,
+}) => {
+  await page.goto("/")
+  await expect(page.getByRole("list", { name: "Metrics" })).toContainText("111")
+  await expect(
+    page.getByRole("list", { name: "Guardrails" }).getByRole("heading", { level: 3 }),
+  ).toHaveCount(7)
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/")
+  await expect(page.getByRole("list", { name: "Guardrails" })).toBeVisible()
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
 })
