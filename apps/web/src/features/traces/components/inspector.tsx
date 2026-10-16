@@ -1,7 +1,7 @@
 // The trace inspector (dashboard-plan.md 7.3): one event's outcome, its facts, and its trace joined
 // to its snapshot, tab by tab. The tab lives in the URL.
 
-import { REASONS } from "@cwa-dashboard/contract/data"
+import { REASONS, SCOPE } from "@cwa-dashboard/contract/data"
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
 import type { ReactNode } from "react"
 import { useParams, useSearchParams } from "react-router"
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui
 import { useEvent } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import { formatCount, formatInstant, formatMs } from "../../../lib/format"
+import { reasonInfo } from "../../../lib/reasons"
 import { BudgetBar } from "../../../components/charts/budget-bar"
 import { ConflictsTab } from "./conflicts-tab"
 import { ExcludedTab } from "./excluded-tab"
@@ -131,6 +132,49 @@ function Facts({ event }: { readonly event: AssemblyEventV1 }) {
   )
 }
 
+// What a trace can and cannot prove (dashboard-plan.md 7.3): each requirement behind the codes it
+// records, with whose responsibility assembler-scope.json says it is, and the requirements that are
+// the application's, which no trace can show.
+function CanProve({ event }: { readonly event: AssemblyEventV1 }) {
+  const trace = event.trace!
+  const codes = [
+    ...trace.excluded.map((row) => row.reason),
+    ...(trace.refused.reason ? [trace.refused.reason] : []),
+  ]
+  const rules = [...new Set(codes.flatMap((code) => reasonInfo(code)?.rule ?? []))].sort(
+    (a, b) => Number(a.slice(2)) - Number(b.slice(2)),
+  )
+  const application = SCOPE.filter((entry) => entry.scope === "application")
+  return (
+    <section aria-label="What this trace can prove" data-slot="panel">
+      <h2 data-slot="panel-header" data-label="">
+        What this trace can prove
+      </h2>
+      {rules.length > 0 ? (
+        <ul data-slot="key-values" aria-label="Requirements behind this trace's codes">
+          {rules.map((rule) => {
+            const entry = SCOPE.find((s) => s.id === rule)
+            return (
+              <li key={rule} aria-label={rule}>
+                <span data-slot="meta-label">{rule}</span>
+                <span>
+                  {entry ? `${entry.scope} · ${entry.note}` : "not in assembler-scope.json"}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      ) : (
+        <p data-slot="panel-note">This trace records no exclusion or refusal.</p>
+      )}
+      <p data-slot="panel-note">
+        No trace can show what is the application's:{" "}
+        {application.map((entry) => `${entry.id} (${entry.note})`).join("; ")}
+      </p>
+    </section>
+  )
+}
+
 function ContextTab({ event }: { readonly event: AssemblyEventV1 }) {
   const trace = event.trace!
   const rows: [string, ReactNode][] = [
@@ -154,20 +198,23 @@ function ContextTab({ event }: { readonly event: AssemblyEventV1 }) {
       `${grant.policy_producer} · ${grant.allow_list_version} · ${grant.allowed_ids.join(", ")}`,
     ])
   return (
-    <div data-slot="panel">
-      <dl data-slot="key-values">
-        {rows.map(([key, value]) => (
-          <div key={key}>
-            <dt>{key}</dt>
-            <dd>{value}</dd>
-          </div>
-        ))}
-      </dl>
-      <p data-slot="panel-note">
-        Timings are measurements: the wrapper's around the whole call, and the assembler's own by
-        stage. They are not deterministic and stay outside the payload hash (R-23).
-      </p>
-    </div>
+    <>
+      <div data-slot="panel">
+        <dl data-slot="key-values">
+          {rows.map(([key, value]) => (
+            <div key={key}>
+              <dt>{key}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p data-slot="panel-note">
+          Timings are measurements: the wrapper's around the whole call, and the assembler's own by
+          stage. They are not deterministic and stay outside the payload hash (R-23).
+        </p>
+      </div>
+      <CanProve event={event} />
+    </>
   )
 }
 
