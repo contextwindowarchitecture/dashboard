@@ -1009,6 +1009,30 @@ a:hover {
   color: var(--muted);
 }
 
+/* The glossary: entries in a column, each term in mono where the contract's id is the term. */
+[data-slot="glossary-section"] {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+[data-slot="glossary-entry"] {
+  border-top: 1px solid var(--line);
+  padding: 14px 0;
+  max-width: 78ch;
+  overflow-wrap: anywhere;
+}
+[data-slot="glossary-entry"]:target {
+  border-top-color: var(--accent);
+}
+[data-slot="glossary-term"] {
+  margin: 0 0 6px;
+  font-size: var(--fs);
+  font-weight: 600;
+}
+[data-slot="glossary-entry"] p {
+  margin: 0 0 6px;
+}
+
 /* A profile's placement: each slot with its wrap, in order. */
 [data-slot="placement-list"] {
   margin: 0;

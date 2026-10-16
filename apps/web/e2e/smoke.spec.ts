@@ -480,3 +480,29 @@ test("the sandbox replays a pasted snapshot through the service, and offers the 
   await page.setViewportSize({ width: 400, height: 800 })
   await expectNoSidewaysScroll(page)
 })
+
+test("a reason chip lands on its glossary entry, and the glossary reads at a phone's width", async ({
+  page,
+}) => {
+  await page.goto("/traces?reason=expired")
+  await page
+    .getByRole("table", { name: "Trace stream" })
+    .getByRole("row")
+    .nth(1)
+    .getByRole("link")
+    .click()
+  await page.getByRole("tab", { name: "Excluded" }).click()
+  await page
+    .getByRole("tabpanel", { name: "Excluded" })
+    .getByRole("link", { name: /^expired/ })
+    .first()
+    .click()
+  await expect(page).toHaveURL(/\/glossary#reason-expired$/)
+  await expect(page.locator("#reason-expired")).toBeInViewport()
+  await expectAccessible(page)
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/glossary#rule-R-16")
+  await expect(page.locator("#rule-R-16")).toBeInViewport()
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})

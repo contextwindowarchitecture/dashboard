@@ -120,7 +120,8 @@ function Reasons({ row }: { readonly row: IndexRow }) {
   return (
     <span data-slot="chip-row">
       {shown.map((code) => (
-        <ReasonChip key={code} code={code} />
+        // Plain in the stream: a row can hold many codes, and a link each would be a tab stop each.
+        <ReasonChip key={code} code={code} link={false} />
       ))}
       {more > 0 ? <span data-slot="cell-note">+{more} more</span> : null}
     </span>

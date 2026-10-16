@@ -234,7 +234,7 @@ export function ControlsForm({
                     }}
                   />
                   <label htmlFor={boxId}>
-                    <code>{item.id}</code> <SlotBadge slot={item.slot} />
+                    <code>{item.id}</code> <SlotBadge slot={item.slot} link={false} />
                   </label>
                 </div>
               )

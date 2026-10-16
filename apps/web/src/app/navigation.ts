@@ -3,6 +3,7 @@
 // it lands.
 
 import {
+  BookOpen,
   Boxes,
   FlaskConical,
   Layers,
@@ -102,6 +103,19 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: "/sandbox",
         icon: FlaskConical,
         patterns: ["/sandbox"],
+      },
+    ],
+  },
+  {
+    id: "reference",
+    label: "Reference",
+    items: [
+      {
+        id: "glossary",
+        label: "Glossary",
+        to: "/glossary",
+        icon: BookOpen,
+        patterns: ["/glossary"],
       },
     ],
   },

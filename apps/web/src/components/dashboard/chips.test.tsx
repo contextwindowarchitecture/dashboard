@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router"
 import { describe, expect, it } from "vitest"
 
 import { LanguageMark } from "./language-mark"
@@ -28,21 +29,21 @@ describe("StatusBadge", () => {
 
 describe("ReasonChip", () => {
   it("names the code and the rule the registry gives it", () => {
-    render(<ReasonChip code="expired" />)
+    render(<ReasonChip code="expired" />, { wrapper: MemoryRouter })
     const chip = screen.getByText("expired").closest("[data-slot=badge]")!
     expect(chip).toHaveTextContent("expired · R-9")
     expect(chip).toHaveAttribute("data-tone", "bad")
   })
 
   it("reads missing_field:<name> as the code the trace wrote", () => {
-    render(<ReasonChip code="missing_field:relevance" />)
+    render(<ReasonChip code="missing_field:relevance" />, { wrapper: MemoryRouter })
     expect(
       screen.getByText("missing_field:relevance").closest("[data-slot=badge]"),
     ).toHaveTextContent("· R-2")
   })
 
   it("never gives a code outside the registry a rule", () => {
-    render(<ReasonChip code="ITEM_EXPIRED" />)
+    render(<ReasonChip code="ITEM_EXPIRED" />, { wrapper: MemoryRouter })
     const chip = screen.getByText("ITEM_EXPIRED").closest("[data-slot=badge]")!
     expect(chip).toHaveTextContent("ITEM_EXPIRED · not in the contract")
     expect(chip.textContent).not.toMatch(/R-\d/)
