@@ -1,0 +1,288 @@
+// The trace stream (dashboard-plan.md 7.2): the index's events, filtered by the URL, newest first,
+// each row linking to its inspector. The filter bar offers what the index counted; the status
+// region says how many rows show, from where, and when a refresh is running.
+
+import type { EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
+import { Link, useSearchParams } from "react-router"
+
+import { useData } from "../../../data/data-context"
+import { useIndex } from "../../../data/queries"
+import { regionOf } from "../../../data/region"
+import { formatCount, formatInstant, formatMs, NOT_AVAILABLE } from "../../../lib/format"
+import { DataRegion } from "../../../components/dashboard/data-region"
+import { EmptyState } from "../../../components/dashboard/empty-state"
+import { LanguageMark } from "../../../components/dashboard/language-mark"
+import { ReasonChip } from "../../../components/dashboard/reason-chip"
+import { StatusBadge } from "../../../components/dashboard/status-badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../components/ui/table"
+import {
+  DEFAULT_FILTERS,
+  facetOptions,
+  filterRows,
+  type IndexRow,
+  isFiltered,
+  parseFilters,
+  type StreamFilters,
+  toSearch,
+} from "../model/stream"
+
+const ALL = "__all"
+const SHOWN_REASONS = 3
+
+type FacetKey = "outcome" | "language" | "route" | "reason" | "service"
+const FACETS: { key: FacetKey; label: string; all: string }[] = [
+  { key: "outcome", label: "Outcome", all: "All outcomes" },
+  { key: "language", label: "Language", all: "All languages" },
+  { key: "route", label: "Route", all: "All routes" },
+  { key: "reason", label: "Reason", all: "All reasons" },
+  { key: "service", label: "Service", all: "All services" },
+]
+
+function FilterBar({
+  index,
+  filters,
+  onChange,
+  canClear,
+}: {
+  readonly index: EventsIndexV1
+  readonly filters: StreamFilters
+  readonly onChange: (filters: StreamFilters) => void
+  /** Whether the bar offers Clear filters; the no-results panel offers it instead. */
+  readonly canClear: boolean
+}) {
+  return (
+    <div data-slot="filter-bar" role="group" aria-label="Filters">
+      {FACETS.map(({ key, label, all }) => {
+        const options = facetOptions(index.facets[key])
+        const id = `filter-${key}`
+        return (
+          <div key={key} data-slot="field">
+            <label id={id} data-label="">
+              {label}
+            </label>
+            <Select
+              value={filters[key] ?? ALL}
+              onValueChange={(value) =>
+                onChange({ ...filters, [key]: value === ALL ? undefined : value })
+              }
+            >
+              <SelectTrigger aria-labelledby={id}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{all}</SelectItem>
+                {options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.value} · {formatCount(option.count)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )
+      })}
+      {canClear && isFiltered(filters) ? (
+        <button type="button" data-slot="ghost-button" onClick={() => onChange(DEFAULT_FILTERS)}>
+          Clear filters
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
+function Tokens({ row }: { readonly row: IndexRow }) {
+  if (row.input_tokens === undefined || row.budget_input === undefined) return <>{NOT_AVAILABLE}</>
+  return (
+    <>
+      {formatCount(row.input_tokens)}{" "}
+      <span data-slot="cell-note">of {formatCount(row.budget_input)}</span>
+    </>
+  )
+}
+
+function Reasons({ row }: { readonly row: IndexRow }) {
+  const shown = row.reason_codes.slice(0, SHOWN_REASONS)
+  const more = row.reason_codes.length - shown.length
+  return (
+    <span data-slot="chip-row">
+      {shown.map((code) => (
+        <ReasonChip key={code} code={code} />
+      ))}
+      {more > 0 ? <span data-slot="cell-note">+{more} more</span> : null}
+    </span>
+  )
+}
+
+function StreamTable({ rows }: { readonly rows: readonly IndexRow[] }) {
+  return (
+    <Table aria-label="Trace stream">
+      <TableHeader>
+        <TableRow>
+          <TableHead>Recorded</TableHead>
+          <TableHead>Event</TableHead>
+          <TableHead>Outcome</TableHead>
+          <TableHead>Route</TableHead>
+          <TableHead>Profile</TableHead>
+          <TableHead>Language</TableHead>
+          <TableHead data-numeric="">Input tokens</TableHead>
+          <TableHead>Reasons</TableHead>
+          <TableHead>Session</TableHead>
+          <TableHead data-numeric="">Wrapper time</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((row) => (
+          <TableRow key={row.event_id}>
+            <TableCell data-mono="">{formatInstant(row.recorded_at)}</TableCell>
+            <TableCell data-mono="">
+              <Link to={`/traces/${row.event_id}`}>{row.event_id}</Link>
+            </TableCell>
+            <TableCell>
+              <StatusBadge
+                outcome={row.outcome}
+                {...(row.input_tokens === undefined ? {} : { inputTokens: row.input_tokens })}
+                {...(row.refused_reason === undefined ? {} : { refusedReason: row.refused_reason })}
+                {...(row.problem_count === undefined ? {} : { problemCount: row.problem_count })}
+              />
+            </TableCell>
+            <TableCell data-mono="">
+              {row.route ? (
+                <>
+                  {row.route} <span data-slot="cell-note">· {row.route_policy_version}</span>
+                </>
+              ) : (
+                NOT_AVAILABLE
+              )}
+            </TableCell>
+            <TableCell data-mono="">
+              {row.profile ? `${row.profile.id} v${row.profile.version}` : NOT_AVAILABLE}
+            </TableCell>
+            <TableCell>
+              <LanguageMark language={row.language} />
+            </TableCell>
+            <TableCell data-numeric="">
+              <Tokens row={row} />
+            </TableCell>
+            <TableCell>
+              <Reasons row={row} />
+            </TableCell>
+            <TableCell data-mono="">
+              {row.session ? (
+                <>
+                  {row.session.id}{" "}
+                  <span data-slot="cell-note">· turn {row.session.turn_index}</span>
+                </>
+              ) : (
+                <span data-slot="cell-note">none</span>
+              )}
+            </TableCell>
+            <TableCell data-numeric="">{formatMs(row.total_ms)}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
+}
+
+export function TraceStream() {
+  const [search, setSearch] = useSearchParams()
+  const filters = parseFilters(search)
+  const query = useIndex()
+  const { source } = useData()
+  const region = regionOf(query, {
+    what: "The index",
+    isEmpty: (index) => index.events.length === 0,
+  })
+  const setFilters = (next: StreamFilters) => setSearch(toSearch(next))
+
+  return (
+    <DataRegion
+      region={region}
+      label="the trace stream"
+      empty={{
+        title: "No events yet",
+        body: (
+          <p>
+            No assembly has been recorded in this window. Events appear here as services send them.
+          </p>
+        ),
+      }}
+    >
+      {(index) => {
+        const rows = filterRows(index.events, filters)
+        const updating = region.status === "ok" && region.updating
+        return (
+          <>
+            <FilterBar
+              index={index}
+              filters={filters}
+              onChange={setFilters}
+              canClear={rows.length > 0}
+            />
+            <div
+              role="status"
+              aria-label="Stream status"
+              aria-live="polite"
+              data-slot="status-region"
+            >
+              <span>
+                {formatCount(rows.length)} of {formatCount(index.events.length)} events
+              </span>
+              <span>· source {source.url("").replace(/\/$/, "")}</span>
+              <span>· generated {formatInstant(index.generated_at)}</span>
+              {updating ? <span>· updating</span> : null}
+            </div>
+            <div data-slot="stream-actions">
+              <button type="button" data-slot="ghost-button" onClick={() => void query.refetch()}>
+                Refresh
+              </button>
+              <a
+                data-slot="ghost-button"
+                href={source.url("events/index.json")}
+                download="index.json"
+              >
+                Download index
+              </a>
+            </div>
+            <div data-slot="content">
+              {rows.length === 0 ? (
+                <EmptyState
+                  title="No events match these filters"
+                  action={
+                    <button
+                      type="button"
+                      data-slot="ghost-button"
+                      onClick={() => setFilters(DEFAULT_FILTERS)}
+                    >
+                      Clear filters
+                    </button>
+                  }
+                >
+                  <p>Clear the filters, or choose others, to see events again.</p>
+                </EmptyState>
+              ) : (
+                <div data-slot="panel">
+                  <StreamTable rows={rows} />
+                </div>
+              )}
+            </div>
+          </>
+        )
+      }}
+    </DataRegion>
+  )
+}

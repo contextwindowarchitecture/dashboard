@@ -11,7 +11,7 @@ import { createFileSource } from "../data/source"
 import { fixtureFetch, type FixtureFetchOptions } from "./fixture-fetch"
 
 export function renderApp(path: string, fetchOptions: FixtureFetchOptions = {}) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const client = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } })
   const source = createFileSource("/data", fixtureFetch(fetchOptions))
   const router = createMemoryRouter(ROUTES, { initialEntries: [path] })
   const rendered = render(

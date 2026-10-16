@@ -30,4 +30,7 @@ if (typeof window !== "undefined") {
     }
   }
   if (!Element.prototype.scrollIntoView) Element.prototype.scrollIntoView = () => {}
+  // Radix's Select captures the pointer while it is open.
+  if (!Element.prototype.hasPointerCapture) Element.prototype.hasPointerCapture = () => false
+  if (!Element.prototype.releasePointerCapture) Element.prototype.releasePointerCapture = () => {}
 }

@@ -87,3 +87,30 @@ test("the shell wears the website's shapes and type", async ({ page }) => {
   expect(await style(current, "border-left-width")).toBe("3px")
   expect(await style(current, "border-left-color")).toBe(await style("[data-kicker]", "color"))
 })
+
+test("the trace stream lists the demo events and filters them through the URL", async ({
+  page,
+}) => {
+  await page.goto("/traces")
+  const table = page.getByRole("table", { name: "Trace stream" })
+  await expect(table.getByRole("row")).toHaveCount(112)
+  await expect(page.getByRole("status", { name: "Stream status" })).toContainText(
+    "111 of 111 events",
+  )
+  await page.goto("/traces?outcome=refused")
+  await expect(page.getByRole("status", { name: "Stream status" })).toContainText(
+    /^\d+ of 111 events/,
+  )
+  const refusedRows = table.getByRole("row")
+  await expect(refusedRows.nth(1)).toContainText("refused")
+  await expectAccessible(page)
+})
+
+test("the trace stream reads in the dark theme and at a phone's width", async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/traces")
+  await expect(page.getByRole("table", { name: "Trace stream" })).toBeVisible()
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})
