@@ -11,6 +11,7 @@ import type {
   FleetReportV1,
   SessionV1,
 } from "../generated/types.ts"
+import { profileDigest, routePolicyDigest } from "./registry-digest.ts"
 
 export type IndexRow = EventsIndexV1["events"][number]
 export type SessionTurn = SessionV1["turns"][number]
@@ -44,6 +45,8 @@ export function indexRow(event: AssemblyEventV1): IndexRow {
           route: snapshot.route_policy.route,
           route_policy_version: snapshot.route_policy.version,
           profile: { id: snapshot.profile.id, version: snapshot.profile.version },
+          route_policy_sha256: routePolicyDigest(snapshot.route_policy),
+          profile_sha256: profileDigest(snapshot.profile),
           budget_input: snapshot.budget.input,
           compressed_count: trace?.compressed.length ?? 0,
         }),

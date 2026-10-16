@@ -44,6 +44,8 @@ const assembledRow = {
   route: "contract-fixture",
   route_policy_version: "fixture/v1",
   profile: { id: "fixture-three-slot", version: 1 },
+  route_policy_sha256: "a".repeat(64),
+  profile_sha256: "b".repeat(64),
   outcome: "assembled",
   reason_codes: ["below_threshold"],
   compressed_count: 0,
@@ -117,6 +119,8 @@ describe("events-index v1", () => {
       "route",
       "route_policy_version",
       "profile",
+      "route_policy_sha256",
+      "profile_sha256",
       "budget_input",
       "compressed_count",
     ]) {
@@ -139,6 +143,19 @@ describe("events-index v1", () => {
     expect(
       validateEventsIndexV1({ ...index, events: [{ ...rejectedRow, problem_count: undefined }] }),
     ).toBe(false)
+  })
+
+  it("gives no registry digests to a rejection, and only lowercase SHA-256 ones elsewhere", () => {
+    for (const field of ["route_policy_sha256", "profile_sha256"]) {
+      expect(
+        validateEventsIndexV1({ ...index, events: [{ ...rejectedRow, [field]: "a".repeat(64) }] }),
+        field,
+      ).toBe(false)
+      expect(
+        validateEventsIndexV1({ ...index, events: [{ ...assembledRow, [field]: "A".repeat(64) }] }),
+        field,
+      ).toBe(false)
+    }
   })
 
   it("has no compression count for a rejection, which compressed nothing", () => {

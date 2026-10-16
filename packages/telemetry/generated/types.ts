@@ -145,6 +145,14 @@ export type Row = {
     id: Profile["id"]
     version: Profile["version"]
   }
+  /**
+   * The lowercase SHA-256 of the RFC 8785 serialization of the snapshot's route policy, as a registry lock pins it (schema/registry_lock.schema.json).
+   */
+  route_policy_sha256?: string
+  /**
+   * The lowercase SHA-256 of the RFC 8785 serialization of the snapshot's profile without its evaluation member, as a registry lock pins it.
+   */
+  profile_sha256?: string
   outcome: "assembled" | "refused" | "rejected"
   /**
    * The refusal's code.

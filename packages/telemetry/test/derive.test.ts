@@ -5,6 +5,7 @@ import { REASONS, SLOT_DEFAULTS } from "@cwa-dashboard/contract/data"
 import { describe, expect, it } from "vitest"
 
 import { buildIndex, buildSessions, indexRow, percentile, serviceRows } from "../src/derive.ts"
+import { profileDigest, routePolicyDigest } from "../src/registry-digest.ts"
 import type { AssemblyEventV1 } from "../generated/types.ts"
 import { validateEventsIndexV1, validateSessionV1 } from "../generated/validators.js"
 
@@ -82,6 +83,8 @@ describe("indexRow", () => {
       input_tokens: e.trace!.result!.input_tokens,
       budget_input: e.snapshot!.budget.input,
       compressed_count: e.trace!.compressed.length,
+      route_policy_sha256: routePolicyDigest(e.snapshot!.route_policy),
+      profile_sha256: profileDigest(e.snapshot!.profile),
       total_ms: e.timings_ms.total,
       language: "typescript",
       redaction_mode: "full",
@@ -102,6 +105,7 @@ describe("indexRow", () => {
     expect(rejection).toMatchObject({ outcome: "rejected", problem_count: 2, reason_codes: [] })
     expect(rejection.route).toBeUndefined()
     expect(rejection.budget_input).toBeUndefined()
+    expect(rejection.route_policy_sha256).toBeUndefined()
   })
 })
 
