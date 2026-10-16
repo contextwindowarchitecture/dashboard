@@ -457,6 +457,8 @@ Rules for all three:
 
 ### Illustration
 
+**Deferred (ADR-0006).** The dotLottie player renders through WebAssembly, which the Content Security Policy does not allow, so no illustration is built in Phase 1 and the three places below keep their words. What follows is the design for when one is chosen.
+
 Three authored illustrations, as dotLottie files under `public/animations/`, drawn in the tokens' palette (paper, ink, the accent and the four planes, nothing else), each with a still first frame that reads on its own:
 
 | Illustration | Where | What it shows |

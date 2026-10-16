@@ -1,6 +1,6 @@
 # ADR-0002: D3 and React SVG for charts; GSAP and Lottie only where named
 
-- Status: accepted
+- Status: accepted; its illustration clause superseded by ADR-0006 (deferred: the dotLottie player needs `'wasm-unsafe-eval'`, which the policy forbids)
 - Date: 2026-10-15
 
 ## Context
