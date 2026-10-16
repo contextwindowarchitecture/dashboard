@@ -1,0 +1,51 @@
+# The one-command local stack (dashboard-plan.md 11; deploy/README.md): the dashboard on http://localhost:8080 and the
+# ingest service on http://localhost:8090, sharing one event tree in a volume, which a first run seeds with the demo
+# tree. `podman compose up` or `docker compose up`; INGEST_TOKEN is the token POST /events takes, and WEB_PORT and
+# INGEST_PORT move the two host ports when 8080 or 8090 is taken.
+name: cwa-dashboard
+
+services:
+  # Copies the demo tree into the volume once; a volume that already holds a tree is left as it is.
+  seed:
+    image: localhost/dashboard-ingest:dev
+    build:
+      context: .
+      dockerfile: deploy/Containerfile.ingest
+    command:
+      - sh
+      - -c
+      - test -e /srv/data/events/index.json || cp -R /app/packages/demo-traffic/fixtures/. /srv/data/
+    volumes:
+      - events:/srv/data
+
+  # POST /events writes into the tree; POST /replay replays through the pinned assembler. The web image proxies /api/
+  # to this name.
+  dashboard-ingest:
+    image: localhost/dashboard-ingest:dev
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    environment:
+      INGEST_TOKEN: ${INGEST_TOKEN:-local-dev-token}
+    ports:
+      - "${INGEST_PORT:-8090}:8090"
+    volumes:
+      - events:/srv/data
+
+  web:
+    image: localhost/dashboard:dev
+    build:
+      context: .
+      dockerfile: deploy/Containerfile
+    depends_on:
+      dashboard-ingest:
+        condition: service_started
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    volumes:
+      - events:/srv/data:ro
+      - ./deploy/base/config.json:/opt/app-root/src/config.json:ro,Z
+      - ./deploy/base/nginx/ingest-proxy.conf:/opt/app-root/etc/nginx.default.d/ingest-proxy.conf:ro,Z
+
+volumes:
+  events: {}
