@@ -15,7 +15,8 @@ import { useIndex, useSessions } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import { formatCount, NOT_AVAILABLE } from "../../../lib/format"
 import { policyPath } from "../model/paths"
-import { profileReuse, promotable, registryModel, type ProfileEntry } from "../model/registry"
+import { reuseOver } from "../../sessions/model/session"
+import { promotable, registryModel, type ProfileEntry } from "../model/registry"
 import { DriftNote, Value } from "./registry-parts"
 
 type Row = EventsIndexV1["events"][number]
@@ -40,7 +41,7 @@ function PartReuse({
   if (ids.length === 0) return <>{NOT_AVAILABLE} · no session ran it</>
   if (queries.some((q) => q.isPending)) return <span data-slot="cell-note">loading</span>
   const sessions = queries.flatMap((q) => (q.data?.result.ok ? [q.data.result.document] : []))
-  const reuse = profileReuse(sessions)
+  const reuse = reuseOver(sessions)
   if (reuse === undefined) return <>{NOT_AVAILABLE}</>
   return (
     <code>

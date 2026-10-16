@@ -105,3 +105,20 @@ export function selectedTurn(model: SessionModel, param: string | null): Turn | 
   const wanted = param !== null && /^\d+$/.test(param) ? Number(param) : undefined
   return model.turns.find((t) => t.turn === wanted) ?? model.turns.at(-1)
 }
+
+/**
+ * Part reuse over several sessions (those that ran a profile, say): each session's own sum (the
+ * session document's part_reuse), added up, with the number of sessions it came from. Undefined
+ * when no turn of any of them could be compared.
+ */
+export function reuseOver(sessions: readonly SessionV1[]) {
+  const sum = { sessions: 0, comparedTurns: 0, reusedParts: 0, parts: 0 }
+  for (const session of sessions) {
+    if (session.part_reuse.compared_turns === 0) continue
+    sum.sessions += 1
+    sum.comparedTurns += session.part_reuse.compared_turns
+    sum.reusedParts += session.part_reuse.reused_parts
+    sum.parts += session.part_reuse.parts
+  }
+  return sum.sessions === 0 ? undefined : sum
+}
