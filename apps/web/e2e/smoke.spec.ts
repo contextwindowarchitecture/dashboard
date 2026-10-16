@@ -114,3 +114,22 @@ test("the trace stream reads in the dark theme and at a phone's width", async ({
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
 })
+
+// The plan's DP-2 path: the stream, then an assembled, a refused and a rejected event, axe on each.
+test("the inspector opens an assembled, a refused and a rejected event from the stream", async ({
+  page,
+}) => {
+  for (const [filter, words] of [
+    ["outcome=assembled", "assembled ·"],
+    ["outcome=refused", "refused ·"],
+    ["outcome=rejected", "rejected ·"],
+  ] as const) {
+    await page.goto(`/traces?${filter}`)
+    const table = page.getByRole("table", { name: "Trace stream" })
+    await table.getByRole("row").nth(1).getByRole("link").click()
+    await expect(page).toHaveURL(/\/traces\/[0-9A-Z]{26}$/)
+    await expect(page.getByRole("region", { name: "Outcome" })).toContainText(words)
+    await expect(page.getByRole("heading", { level: 1 })).toBeFocused()
+    await expectAccessible(page)
+  }
+})

@@ -4,6 +4,7 @@
 import { Navigate, type Params, type RouteObject } from "react-router"
 
 import { Shell } from "../components/layout/shell"
+import { InspectorPage } from "./pages/inspector"
 import { NotFoundPage } from "./pages/not-found"
 import { TracesPage } from "./pages/traces"
 
@@ -30,7 +31,17 @@ export const ROUTES: RouteObject[] = [
       {
         path: "traces",
         handle: handle("Traces", () => "Traces"),
-        children: [{ index: true, element: <TracesPage />, handle: handle("Trace stream") }],
+        children: [
+          { index: true, element: <TracesPage />, handle: handle("Trace stream") },
+          {
+            path: ":eventId",
+            element: <InspectorPage />,
+            handle: handle(
+              (params) => params["eventId"] ?? "",
+              (params) => params["eventId"] ?? "",
+            ),
+          },
+        ],
       },
       { path: "*", element: <NotFoundPage />, handle: handle("Page not found") },
     ],
