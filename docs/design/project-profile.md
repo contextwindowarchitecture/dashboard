@@ -19,7 +19,7 @@ The maintainer's decisions of 2026-10-15 (plan section 0):
 | D9 | A minimal ingest service ships in Phase 1 | not yet: DP-6 |
 | D10 | The first wrapper is TypeScript, extracted from the generator | not yet: Phase 2 |
 | D11 | Hosting on the organisation's OpenShift cluster and quay.io, at `dashboard.contextwindowarchitecture.io`, demo traffic only | not yet: DP-6 |
-| D12 | Sandbox replay runs the real assembler server-side, never in the browser | not yet: ADR-0005 at DP-5 |
+| D12 | Sandbox replay runs the real assembler server-side, never in the browser | ADR-0005 |
 
 Two added requirements: **R-DASH-1**, item metadata is visible for every item in every redaction mode, and **R-DASH-2**, redaction is switched outside the dashboard and the dashboard names the switch. Both are tested from DP-2.
 
