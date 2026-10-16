@@ -18,7 +18,7 @@ describe("the app's own source keeps STYLE.md's shapes and stillness", () => {
   ]
   const declarations: [string, RegExp][] = [
     ["a box-shadow", /\bbox-shadow\s*:/],
-    ["a border-radius", /\bborder-radius\s*:\s*(?!var\(--pill\)|0\b)/],
+    ["a border-radius", /\bborder-radius\s*:(?!\s*(?:var\(--pill\)|0\b))/],
     ["a gradient", /\b(?:linear|radial|conic)-gradient\(/],
     ["a transition", /\btransition(?:-[\w]+)?\s*:/],
     ["an animation", /\banimation(?:-[\w]+)?\s*:|@keyframes\b/],

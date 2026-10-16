@@ -53,7 +53,11 @@ html[data-theme="dark"] {
 }
 
 /* shadcn's tokens from the website's (STYLE.md 9), in both themes, so a generated primitive that
- * uses only shadcn's tokens is already in the site's colours. */
+ * uses only shadcn's tokens is already in the site's colours. Two of shadcn's names are the
+ * website's too, with other meanings: --muted (shadcn's quiet background, the website's secondary
+ * text) and --accent (shadcn's hover fill, the website's clay). They are not redefined here, or every
+ * muted text would take the surface colour; globals.css maps Tailwind's --color-muted and
+ * --color-accent to --surface and --accent-soft instead. */
 html:root {
   --background: var(--bg);
   --foreground: var(--fg);
@@ -65,9 +69,7 @@ html:root {
   --primary-foreground: var(--bg);
   --secondary: var(--surface);
   --secondary-foreground: var(--fg);
-  --muted: var(--surface);
   --muted-foreground: var(--muted);
-  --accent: var(--accent-soft);
   --accent-foreground: var(--fg);
   --destructive: var(--accent);
   --border: var(--line);
@@ -98,9 +100,7 @@ html[data-theme="dark"] {
   --primary-foreground: var(--bg);
   --secondary: var(--surface);
   --secondary-foreground: var(--fg);
-  --muted: var(--surface);
   --muted-foreground: var(--muted);
-  --accent: var(--accent-soft);
   --accent-foreground: var(--fg);
   --destructive: var(--accent);
   --border: var(--line);

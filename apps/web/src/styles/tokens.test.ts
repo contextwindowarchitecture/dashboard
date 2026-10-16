@@ -125,7 +125,6 @@ describe("tokens.css sets shadcn's tokens from the website's", () => {
     "--background": "var(--bg)",
     "--card": "var(--bg)",
     "--popover": "var(--bg)",
-    "--muted": "var(--surface)",
     "--secondary": "var(--surface)",
     "--sidebar": "var(--surface)",
     "--foreground": "var(--fg)",
@@ -135,7 +134,6 @@ describe("tokens.css sets shadcn's tokens from the website's", () => {
     "--input": "var(--line)",
     "--primary": "var(--accent)",
     "--ring": "var(--accent)",
-    "--accent": "var(--accent-soft)",
     "--chart-1": "var(--p-gov)",
     "--chart-2": "var(--p-state)",
     "--chart-3": "var(--p-evid)",
@@ -150,6 +148,21 @@ describe("tokens.css sets shadcn's tokens from the website's", () => {
         expect(set.get(token), `${selector} ${token}`).toBe(value)
       }
     }
+  })
+
+  // --muted and --accent are the website's names too, with other meanings; redefining them would
+  // turn every muted text into the surface colour. Tailwind's theme maps shadcn's uses instead.
+  it("leaves the website's --muted and --accent alone, mapping shadcn's uses in the theme", () => {
+    // html[data-theme="dark"] is also the website's own dark block, which sets both rightly.
+    for (const selector of ["html:root", 'html[data-theme="dark"]']) {
+      const set = declarations(tokensCss, selector)
+      expect(set.get("--muted"), selector).not.toBe("var(--surface)")
+      expect(set.get("--accent"), selector).not.toBe("var(--accent-soft)")
+    }
+    expect(declarations(tokensCss, "html:root").has("--muted")).toBe(false)
+    expect(declarations(tokensCss, "html:root").has("--accent")).toBe(false)
+    expect(globalsCss).toContain("--color-muted: var(--surface);")
+    expect(globalsCss).toContain("--color-accent: var(--accent-soft);")
   })
 
   it("drives Tailwind's dark variant from the same attribute", () => {
