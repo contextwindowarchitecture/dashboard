@@ -643,6 +643,16 @@ a:hover {
   padding: 0 32px 32px;
   min-width: 0;
 }
+/* A column of blocks inside a page's content: its gap, none of the page's padding. */
+[data-slot="stack"] {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+/* Its items shrink to the column, so a wide table or diff scrolls in its region, not the page. */
+[data-slot="stack"] > * {
+  min-width: 0;
+}
 [data-slot="panel"] {
   border: 1px solid var(--line);
   background: var(--bg);
@@ -1157,6 +1167,10 @@ a:hover {
   position: relative;
   display: flex;
   background: var(--line);
+}
+/* A ghost is a segment the sandbox's replay lost, drawn at no width so it can collapse. */
+[data-slot="budget-bar"] > [data-ghost] {
+  min-width: 0;
 }
 [data-slot="budget-bar"] > [data-segment] {
   flex-grow: 0;

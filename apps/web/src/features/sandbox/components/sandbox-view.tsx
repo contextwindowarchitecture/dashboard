@@ -5,9 +5,10 @@
 
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
 import { useQuery } from "@tanstack/react-query"
-import { useRef, useState } from "react"
+import { lazy, Suspense, useRef, useState } from "react"
 import { Link, useSearchParams } from "react-router"
 
+import { BudgetBar } from "../../../components/charts/budget-bar"
 import { DashboardPage } from "../../../components/dashboard/dashboard-page"
 import { DataRegion } from "../../../components/dashboard/data-region"
 import { StatusBadge } from "../../../components/dashboard/status-badge"
@@ -15,8 +16,9 @@ import { useEvent } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import type { ReplayAnswer, ReplayClient } from "../api/replay"
 import { useReplayClient } from "../api/replay-context"
-import { applyControls } from "../model/controls"
+import { applyControls, type Snapshot } from "../model/controls"
 import { traceDiff } from "../model/diff"
+import { settle } from "../model/settle"
 import { parity, replayable } from "../model/fidelity"
 import { controlsFromSearch, edited, searchWithControls } from "../model/url"
 import { ControlsForm } from "./controls-form"
@@ -24,9 +26,56 @@ import { ControlsForm } from "./controls-form"
 type Run =
   | { readonly status: "idle" }
   | { readonly status: "running" }
-  | { readonly status: "done"; readonly answer: ReplayAnswer }
+  | {
+      readonly status: "done"
+      readonly answer: ReplayAnswer
+      /** The snapshot replayed, the controls applied. */
+      readonly snapshot: Snapshot
+      /** Which run this is, so a replay again settles afresh. */
+      readonly id: number
+    }
 
 type Replayed = Extract<ReplayAnswer, { kind: "replayed" }>
+
+const SettleMotion = lazy(() => import("./settle-motion"))
+
+/** The replay's bar, settling from the recorded assembly's, and the diff revealed beneath it. */
+function Settled({
+  event,
+  answer,
+  snapshot,
+}: {
+  readonly event: AssemblyEventV1
+  readonly answer: Replayed
+  readonly snapshot: Snapshot
+}) {
+  const scope = useRef<HTMLDivElement>(null)
+  const replayed = {
+    ...event,
+    snapshot,
+    trace: answer.trace as AssemblyEventV1["trace"],
+  } as AssemblyEventV1
+  const plan = settle(event, replayed)
+  return (
+    <>
+      <div ref={scope} data-slot="stack">
+        <div data-slot="panel" data-padded="">
+          <BudgetBar event={replayed} ghosts={plan?.ghosts ?? []} />
+        </div>
+        <div data-slot="settle-reveal">
+          <DiffPanel recorded={event.trace} replayed={answer.trace} />
+        </div>
+      </div>
+      {/* After the scope, not inside it: React reattaches a ref after its element's children, so a
+          motion inside it would find no scope when Strict Mode mounts it a second time. */}
+      {plan ? (
+        <Suspense fallback={null}>
+          <SettleMotion scope={scope} from={plan.from} />
+        </Suspense>
+      ) : null}
+    </>
+  )
+}
 
 function NotConfigured() {
   return (
@@ -183,7 +232,7 @@ function Result({
           <>
             <Outcome answer={answer} />
             <ParityPanel event={event} answer={answer} isEdited={isEdited} />
-            <DiffPanel recorded={event.trace} replayed={answer.trace} />
+            <Settled key={run.id} event={event} answer={answer} snapshot={run.snapshot} />
           </>
         )
       case "rejected":
@@ -210,7 +259,7 @@ function Result({
     }
   }
   return (
-    <section aria-label="Replay result" aria-live="polite" data-slot="content">
+    <section aria-label="Replay result" aria-live="polite" data-slot="stack">
       {body()}
     </section>
   )
@@ -227,6 +276,7 @@ function Replayer({
   const [run, setRun] = useState<Run>({ status: "idle" })
   const [search, setSearch] = useSearchParams()
   const inFlight = useRef<AbortController | null>(null)
+  const runs = useRef(0)
   const components = useQuery({
     queryKey: ["replay-components"],
     queryFn: ({ signal }) => client.components(signal),
@@ -249,13 +299,16 @@ function Replayer({
     setRun({ status: "running" })
     try {
       const answer = await client.replay(applied.snapshot, controller.signal)
-      if (!controller.signal.aborted) setRun({ status: "done", answer })
+      if (!controller.signal.aborted) {
+        runs.current += 1
+        setRun({ status: "done", answer, snapshot: applied.snapshot, id: runs.current })
+      }
     } catch (error) {
       if (!controller.signal.aborted) throw error
     }
   }
   return (
-    <div data-slot="content">
+    <div data-slot="stack">
       {source.kind === "full" ? null : (
         <section aria-label="Fidelity" data-slot="note">
           <p>{source.reason}</p>

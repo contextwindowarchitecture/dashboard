@@ -9,13 +9,20 @@ import { useId } from "react"
 
 import { type PlaneKey, planeTotals } from "../../features/traces/model/inspector"
 import { formatCount, formatTokens } from "../../lib/format"
-import { budgetBar } from "./budget-bar-geometry"
+import { budgetBar, type SegmentKey } from "./budget-bar-geometry"
 
 const PLANE_KEYS: readonly PlaneKey[] = ["gov", "state", "evid", "inter"]
 const planeName = (key: PlaneKey) =>
   MODEL.planes.find((plane) => plane.id.startsWith(key))?.name ?? key
 
-export function BudgetBar({ event }: { readonly event: AssemblyEventV1 }) {
+export function BudgetBar({
+  event,
+  ghosts = [],
+}: {
+  readonly event: AssemblyEventV1
+  /** Segments to draw at no width, so a choreography can collapse them (the sandbox's settle). */
+  readonly ghosts?: readonly SegmentKey[]
+}) {
   const id = useId()
   const trace = event.trace!
   const budget = event.snapshot!.budget
@@ -50,6 +57,15 @@ export function BudgetBar({ event }: { readonly event: AssemblyEventV1 }) {
               key={segment.key}
               data-segment={segment.key}
               style={{ flexBasis: `${segment.percent}%` }}
+            />
+          ))}
+          {ghosts.map((key) => (
+            <span
+              key={`ghost-${key}`}
+              aria-hidden="true"
+              data-segment={key}
+              data-ghost=""
+              style={{ flexBasis: "0%" }}
             />
           ))}
           {bar.marginPercent !== undefined ? (

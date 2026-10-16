@@ -46,6 +46,7 @@ describe("lib/motion", () => {
 // illustration player only in its wrapper, so neither reaches a chunk that does not need it.
 // A choreography module is added to this list by name when it lands.
 const CHOREOGRAPHIES: string[] = [
+  "features/sandbox/components/settle-motion.tsx",
   "features/sessions/components/session-player-motion.tsx",
   "features/traces/components/stage-walk-motion.tsx",
 ]
