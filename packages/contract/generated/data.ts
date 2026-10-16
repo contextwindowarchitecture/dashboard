@@ -971,7 +971,28 @@ export const SCOPE = [
   }
 ] as const
 
+/** implementations/index.json: each implementation's id and label, without its report. */
+export const IMPLEMENTATION_INDEX = [
+  {
+    "id": "python",
+    "label": "Python"
+  },
+  {
+    "id": "typescript",
+    "label": "TypeScript"
+  },
+  {
+    "id": "go",
+    "label": "Go"
+  },
+  {
+    "id": "rust",
+    "label": "Rust"
+  }
+] as const
+
 export type ReasonCode = (typeof REASONS)[number]["code"]
 export type RequirementId = (typeof REQUIREMENTS)[number]["id"]
 export type PlaneId = (typeof MODEL)["planes"][number]["id"]
 export type SlotId = (typeof MODEL)["slots"][number]["id"]
+export type ImplementationId = (typeof IMPLEMENTATION_INDEX)[number]["id"]

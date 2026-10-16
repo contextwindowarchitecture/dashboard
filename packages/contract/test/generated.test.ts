@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   CONTRACT_SOURCE,
+  IMPLEMENTATION_INDEX,
   MODEL,
   REASONS,
   REQUIREMENTS,
@@ -151,6 +152,10 @@ describe("the generated contract data", () => {
       expect(MODEL.planes.map((p) => p.id)).toContain(plane)
       expect(plane.startsWith(SLOT_DEFAULTS[slot.id].plane)).toBe(true)
     }
+  })
+
+  it("holds the implementations' index, small enough for any page to name a language", () => {
+    expect(IMPLEMENTATION_INDEX).toEqual(read("implementations/index.json"))
   })
 
   it("holds the registry and the four implementations' reports", () => {

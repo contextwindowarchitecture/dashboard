@@ -1,0 +1,30 @@
+import { describe, expect, it } from "vitest"
+
+import { formatCount, formatInstant, formatMs, formatTokens, NOT_AVAILABLE } from "./format"
+
+describe("format", () => {
+  it("writes counts and tokens with the unit, in en-US", () => {
+    expect(formatCount(3740)).toBe("3,740")
+    expect(formatTokens(3740)).toBe("3,740 tokens")
+    expect(formatTokens(1)).toBe("1 token")
+    expect(formatTokens(0)).toBe("0 tokens")
+  })
+
+  it("writes milliseconds to a precision that suits their size", () => {
+    expect(formatMs(0.784)).toBe("0.78 ms")
+    expect(formatMs(12.44)).toBe("12.4 ms")
+    expect(formatMs(312.6)).toBe("313 ms")
+  })
+
+  it("writes instants in UTC, to the second", () => {
+    expect(formatInstant("2026-10-15T09:30:00.123Z")).toBe("2026-10-15 09:30:00Z")
+    expect(formatInstant("2026-10-15T11:30:00+02:00")).toBe("2026-10-15 09:30:00Z")
+  })
+
+  it("says Not available, never 0, for a value it does not have", () => {
+    expect(formatTokens(undefined)).toBe(NOT_AVAILABLE)
+    expect(formatMs(Number.NaN)).toBe(NOT_AVAILABLE)
+    expect(formatCount(null)).toBe(NOT_AVAILABLE)
+    expect(formatInstant("not a time")).toBe(NOT_AVAILABLE)
+  })
+})

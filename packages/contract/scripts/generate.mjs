@@ -147,10 +147,14 @@ export const SLOT_DEFAULTS = ${json(read("contract/slot-defaults.json"))} as con
 /** contract/assembler-scope.json: whether each requirement is the assembler's, the boundary's or the application's. */
 export const SCOPE = ${json(read("contract/assembler-scope.json"))} as const
 
+/** implementations/index.json: each implementation's id and label, without its report. */
+export const IMPLEMENTATION_INDEX = ${json(read("implementations/index.json"))} as const
+
 export type ReasonCode = (typeof REASONS)[number]["code"]
 export type RequirementId = (typeof REQUIREMENTS)[number]["id"]
 export type PlaneId = (typeof MODEL)["planes"][number]["id"]
 export type SlotId = (typeof MODEL)["slots"][number]["id"]
+export type ImplementationId = (typeof IMPLEMENTATION_INDEX)[number]["id"]
 `
 }
 

@@ -397,3 +397,63 @@ a:hover {
     display: none;
   }
 }
+
+/* --- Chips (STYLE.md 6, Chips): the generated Badge, restyled; the tone names the outcome ------- */
+
+[data-slot="badge"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: auto;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--muted);
+}
+[data-slot="badge"][data-tone="ok"],
+[data-slot="badge"][data-tone="info"] {
+  color: var(--fg);
+}
+[data-slot="badge"][data-tone="plane"] {
+  color: var(--plane);
+}
+[data-slot="badge"][data-tone="warn"] {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+[data-slot="badge"][data-tone="bad"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+[data-slot="badge"][data-tone="fill"] {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+[data-slot="badge"][data-tone="conflict"] {
+  color: var(--fg);
+  border-color: var(--fg);
+}
+/* An identifier keeps its case (STYLE.md 4). */
+[data-slot="badge"][data-identifier],
+[data-slot="badge"] [data-identifier] {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-mono);
+}
+[data-slot="language-mark"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  white-space: nowrap;
+}
