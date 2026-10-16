@@ -15,6 +15,7 @@ import { useEvent, useSession } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import { formatCount, NOT_AVAILABLE } from "../../../lib/format"
 import { selectedTurn, sessionModel, type SessionModel, type Turn } from "../model/session"
+import { SessionPlayer } from "./session-player"
 
 const PLANES = ["gov", "state", "evid", "inter"] as const
 const count = (value: number | undefined) =>
@@ -221,7 +222,8 @@ function TurnDetail({ turn }: { readonly turn: Turn }) {
 
 export function SessionView() {
   const { sessionId = "" } = useParams()
-  const [search] = useSearchParams()
+  const [search, setSearch] = useSearchParams()
+  const go = (turn: number) => setSearch({ turn: String(turn) }, { replace: true })
   const region = regionOf(useSession(sessionId), { what: `Session ${sessionId}` })
   const kicker =
     region.status === "ok"
@@ -238,6 +240,7 @@ export function SessionView() {
               <Facts session={session} model={model} />
               <div data-slot="session-layout">
                 <div data-slot="panel" data-padded="">
+                  {turn ? <SessionPlayer model={model} turn={turn} go={go} /> : null}
                   <TurnTimeline model={model} selected={turn?.turn} />
                   <TurnTable model={model} selected={turn?.turn} />
                 </div>

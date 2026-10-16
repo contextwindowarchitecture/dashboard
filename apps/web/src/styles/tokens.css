@@ -903,6 +903,39 @@ a:hover {
   opacity: 0.45;
   cursor: default;
 }
+/* The scrubber (STYLE.md 7): a square ink thumb on a hairline track. */
+[data-slot="scrubber"] {
+  appearance: none;
+  width: min(220px, 100%);
+  height: 16px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+[data-slot="scrubber"]::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--line);
+}
+[data-slot="scrubber"]::-moz-range-track {
+  height: 1px;
+  background: var(--line);
+}
+[data-slot="scrubber"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 0;
+  background: var(--fg);
+}
+[data-slot="scrubber"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--fg);
+}
 [data-slot="walk-status"] {
   margin: 0;
   font-family: var(--mono);
