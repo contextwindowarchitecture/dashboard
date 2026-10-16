@@ -216,6 +216,8 @@ export function joinItems(event: AssemblyEventV1): ItemRow[] {
 
 export interface PlaneTotals {
   readonly byPlane: Record<PlaneKey, number>
+  /** Of each plane's tokens, those of occurrences stepped down to a variant (compressed[].to). */
+  readonly compressedByPlane: Record<PlaneKey, number>
   /** The payload's tokens beyond its items': wrappers and separators. Absent with no payload. */
   readonly overhead: number | undefined
   /** The items' tokens exceeded the payload's, which would be the assembler's inconsistency. */
@@ -228,10 +230,16 @@ export function planeTotals(trace: Trace): PlaneTotals {
     const plane = planeOf(row.slot)
     if (plane) byPlane[plane] += row.tokens
   }
+  const compressedByPlane: Record<PlaneKey, number> = { gov: 0, state: 0, evid: 0, inter: 0 }
+  for (const row of trace.compressed) {
+    const plane = planeOf(row.slot)
+    if (plane) compressedByPlane[plane] += row.to
+  }
   const sum = Object.values(byPlane).reduce((a, b) => a + b, 0)
-  if (!trace.result) return { byPlane, overhead: undefined, overheadNegative: false }
+  if (!trace.result)
+    return { byPlane, compressedByPlane, overhead: undefined, overheadNegative: false }
   const gap = trace.result.input_tokens - sum
-  return { byPlane, overhead: Math.max(0, gap), overheadNegative: gap < 0 }
+  return { byPlane, compressedByPlane, overhead: Math.max(0, gap), overheadNegative: gap < 0 }
 }
 
 export interface Placement {

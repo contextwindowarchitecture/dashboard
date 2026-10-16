@@ -921,3 +921,111 @@ a:hover {
   font-family: var(--mono);
   font-size: var(--fs-mono);
 }
+
+/* --- Budget bar and placement strip (STYLE.md 6, Charts) ----------------------------------------- */
+
+[data-slot="panel"][data-padded] {
+  padding: 18px;
+  display: grid;
+  gap: 18px;
+}
+[data-slot="budget"] {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+[data-slot="budget"] figcaption[data-label] {
+  margin: 0;
+}
+[data-slot="budget-track"] {
+  display: flex;
+  align-items: stretch;
+  height: 8px;
+}
+[data-slot="budget-bar"] {
+  position: relative;
+  display: flex;
+  background: var(--line);
+}
+[data-slot="budget-bar"] > [data-segment] {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-width: 2px;
+}
+[data-segment="gov"] {
+  background: var(--p-gov);
+}
+[data-segment="state"] {
+  background: var(--p-state);
+}
+[data-segment="evid"] {
+  background: var(--p-evid);
+}
+[data-segment="inter"] {
+  background: var(--p-inter);
+}
+[data-segment="gov-compressed"] {
+  background: color-mix(in oklab, var(--p-gov) 50%, transparent);
+}
+[data-segment="state-compressed"] {
+  background: color-mix(in oklab, var(--p-state) 50%, transparent);
+}
+[data-segment="evid-compressed"] {
+  background: color-mix(in oklab, var(--p-evid) 50%, transparent);
+}
+[data-segment="inter-compressed"] {
+  background: color-mix(in oklab, var(--p-inter) 50%, transparent);
+}
+[data-segment="overhead"] {
+  background: var(--muted);
+}
+[data-slot="budget-margin"] {
+  position: absolute;
+  inset: -3px 0;
+  display: flex;
+  pointer-events: none;
+}
+[data-slot="budget-margin"] > span {
+  flex-grow: 0;
+  flex-shrink: 0;
+  border-right: 1px dashed var(--fg);
+}
+[data-slot="budget-reserve"] {
+  background: var(--surface);
+  border-left: 1px dashed var(--fg);
+}
+[data-slot="chart-summary"] {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  max-width: 70ch;
+}
+[data-slot="chart-table"] {
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+}
+[data-slot="chart-table"] th,
+[data-slot="chart-table"] td {
+  padding: 4px 12px 4px 0;
+  text-align: left;
+  font-weight: 400;
+  border-bottom: 1px solid var(--line);
+}
+[data-slot="chart-table"] thead th {
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+[data-slot="chart-table"] [data-numeric] {
+  text-align: right;
+}
+[data-slot="placement"] h2[data-label] {
+  margin: 0 0 8px;
+}
+[data-slot="placement"] ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

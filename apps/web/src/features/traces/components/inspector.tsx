@@ -15,9 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui
 import { useEvent } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import { formatCount, formatInstant, formatMs } from "../../../lib/format"
+import { BudgetBar } from "../../../components/charts/budget-bar"
 import { ConflictsTab } from "./conflicts-tab"
 import { ExcludedTab } from "./excluded-tab"
 import { ItemsTab } from "./items-tab"
+import { PlacementStrip } from "./placement-strip"
 
 const TABS = [
   { id: "items", label: "Items", needsTrace: true },
@@ -200,6 +202,12 @@ function EventView({ event }: { readonly event: AssemblyEventV1 }) {
     <div data-slot="content">
       <OutcomeBanner event={event} />
       <Facts event={event} />
+      {event.trace && event.snapshot ? (
+        <div data-slot="panel" data-padded="">
+          <BudgetBar event={event} />
+          <PlacementStrip event={event} />
+        </div>
+      ) : null}
       <Tabs
         value={tab}
         onValueChange={(value) => setSearch(value === available[0]!.id ? {} : { tab: value })}
