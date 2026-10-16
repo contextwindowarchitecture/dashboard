@@ -1,8 +1,10 @@
 // Renders the whole app at a path, over the demo tree, as the browser would: the same routes and
-// providers as main.tsx, with a memory router and a fixture-backed source.
+// providers as main.tsx, with a memory router and a fixture-backed source; under Strict Mode, as
+// main.tsx renders it, when a test asks.
 
 import { QueryClient } from "@tanstack/react-query"
 import { render } from "@testing-library/react"
+import { StrictMode } from "react"
 import { createMemoryRouter } from "react-router"
 
 import { AppProviders } from "../app/providers"
@@ -10,17 +12,22 @@ import { ROUTES } from "../app/routes"
 import { createFileSource } from "../data/source"
 import { fixtureFetch, type FixtureFetchOptions } from "./fixture-fetch"
 
-export function renderApp(path: string, fetchOptions: FixtureFetchOptions = {}) {
+export function renderApp(
+  path: string,
+  fetchOptions: FixtureFetchOptions = {},
+  { strict = false }: { readonly strict?: boolean } = {},
+) {
   const client = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } })
   const source = createFileSource("/data", fixtureFetch(fetchOptions))
   const router = createMemoryRouter(ROUTES, { initialEntries: [path] })
-  const rendered = render(
+  const app = (
     <AppProviders
       client={client}
       source={source}
       config={{ dataRoot: "/data", source: "file" }}
       router={router}
-    />,
+    />
   )
+  const rendered = render(strict ? <StrictMode>{app}</StrictMode> : app)
   return { ...rendered, router }
 }

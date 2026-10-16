@@ -45,7 +45,7 @@ describe("lib/motion", () => {
 // STYLE.md 7 and 9: GSAP runs only in the three choreographies, through lib/motion, and the
 // illustration player only in its wrapper, so neither reaches a chunk that does not need it.
 // A choreography module is added to this list by name when it lands.
-const CHOREOGRAPHIES: string[] = []
+const CHOREOGRAPHIES: string[] = ["features/traces/components/stage-walk-motion.tsx"]
 const ILLUSTRATION = "components/dashboard/illustration.tsx"
 
 describe("motion and illustration stay where STYLE.md 7 names them", () => {

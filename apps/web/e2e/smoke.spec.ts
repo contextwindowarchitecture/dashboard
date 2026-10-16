@@ -179,3 +179,31 @@ test("the overview sums the window and reads in both themes and at a phone's wid
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
 })
+
+// STYLE.md 7, Walk the trace: the lazily loaded choreography loads under the policy, plays a refused
+// trace to its refusal with the stage in the URL, and under reduced motion still plays, instantly.
+test("the stage walk plays a refused trace to its refusal, in both motion preferences", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+    await page.goto("/traces?outcome=refused&reason=over_budget")
+    await page
+      .getByRole("table", { name: "Trace stream" })
+      .getByRole("row")
+      .nth(1)
+      .getByRole("link")
+      .click()
+    await page.getByRole("tab", { name: "Excluded" }).click()
+    const walk = page.getByRole("group", { name: "Stage walk" })
+    await walk.getByRole("button", { name: "Play" }).click()
+    await expect(page).toHaveURL(/[?&]stage=/)
+    await expect(page.getByRole("region", { name: "Refusal" })).toBeVisible()
+    await expect(page).toHaveURL(/[?&]stage=refusal/)
+    await expect(walk.getByRole("button", { name: "Play" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    )
+    await expectAccessible(page)
+  }
+})

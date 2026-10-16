@@ -2,10 +2,11 @@
 // conformance/README.md fixes, each with its code, the contract's words for it, and the item kept
 // in its place where there is one. The stage walk (STYLE.md 7, Walk the trace) shows the stages one
 // at a time, the current one in the URL, and ends a refused trace on its refusal; with no stage in
-// the URL every stage is shown, so the page is complete without it.
+// the URL every stage is shown, so the page is complete without it. Its motion, and the clock that
+// plays it, load only when a walk starts.
 
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
-import type { KeyboardEvent } from "react"
+import { lazy, Suspense, useRef, useState, type KeyboardEvent } from "react"
 import { Link, useSearchParams } from "react-router"
 
 import { ReasonChip } from "../../../components/dashboard/reason-chip"
@@ -13,6 +14,8 @@ import { SlotBadge } from "../../../components/dashboard/slot-badge"
 import { reasonInfo } from "../../../lib/reasons"
 import { excludedByStage, type ExcludedRow, type StageGroup } from "../model/inspector"
 import { stageTimeline, type Step } from "../model/stage-timeline"
+
+const StageWalkMotion = lazy(() => import("./stage-walk-motion"))
 
 const STAGE_TITLES: Record<StageGroup["stage"], string> = {
   producer: "Reported by producers",
@@ -84,7 +87,8 @@ function useWalk(event: AssemblyEventV1) {
       },
       { replace: true },
     )
-  return { steps, at, go }
+  const [playing, setPlaying] = useState(false)
+  return { steps, at, go, playing, setPlaying }
 }
 
 function walkStatus(steps: readonly Step[], at: number, stages: number) {
@@ -101,19 +105,41 @@ function WalkControls({
   readonly walk: ReturnType<typeof useWalk>
   readonly stages: number
 }) {
-  const { steps, at, go } = walk
+  const { steps, at, go, playing, setPlaying } = walk
   const canBack = at > 0
   const canForward = at < steps.length - 1
-  const back = () => canBack && go(at - 1)
-  const forward = () => canForward && go(at + 1)
+  const step = (to: number) => {
+    setPlaying(false)
+    go(to)
+  }
+  const back = () => canBack && step(at - 1)
+  const forward = () => canForward && step(at + 1)
+  const play = () => {
+    if (!canForward || at < 0) go(0)
+    setPlaying(true)
+  }
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowLeft") back()
     else if (e.key === "ArrowRight") forward()
-    else return
+    else if (e.key === " ") {
+      if (playing) setPlaying(false)
+      else play()
+    } else return
     e.preventDefault()
   }
   return (
     <div role="group" aria-label="Stage walk" data-slot="walk-controls" onKeyDown={onKeyDown}>
+      <button type="button" data-slot="ghost-button" aria-pressed={playing} onClick={play}>
+        Play
+      </button>
+      <button
+        type="button"
+        data-slot="ghost-button"
+        aria-pressed={!playing}
+        onClick={() => setPlaying(false)}
+      >
+        Pause
+      </button>
       <button type="button" data-slot="ghost-button" aria-disabled={!canBack} onClick={back}>
         Step back
       </button>
@@ -124,7 +150,10 @@ function WalkControls({
         type="button"
         data-slot="ghost-button"
         aria-disabled={at < 0}
-        onClick={() => at >= 0 && go(null)}
+        onClick={() => {
+          setPlaying(false)
+          if (at >= 0) go(null)
+        }}
       >
         Show all
       </button>
@@ -138,14 +167,24 @@ function WalkControls({
 export function ExcludedTab({ event }: { readonly event: AssemblyEventV1 }) {
   const groups = excludedByStage(event)
   const walk = useWalk(event)
+  const scope = useRef<HTMLDivElement>(null)
   if (groups.length === 0) return <p data-slot="cell-note">Nothing was excluded.</p>
   // Steps and groups share their order: the walk's step i is group i, then the refusal, if any.
-  const { steps, at } = walk
+  const { steps, at, go, playing, setPlaying } = walk
+  const advance = () => {
+    if (at < steps.length - 1) go(at + 1)
+    else setPlaying(false)
+  }
   const shown = at < 0 ? groups : groups.slice(0, at + 1)
   const step = steps[at]
   return (
-    <div data-slot="stage-groups">
+    <div data-slot="stage-groups" ref={scope}>
       <WalkControls walk={walk} stages={groups.length} />
+      {step ? (
+        <Suspense fallback={null}>
+          <StageWalkMotion scope={scope} stage={step.stage} playing={playing} onAdvance={advance} />
+        </Suspense>
+      ) : null}
       {shown.map((group, i) => (
         <section
           key={group.stage}
