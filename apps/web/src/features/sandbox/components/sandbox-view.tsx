@@ -561,6 +561,14 @@ export function SandboxView() {
             <Link to="/traces">Open the trace stream →</Link>
           </p>
           <PastedReplay client={client} />
+          <section aria-label="Shadow regression" data-slot="panel" data-padded="">
+            <p data-label="">Shadow regression · Phase 2</p>
+            <p>
+              Replaying a whole corpus of recorded events against a changed route policy or profile,
+              and reporting every assembly that changes, arrives in Phase 2 with the query API.
+              Here, one event or one snapshot replays at a time.
+            </p>
+          </section>
         </div>
       ) : (
         <EventReplay eventId={eventId} client={client} />
