@@ -6,6 +6,8 @@ import type { ReactNode } from "react"
 export interface DashboardPageProps {
   readonly kicker: string
   readonly title: string
+  /** The title is a record's id, set without the title's measure (STYLE.md 4). */
+  readonly identifier?: boolean
   readonly lede?: ReactNode
   readonly meta?: ReactNode
   readonly actions?: ReactNode
@@ -17,6 +19,7 @@ export const PAGE_TITLE_ID = "page-title"
 export function DashboardPage({
   kicker,
   title,
+  identifier = false,
   lede,
   meta,
   actions,
@@ -30,7 +33,12 @@ export function DashboardPage({
       >
         <div className="min-w-0">
           <p data-kicker="">{kicker}</p>
-          <h1 id={PAGE_TITLE_ID} tabIndex={-1} data-slot="page-title">
+          <h1
+            id={PAGE_TITLE_ID}
+            tabIndex={-1}
+            data-slot="page-title"
+            {...(identifier ? { "data-identifier": "" } : {})}
+          >
             {title}
           </h1>
           {lede ? <p data-slot="page-lede">{lede}</p> : null}

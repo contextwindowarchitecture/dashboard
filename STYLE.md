@@ -176,7 +176,7 @@ The theme is an attribute, `data-theme="light"` or `"dark"`, on `<html>`. The ap
 | Role | Family | Size | Weight | Tracking | Line-height | Measure | Notes |
 |---|---|---|---|---|---|---|---|
 | Narrative page title (About, Telemetry, Glossary) | sans | `clamp(38px, 5.4vw, 72px)` | 700 | `-0.045em` | `0.96` | `16ch` | `text-wrap: balance` |
-| Dashboard page title (h1) | sans | `clamp(28px, 3.6vw, 44px)` | 700 | `-0.035em` | `1.02` | `24ch` | `text-wrap: balance`; `overflow-wrap: anywhere`, since a record page's title is its id; the site's h2 scale |
+| Dashboard page title (h1) | sans | `clamp(28px, 3.6vw, 44px)` | 700 | `-0.035em` | `1.02` | `24ch` | `text-wrap: balance`; `overflow-wrap: anywhere`, since a record page's title is its id, which also drops the measure (`data-identifier`, `max-width: none`) and so breaks only when the page is narrower than the id; the site's h2 scale |
 | Section title (h2) | sans | `var(--fs-h3)` 22px | 600 | `-0.02em` | `1.2` | none | `margin: 0 0 12px` |
 | Card, panel and column title | sans | `var(--fs-title)` 16px | 600 | `-0.015em` | `1.35` | | |
 | Lede, page description | sans | `var(--fs-lede)` 18px | 400 | none | `1.6` | `64ch` | `color: var(--muted)`, `text-wrap: pretty` |

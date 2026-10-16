@@ -303,7 +303,7 @@ export function Inspector() {
           .join(" · ")
       : "Trace"
   return (
-    <DashboardPage kicker={kicker} title={eventId}>
+    <DashboardPage kicker={kicker} title={eventId} identifier>
       <DataRegion region={region} label={`event ${eventId}`}>
         {(event) => <EventView event={event} />}
       </DataRegion>

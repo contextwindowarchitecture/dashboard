@@ -276,7 +276,7 @@ export function SessionView() {
       ? ["Session", region.data.service, region.data.route].join(" · ")
       : "Session"
   return (
-    <DashboardPage kicker={kicker} title={sessionId}>
+    <DashboardPage kicker={kicker} title={sessionId} identifier>
       <DataRegion region={region} label={`session ${sessionId}`}>
         {(session) => {
           const model = sessionModel(session)

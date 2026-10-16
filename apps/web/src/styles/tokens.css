@@ -175,6 +175,10 @@ a:hover {
   overflow-wrap: anywhere;
   margin: 0;
 }
+/* A record's id is one word, not prose: no measure, so it breaks only when the page is narrower. */
+[data-slot="page-title"][data-identifier] {
+  max-width: none;
+}
 [data-slot="page-title"]:focus {
   outline: none;
 }
