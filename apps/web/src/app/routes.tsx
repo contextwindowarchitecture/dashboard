@@ -4,8 +4,10 @@
 import { Navigate, type Params, type RouteObject } from "react-router"
 
 import { Shell } from "../components/layout/shell"
+import { ImplementationView } from "../features/fleet/components/implementation-view"
 import { PolicyView } from "../features/registry/components/policy-view"
 import { ProfileView } from "../features/registry/components/profile-view"
+import { FleetPage } from "./pages/fleet"
 import { InspectorPage } from "./pages/inspector"
 import { NotFoundPage } from "./pages/not-found"
 import { OverviewPage } from "./pages/overview"
@@ -98,6 +100,21 @@ export const ROUTES: RouteObject[] = [
                 ),
               },
             ],
+          },
+        ],
+      },
+      {
+        path: "fleet",
+        handle: handle("Fleet", () => "Fleet"),
+        children: [
+          { index: true, element: <FleetPage />, handle: handle("Fleet") },
+          {
+            path: ":language",
+            element: <ImplementationView />,
+            handle: handle(
+              (params) => params["language"] ?? "",
+              (params) => params["language"] ?? "",
+            ),
           },
         ],
       },

@@ -865,6 +865,35 @@ a:hover {
   display: block;
 }
 
+/* The latency chart (STYLE.md 6, Charts): percentiles by symbol in ink, the span between them a
+   hairline; a clamped value hollow. */
+[data-slot="latency-chart"] {
+  margin: 0;
+  min-width: 0;
+}
+[data-slot="latency-chart"] [data-slot="axis"] line {
+  stroke: var(--line);
+}
+[data-slot="latency-chart"] text {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--muted);
+}
+[data-slot="latency-chart"] [data-slot="latency-span"] {
+  stroke: var(--muted);
+}
+[data-slot="latency-chart"] [data-percentile] :is(circle, rect, polygon) {
+  fill: var(--fg);
+}
+[data-slot="latency-chart"] [data-clamped] :is(circle, rect, polygon) {
+  fill: var(--bg);
+  stroke: var(--fg);
+}
+/* A tokenizer or renderer every implementation must provide (conformance/README.md). */
+[data-required] {
+  font-weight: 600;
+}
+
 /* A profile's placement: each slot with its wrap, in order. */
 [data-slot="placement-list"] {
   margin: 0;

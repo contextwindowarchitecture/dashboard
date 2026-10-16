@@ -315,3 +315,32 @@ test("the registry's pages read in both themes and at a phone's width", async ({
     await expectAccessible(page)
   }
 })
+
+test("the fleet and an implementation's cases read in both themes and at a phone's width", async ({
+  page,
+}) => {
+  await page.goto("/fleet")
+  await expect(page.getByRole("table", { name: "Conformance" })).toBeVisible()
+  await expect(page.getByRole("img", { name: /P50, P95 and P99/ })).toBeVisible()
+  await expectAccessible(page)
+  await page
+    .getByRole("table", { name: "Conformance" })
+    .getByRole("link", { name: "typescript" })
+    .click()
+  await page
+    .getByRole("table", { name: "Cases" })
+    .getByRole("link", { name: "R-26" })
+    .first()
+    .click()
+  await expect(page).toHaveURL(/\/fleet\/typescript\?rule=R-26$/)
+  await expect(page.getByRole("status", { name: "Cases status" })).toContainText("exercise R-26")
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  for (const path of ["/fleet", "/fleet/typescript"]) {
+    await page.goto(path)
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
+    await expectNoSidewaysScroll(page)
+    await expectAccessible(page)
+  }
+})

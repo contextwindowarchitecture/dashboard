@@ -3,6 +3,7 @@
 // it lands.
 
 import {
+  Boxes,
   Layers,
   LayoutDashboard,
   ListTree,
@@ -66,6 +67,19 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: "/registry/profiles",
         icon: Layers,
         patterns: ["/registry/profiles", "/registry/profiles/:id/:version"],
+      },
+    ],
+  },
+  {
+    id: "fleet",
+    label: "Fleet",
+    items: [
+      {
+        id: "fleet",
+        label: "Fleet",
+        to: "/fleet",
+        icon: Boxes,
+        patterns: ["/fleet", "/fleet/:language"],
       },
     ],
   },
