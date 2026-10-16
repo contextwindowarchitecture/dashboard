@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@cwa-dashboard/contract": "workspace:*",
+    "@cwa-dashboard/telemetry": "workspace:*",
     "@fontsource-variable/space-grotesk": "5.3.0",
     "@fontsource/ibm-plex-mono": "5.3.0",
     "@gsap/react": "2.1.2",
