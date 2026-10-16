@@ -22,7 +22,7 @@
   },
   "redaction_mode": "full",
   "timings_ms": {
-    "total": 0.18950000000000955
+    "total": 0.14683399999998414
   },
   "outcome": "assembled",
   "snapshot": {
@@ -461,12 +461,12 @@
       }
     ],
     "timings": {
-      "admission": 0.04141599999999812,
+      "admission": 0.03858299999998849,
       "conflicts": 0.0005419999999958236,
-      "supersession": 0.0031670000000190157,
-      "deduplication": 0.007000000000005002,
-      "diversity": 0.002250000000003638,
-      "fitting": 0.04454199999997854
+      "supersession": 0.003290999999990163,
+      "deduplication": 0.005875000000003183,
+      "diversity": 0.0024169999999799074,
+      "fitting": 0.0347500000000025
     }
   },
   "payload": {

@@ -163,6 +163,10 @@ export type Row = {
    */
   budget_input?: number
   /**
+   * The trace's compressed rows: occurrences stepped down to a variant.
+   */
+  compressed_count?: number
+  /**
    * How many problems rejected the snapshot.
    */
   problem_count?: number

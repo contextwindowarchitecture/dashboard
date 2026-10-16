@@ -204,6 +204,11 @@
           "type": "integer",
           "minimum": 0
         },
+        "compressed_count": {
+          "description": "The trace's compressed rows: occurrences stepped down to a variant.",
+          "type": "integer",
+          "minimum": 0
+        },
         "problem_count": {
           "description": "How many problems rejected the snapshot.",
           "type": "integer",
@@ -239,7 +244,13 @@
             }
           },
           "then": {
-            "required": ["route", "route_policy_version", "profile", "budget_input"],
+            "required": [
+              "route",
+              "route_policy_version",
+              "profile",
+              "budget_input",
+              "compressed_count"
+            ],
             "not": {
               "required": ["problem_count"]
             }
@@ -292,6 +303,9 @@
                 },
                 {
                   "required": ["refused_reason"]
+                },
+                {
+                  "required": ["compressed_count"]
                 }
               ]
             }

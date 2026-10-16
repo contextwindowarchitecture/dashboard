@@ -45,6 +45,7 @@ export function indexRow(event: AssemblyEventV1): IndexRow {
           route_policy_version: snapshot.route_policy.version,
           profile: { id: snapshot.profile.id, version: snapshot.profile.version },
           budget_input: snapshot.budget.input,
+          compressed_count: trace?.compressed.length ?? 0,
         }),
     outcome: event.outcome,
     ...(event.outcome === "refused" && trace?.refused.reason

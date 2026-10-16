@@ -46,6 +46,7 @@ const assembledRow = {
   profile: { id: "fixture-three-slot", version: 1 },
   outcome: "assembled",
   reason_codes: ["below_threshold"],
+  compressed_count: 0,
   input_tokens: 34,
   budget_input: 64,
   session: { id: "refund-7", turn_index: 2 },
@@ -111,8 +112,14 @@ describe("events-index v1", () => {
     }
   })
 
-  it("requires the route, profile and budget of an event that was assembled or refused", () => {
-    for (const field of ["route", "route_policy_version", "profile", "budget_input"]) {
+  it("requires the route, profile, budget and compression count of an event that was assembled or refused", () => {
+    for (const field of [
+      "route",
+      "route_policy_version",
+      "profile",
+      "budget_input",
+      "compressed_count",
+    ]) {
       const row: Doc = clone(assembledRow)
       delete row[field]
       expect(validateEventsIndexV1({ ...index, events: [row] }), field).toBe(false)
@@ -131,6 +138,12 @@ describe("events-index v1", () => {
     ).toBe(false)
     expect(
       validateEventsIndexV1({ ...index, events: [{ ...rejectedRow, problem_count: undefined }] }),
+    ).toBe(false)
+  })
+
+  it("has no compression count for a rejection, which compressed nothing", () => {
+    expect(
+      validateEventsIndexV1({ ...index, events: [{ ...rejectedRow, compressed_count: 0 }] }),
     ).toBe(false)
   })
 

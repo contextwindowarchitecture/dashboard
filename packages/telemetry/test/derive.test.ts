@@ -81,6 +81,7 @@ describe("indexRow", () => {
       profile: { id: e.snapshot!.profile.id, version: e.snapshot!.profile.version },
       input_tokens: e.trace!.result!.input_tokens,
       budget_input: e.snapshot!.budget.input,
+      compressed_count: e.trace!.compressed.length,
       total_ms: e.timings_ms.total,
       language: "typescript",
       redaction_mode: "full",

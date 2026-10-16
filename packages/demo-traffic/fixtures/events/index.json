@@ -19,6 +19,7 @@
         "version": 1
       },
       "budget_input": 500,
+      "compressed_count": 6,
       "outcome": "assembled",
       "reason_codes": [
         "superseded"
@@ -28,7 +29,7 @@
         "id": "ir-3",
         "turn_index": 2
       },
-      "total_ms": 0.9214579999999728
+      "total_ms": 0.4900000000000091
     },
     {
       "event_id": "01M5090JKMASM5529ABCF79QQZ",
@@ -43,6 +44,7 @@
         "version": 1
       },
       "budget_input": 500,
+      "compressed_count": 2,
       "outcome": "assembled",
       "reason_codes": [
         "superseded"
@@ -52,7 +54,7 @@
         "id": "ir-3",
         "turn_index": 1
       },
-      "total_ms": 0.354959000000008
+      "total_ms": 0.27820799999997803
     },
     {
       "event_id": "01M508QDMMT8Y1VM51Y0MQNXM2",
@@ -67,6 +69,7 @@
         "version": 1
       },
       "budget_input": 500,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 331,
@@ -74,7 +77,7 @@
         "id": "ir-3",
         "turn_index": 0
       },
-      "total_ms": 0.18950000000000955
+      "total_ms": 0.14683399999998414
     },
     {
       "event_id": "01M504NDFMDGR1Q6EC4BTKCC5C",
@@ -89,10 +92,11 @@
         "version": 1
       },
       "budget_input": 130,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "slot_floor_over_budget",
       "reason_codes": [],
-      "total_ms": 0.22074999999998113
+      "total_ms": 0.1800839999999937
     },
     {
       "event_id": "01M5017HVM0ZA194R0PG8TD0HT",
@@ -107,10 +111,11 @@
         "version": 1
       },
       "budget_input": 2048,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.22554200000001856
+      "total_ms": 0.17279199999998696
     },
     {
       "event_id": "01M4ZYYA3MV0M2RZBF1H40Y7MV",
@@ -125,6 +130,7 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 65,
@@ -132,7 +138,7 @@
         "id": "desk-agent-12",
         "turn_index": 1
       },
-      "total_ms": 0.09341699999998809
+      "total_ms": 0.0731670000000122
     },
     {
       "event_id": "01M4ZXSP7MKY2A3A6DG03DFCHK",
@@ -147,6 +153,7 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [],
@@ -154,7 +161,7 @@
         "id": "desk-agent-12",
         "turn_index": 0
       },
-      "total_ms": 0.12395799999998758
+      "total_ms": 0.11875000000000568
     },
     {
       "event_id": "01M4ZTBTKMYHK0PXNZT3T5KPGM",
@@ -169,6 +176,7 @@
         "version": 1
       },
       "budget_input": 8192,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "stale_state",
@@ -177,7 +185,7 @@
         "source_diversity_cap"
       ],
       "input_tokens": 75,
-      "total_ms": 0.24187499999999318
+      "total_ms": 0.512582999999978
     },
     {
       "event_id": "01M4ZPXYZMMH9JA1A795GT6HGX",
@@ -192,12 +200,13 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "conflict_lost"
       ],
       "input_tokens": 51,
-      "total_ms": 0.17695800000001327
+      "total_ms": 0.13766699999999332
     },
     {
       "event_id": "01M4ZKRB14SW2GC3BS775AZDHG",
@@ -212,6 +221,7 @@
         "version": 1
       },
       "budget_input": 6000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "producer_slot_not_allowed",
@@ -223,7 +233,7 @@
         "id": "agent-run-412",
         "turn_index": 1
       },
-      "total_ms": 0.2060419999999965
+      "total_ms": 0.17541699999998173
     },
     {
       "event_id": "01M4ZKH0N4HT508FAY0X5JVM7S",
@@ -238,6 +248,7 @@
         "version": 1
       },
       "budget_input": 6000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "producer_slot_not_allowed",
@@ -248,7 +259,7 @@
         "id": "agent-run-412",
         "turn_index": 0
       },
-      "total_ms": 0.23908400000001961
+      "total_ms": 0.2136250000000075
     },
     {
       "event_id": "01M4ZHGXW4QVNQ7FTKA8D9EVT2",
@@ -263,6 +274,7 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [
@@ -274,7 +286,7 @@
         "id": "intake-12",
         "turn_index": 2
       },
-      "total_ms": 0.20041599999998994
+      "total_ms": 0.16674999999997908
     },
     {
       "event_id": "01M4ZGKMC4FAH0M12TN8R3QYPE",
@@ -289,6 +301,7 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 215,
@@ -296,7 +309,7 @@
         "id": "intake-12",
         "turn_index": 1
       },
-      "total_ms": 0.22587500000000205
+      "total_ms": 0.20795799999999076
     },
     {
       "event_id": "01M4ZG4ZM48MAN296TJPP3NVXM",
@@ -311,6 +324,7 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 160,
@@ -318,7 +332,7 @@
         "id": "intake-12",
         "turn_index": 0
       },
-      "total_ms": 0.2345420000000047
+      "total_ms": 0.21895900000001234
     },
     {
       "event_id": "01M4ZD3Y5439GVAR3H0FA56RD5",
@@ -333,6 +347,7 @@
         "version": 1
       },
       "budget_input": 720,
+      "compressed_count": 1,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
@@ -342,7 +357,7 @@
         "id": "refund-7",
         "turn_index": 4
       },
-      "total_ms": 0.6578330000000108
+      "total_ms": 0.5840829999999926
     },
     {
       "event_id": "01M4ZD08Z4QNN8GJX11BSW64XE",
@@ -357,6 +372,7 @@
         "version": 1
       },
       "budget_input": 720,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
@@ -366,7 +382,7 @@
         "id": "refund-7",
         "turn_index": 3
       },
-      "total_ms": 0.43633299999999053
+      "total_ms": 0.41841700000000515
     },
     {
       "event_id": "01M4ZCWKS4HXMQBYHST49K7EYG",
@@ -381,6 +397,7 @@
         "version": 1
       },
       "budget_input": 720,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 623,
@@ -388,7 +405,7 @@
         "id": "refund-7",
         "turn_index": 2
       },
-      "total_ms": 0.38895800000000236
+      "total_ms": 0.42820800000001213
     },
     {
       "event_id": "01M4ZCRYK48S5GFA51EDM9CYPS",
@@ -403,6 +420,7 @@
         "version": 1
       },
       "budget_input": 720,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 510,
@@ -410,7 +428,7 @@
         "id": "refund-7",
         "turn_index": 1
       },
-      "total_ms": 0.4181250000000034
+      "total_ms": 0.45737499999998477
     },
     {
       "event_id": "01M4ZCN9D4M5QNPFCQ5A2K3W6H",
@@ -425,6 +443,7 @@
         "version": 1
       },
       "budget_input": 720,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 438,
@@ -432,7 +451,7 @@
         "id": "refund-7",
         "turn_index": 0
       },
-      "total_ms": 0.5137919999999951
+      "total_ms": 0.786042000000009
     },
     {
       "event_id": "01M4Z98B2MXAHPP1FQV5R1P39M",
@@ -447,7 +466,7 @@
         "id": "fixture-c1",
         "turn_index": 1
       },
-      "total_ms": 0.030207999999987578
+      "total_ms": 0.02966699999998923
     },
     {
       "event_id": "01M4Z96GFMM96EVAPDB61FA3YM",
@@ -462,6 +481,7 @@
         "version": 1
       },
       "budget_input": 8192,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 34,
@@ -469,7 +489,7 @@
         "id": "fixture-c1",
         "turn_index": 0
       },
-      "total_ms": 0.155208000000016
+      "total_ms": 0.08637500000000387
     },
     {
       "event_id": "01M4Z1ECHGYSY7KKBTESM2JNZ4",
@@ -480,7 +500,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.011209000000008018
+      "total_ms": 0.012374999999991587
     },
     {
       "event_id": "01M4Z1DF80KSXRNKR02TMX11VZ",
@@ -491,7 +511,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.019583000000011452
+      "total_ms": 0.021500000000003183
     },
     {
       "event_id": "01M4Z1CHYGZ36CBJC9BVENQNDM",
@@ -502,7 +522,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.009874999999993861
+      "total_ms": 0.010541000000017675
     },
     {
       "event_id": "01M4Z1BMN09W0J2BKMJA125KR2",
@@ -513,7 +533,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.012666000000024269
+      "total_ms": 0.013666000000000622
     },
     {
       "event_id": "01M4Z1AQBG3H4238JWQY62EPD9",
@@ -524,7 +544,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.011957999999992808
+      "total_ms": 0.012499999999988631
     },
     {
       "event_id": "01M4Z19T20ASS5X8QB9YS79JAD",
@@ -535,7 +555,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01166700000001697
+      "total_ms": 0.012334000000009837
     },
     {
       "event_id": "01M4Z18WRGV1ZV6DEMVF7FPDPT",
@@ -546,7 +566,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01191599999998516
+      "total_ms": 0.012374999999991587
     },
     {
       "event_id": "01M4Z17ZF0YSHEDSMARM8NK98D",
@@ -557,7 +577,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01362499999999045
+      "total_ms": 0.012209000000012793
     },
     {
       "event_id": "01M4Z1725G0CBC4C6N6AHYNERB",
@@ -568,7 +588,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.014708000000013044
+      "total_ms": 0.014832999999981666
     },
     {
       "event_id": "01M4Z164W0PGCFHGFQM3XPC4YF",
@@ -579,7 +599,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.013041999999984455
+      "total_ms": 0.012833000000000538
     },
     {
       "event_id": "01M4Z157JG42VQWRZ3E1XF2YYB",
@@ -590,7 +610,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.029832999999996446
+      "total_ms": 0.021958000000012134
     },
     {
       "event_id": "01M4Z14A9076WEDG0CY9Q9PFNG",
@@ -601,7 +621,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.02358300000000213
+      "total_ms": 0.02370899999999665
     },
     {
       "event_id": "01M4Z13CZGMSD1YSRDDTFW9304",
@@ -612,7 +632,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.013208999999989146
+      "total_ms": 0.014124999999978627
     },
     {
       "event_id": "01M4Z12FP04012M3JVECQ4CWZJ",
@@ -623,7 +643,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.013125000000002274
+      "total_ms": 0.01520800000000122
     },
     {
       "event_id": "01M4Z11JCGFY9PBJ2WMDME3M0R",
@@ -634,7 +654,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.029832999999996446
+      "total_ms": 0.026916999999997415
     },
     {
       "event_id": "01M4Z10N30PE2QB9MW3RR9FE5K",
@@ -645,7 +665,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.02145899999999301
+      "total_ms": 0.02341599999999744
     },
     {
       "event_id": "01M4Z0ZQSGAXEFXEVJN7KY3K73",
@@ -656,7 +676,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.0231250000000216
+      "total_ms": 0.024957999999998037
     },
     {
       "event_id": "01M4Z0YTG0XBMQ294BD4FB74XX",
@@ -667,7 +687,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.012334000000009837
+      "total_ms": 0.014875000000017735
     },
     {
       "event_id": "01M4Z0XX6G8FE8H18PH484RSE5",
@@ -678,7 +698,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.016665999999986525
+      "total_ms": 0.017166000000003123
     },
     {
       "event_id": "01M4Z0WZX0RM3WBR0S55GK9QKA",
@@ -689,7 +709,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.033125000000012506
+      "total_ms": 0.017666999999988775
     },
     {
       "event_id": "01M4Z0W2KGTKPJEDRCMD9JMYMT",
@@ -700,7 +720,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.019040999999987207
+      "total_ms": 0.018584000000004153
     },
     {
       "event_id": "01M4Z0V5A0E2ZHQMTVKKYX844Z",
@@ -711,7 +731,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.019249999999999545
+      "total_ms": 0.020375000000001364
     },
     {
       "event_id": "01M4Z0T80G94T8SYCR5HJXAK4W",
@@ -722,7 +742,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.025707999999980302
+      "total_ms": 0.023458000000005086
     },
     {
       "event_id": "01M4Z0SAQ0RSQD9VZQ7601ZAA6",
@@ -733,7 +753,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.04345900000001279
+      "total_ms": 0.040541999999987866
     },
     {
       "event_id": "01M4Z0RDDGDTWSSTP0YVFC0Q1P",
@@ -744,7 +764,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.09470799999999713
+      "total_ms": 0.09308300000000713
     },
     {
       "event_id": "01M4Z0QG40YTBN4W131SCZKA7M",
@@ -759,12 +779,13 @@
         "version": 1
       },
       "budget_input": 150,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 116,
-      "total_ms": 0.11954099999999812
+      "total_ms": 0.12466599999999062
     },
     {
       "event_id": "01M4Z0PJTGX1QAR9JDAHHE46TJ",
@@ -779,13 +800,14 @@
         "version": 1
       },
       "budget_input": 28,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "below_threshold",
         "over_budget"
       ],
       "input_tokens": 28,
-      "total_ms": 0.11879200000001333
+      "total_ms": 0.1134580000000085
     },
     {
       "event_id": "01M4Z0NNH03N8G97G375T4RR47",
@@ -800,12 +822,13 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "superseded"
       ],
       "input_tokens": 83,
-      "total_ms": 0.2487079999999935
+      "total_ms": 0.2471670000000188
     },
     {
       "event_id": "01M4Z0MR7GAJN2TWFX1BZT7REK",
@@ -820,6 +843,7 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "conflict_lost",
@@ -827,7 +851,7 @@
         "duplicate_content"
       ],
       "input_tokens": 51,
-      "total_ms": 0.19658400000000142
+      "total_ms": 0.19720899999998664
     },
     {
       "event_id": "01M4Z0KTY0KTQFJWBE5DHG6CEX",
@@ -842,12 +866,13 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [
         "superseded"
       ],
-      "total_ms": 0.09770799999999724
+      "total_ms": 0.09408399999998096
     },
     {
       "event_id": "01M4Z0JXMGCXBDFTTQT9TVK30T",
@@ -862,12 +887,13 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "required_slot_missing",
       "reason_codes": [
         "untrusted_in_governance"
       ],
-      "total_ms": 0.07437500000000341
+      "total_ms": 0.07687500000000114
     },
     {
       "event_id": "01M4Z0J0B0TTF352G3HGS6SAGC",
@@ -882,12 +908,13 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "required_slot_missing",
       "reason_codes": [
         "untrusted_in_governance"
       ],
-      "total_ms": 0.055165999999999826
+      "total_ms": 0.05329199999999901
     },
     {
       "event_id": "01M4Z0H31G05G7JTBY30GMNA0J",
@@ -902,10 +929,11 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 41,
-      "total_ms": 0.10649999999999693
+      "total_ms": 0.09895800000001032
     },
     {
       "event_id": "01M4Z0G5R0AGKZA0P14VWSNZ0Q",
@@ -920,10 +948,11 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.08337499999998954
+      "total_ms": 0.07658399999999688
     },
     {
       "event_id": "01M4Z0F8EG8CNWAWEFZDXGD0BF",
@@ -938,10 +967,11 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.07349999999999568
+      "total_ms": 0.060207999999988715
     },
     {
       "event_id": "01M4Z0EB508BQMN0WT7K65A25J",
@@ -956,10 +986,11 @@
         "version": 1
       },
       "budget_input": 25,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.11049999999998761
+      "total_ms": 0.07933299999999122
     },
     {
       "event_id": "01M4Z0DDVGXRVJ9X6N3QP8PHW8",
@@ -974,6 +1005,7 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "untrusted_in_governance",
@@ -981,7 +1013,7 @@
         "slot_unplaced"
       ],
       "input_tokens": 43,
-      "total_ms": 0.8292080000000084
+      "total_ms": 0.13920799999999645
     },
     {
       "event_id": "01M4Z0CGJ0JPMVWXVNE66V47J0",
@@ -996,10 +1028,11 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "required_slot_missing",
       "reason_codes": [],
-      "total_ms": 0.05287500000000023
+      "total_ms": 0.055416000000008125
     },
     {
       "event_id": "01M4Z0BK8GMSAA4CTM7MKBZESW",
@@ -1014,12 +1047,13 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "protected_slot_unplaced",
       "reason_codes": [
         "slot_unplaced"
       ],
-      "total_ms": 0.09350000000000591
+      "total_ms": 0.1006670000000156
     },
     {
       "event_id": "01M4Z0ANZ05N0B9CP2EE6P6Z5W",
@@ -1034,13 +1068,14 @@
         "version": 1
       },
       "budget_input": 53,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "below_threshold",
         "over_budget"
       ],
       "input_tokens": 53,
-      "total_ms": 0.21733299999999645
+      "total_ms": 0.23425000000000296
     },
     {
       "event_id": "01M4Z09RNGQMCSN0NZPC5RAT7R",
@@ -1055,10 +1090,11 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 2,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 65,
-      "total_ms": 0.08483300000000327
+      "total_ms": 0.09345799999999826
     },
     {
       "event_id": "01M4Z08VC0PZ8YDM9SEQKNS8A9",
@@ -1073,13 +1109,14 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "authority_not_allowed",
         "capability_not_allowed"
       ],
       "input_tokens": 77,
-      "total_ms": 0.20691600000000676
+      "total_ms": 0.22412499999998658
     },
     {
       "event_id": "01M4Z07Y2G2M8Y42J3N90BBQRH",
@@ -1094,12 +1131,13 @@
         "version": 1
       },
       "budget_input": 60,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 56,
-      "total_ms": 0.22970899999999972
+      "total_ms": 0.27391600000001404
     },
     {
       "event_id": "01M4Z070S0PZP2N8FCZGDY2CSY",
@@ -1114,13 +1152,14 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "duplicate_content",
         "source_diversity_cap"
       ],
       "input_tokens": 83,
-      "total_ms": 0.16029199999999832
+      "total_ms": 0.2087500000000091
     },
     {
       "event_id": "01M4Z063FGBYR78A8N08ZD9NQ9",
@@ -1135,10 +1174,11 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 64,
-      "total_ms": 0.14850000000001273
+      "total_ms": 0.415458000000001
     },
     {
       "event_id": "01M4Z0566047KB1X12V54QJQ7N",
@@ -1153,12 +1193,13 @@
         "version": 1
       },
       "budget_input": 8192,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "expired"
       ],
       "input_tokens": 34,
-      "total_ms": 0.09420899999999222
+      "total_ms": 0.09308300000000713
     },
     {
       "event_id": "01M4Z048WGEVHYBBG9CJEF38J1",
@@ -1173,12 +1214,13 @@
         "version": 1
       },
       "budget_input": 25,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [
         "over_budget"
       ],
-      "total_ms": 0.11062499999999886
+      "total_ms": 0.11845800000000395
     },
     {
       "event_id": "01M4Z03BK0HK5Q5G86C31C1M59",
@@ -1193,13 +1235,14 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [
         "out_of_scope",
         "below_threshold"
       ],
-      "total_ms": 0.0670419999999865
+      "total_ms": 0.06758299999998485
     },
     {
       "event_id": "01M4Z02E9GH1ZHN0RSRXWN1NEY",
@@ -1214,12 +1257,13 @@
         "version": 1
       },
       "budget_input": 40,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [
         "over_budget"
       ],
-      "total_ms": 0.133624999999995
+      "total_ms": 0.13504199999999855
     },
     {
       "event_id": "01M4Z01H00SFASYX2TFC4DE7GZ",
@@ -1234,10 +1278,11 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [],
-      "total_ms": 0.06320800000000304
+      "total_ms": 0.06420900000000529
     },
     {
       "event_id": "01M4Z00KPGJK3BNPBGPYMXRQAW",
@@ -1252,12 +1297,13 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [
         "over_budget"
       ],
-      "total_ms": 0.08074999999999477
+      "total_ms": 0.0746249999999975
     },
     {
       "event_id": "01M4YZZPD08K248PTFFZR2Y36H",
@@ -1272,12 +1318,13 @@
         "version": 1
       },
       "budget_input": 39,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "below_threshold"
       ],
       "input_tokens": 39,
-      "total_ms": 0.08979100000000528
+      "total_ms": 0.09308299999997871
     },
     {
       "event_id": "01M4YZYS3G6YPX5Z0E4K2K33AE",
@@ -1292,12 +1339,13 @@
         "version": 1
       },
       "budget_input": 47,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "below_threshold"
       ],
       "input_tokens": 47,
-      "total_ms": 0.08554200000000378
+      "total_ms": 0.09070800000000645
     },
     {
       "event_id": "01M4YZXVT0N9BECJFQPP1EDDVP",
@@ -1312,6 +1360,7 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "conflict_lost",
@@ -1320,7 +1369,7 @@
         "source_diversity_cap"
       ],
       "input_tokens": 55,
-      "total_ms": 0.19233400000000245
+      "total_ms": 0.20150000000001
     },
     {
       "event_id": "01M4YZWYGG6B0MYZ7SH7W121CT",
@@ -1335,12 +1384,13 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [
         "source_diversity_cap"
       ],
-      "total_ms": 0.09291600000000244
+      "total_ms": 0.10050000000001091
     },
     {
       "event_id": "01M4YZW170V4R2HB536DH4YA1E",
@@ -1355,13 +1405,14 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "duplicate_content",
         "source_diversity_cap"
       ],
       "input_tokens": 83,
-      "total_ms": 0.18133299999999508
+      "total_ms": 0.18225000000001046
     },
     {
       "event_id": "01M4YZV3XGNVX2XMKA1S6NW9CY",
@@ -1376,12 +1427,13 @@
         "version": 1
       },
       "budget_input": 48,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "below_threshold"
       ],
       "input_tokens": 48,
-      "total_ms": 0.09133300000000588
+      "total_ms": 0.08916599999997743
     },
     {
       "event_id": "01M4YZT6M0TMR0MJ171Q2W6C1M",
@@ -1396,12 +1448,13 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "duplicate_content"
       ],
       "input_tokens": 41,
-      "total_ms": 0.1160419999999931
+      "total_ms": 0.10866699999999696
     },
     {
       "event_id": "01M4YZS9AG8RWARWZVTED6WQ17",
@@ -1416,6 +1469,7 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "below_threshold",
@@ -1423,7 +1477,7 @@
         "duplicate_content"
       ],
       "input_tokens": 53,
-      "total_ms": 0.19908300000000168
+      "total_ms": 0.1817089999999837
     },
     {
       "event_id": "01M4YZRC10D9N71MHZSCFJM2MB",
@@ -1438,12 +1492,13 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "duplicate_content"
       ],
       "input_tokens": 93,
-      "total_ms": 0.3486249999999984
+      "total_ms": 0.29008300000000986
     },
     {
       "event_id": "01M4YZQEQGCNCGBPXQ3A95H12A",
@@ -1458,12 +1513,13 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [
         "duplicate_content"
       ],
-      "total_ms": 0.5292919999999981
+      "total_ms": 0.20524999999997817
     },
     {
       "event_id": "01M4YZPHE0Q49APBGFAPPZ2Z93",
@@ -1478,12 +1534,13 @@
         "version": 1
       },
       "budget_input": 40,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 32,
-      "total_ms": 0.1313339999999954
+      "total_ms": 0.14170899999999165
     },
     {
       "event_id": "01M4YZNM4GRT2WHBVGBBTJV7WD",
@@ -1498,10 +1555,11 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "required_slot_missing",
       "reason_codes": [],
-      "total_ms": 0.07591600000000653
+      "total_ms": 0.07824999999999704
     },
     {
       "event_id": "01M4YZMPV0BTVCRTK515MFGEAM",
@@ -1516,10 +1574,11 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [],
-      "total_ms": 0.07445899999999028
+      "total_ms": 0.0779590000000212
     },
     {
       "event_id": "01M4YZKSHGKMG1A2MZXFSF08X1",
@@ -1534,12 +1593,13 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [
         "conflict_lost"
       ],
-      "total_ms": 0.09775000000000489
+      "total_ms": 0.10166699999999196
     },
     {
       "event_id": "01M4YZJW805SH6F04BJZCKGCC2",
@@ -1554,10 +1614,11 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [],
-      "total_ms": 0.06733399999998824
+      "total_ms": 0.07758300000000418
     },
     {
       "event_id": "01M4YZHYYGC6H1HAH74899MJ2C",
@@ -1572,13 +1633,14 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "untrusted_in_governance",
         "conflict_deferred"
       ],
       "input_tokens": 227,
-      "total_ms": 0.43362499999999216
+      "total_ms": 0.48566600000000903
     },
     {
       "event_id": "01M4YZH1N0GES9SXD5HHBYMGF1",
@@ -1593,13 +1655,14 @@
         "version": 1
       },
       "budget_input": 4000,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "expired",
         "conflict_lost"
       ],
       "input_tokens": 124,
-      "total_ms": 0.40791600000000017
+      "total_ms": 0.9339170000000081
     },
     {
       "event_id": "01M4YZG4BGXEXZK6MKKXBX1E70",
@@ -1614,12 +1677,13 @@
         "version": 1
       },
       "budget_input": 8192,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "capability_not_allowed"
       ],
       "input_tokens": 16,
-      "total_ms": 0.0692499999999967
+      "total_ms": 0.07120900000001029
     },
     {
       "event_id": "01M4YZF720Q1719XADN4MSNF3D",
@@ -1634,12 +1698,13 @@
         "version": 1
       },
       "budget_input": 64,
+      "compressed_count": 2,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 61,
-      "total_ms": 0.1322499999999991
+      "total_ms": 0.1282500000000084
     },
     {
       "event_id": "01M4YZE9RGWCYGMD3RMR30SR7A",
@@ -1654,12 +1719,13 @@
         "version": 1
       },
       "budget_input": 52,
+      "compressed_count": 1,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 50,
-      "total_ms": 0.1317499999999967
+      "total_ms": 0.1373749999999916
     },
     {
       "event_id": "01M4YZDCF0Z5MWJJCKJSVCRP75",
@@ -1674,10 +1740,11 @@
         "version": 1
       },
       "budget_input": 25,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.07754099999999653
+      "total_ms": 0.07741599999999949
     },
     {
       "event_id": "01M4YZCF5GKJ54Y80FAZMF0M1S",
@@ -1692,12 +1759,13 @@
         "version": 1
       },
       "budget_input": 40,
+      "compressed_count": 1,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 36,
-      "total_ms": 0.18329099999999698
+      "total_ms": 0.20666600000001267
     },
     {
       "event_id": "01M4YZBHW0P1SYAXVMEKD64YM1",
@@ -1712,12 +1780,13 @@
         "version": 1
       },
       "budget_input": 50,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "slot_floor_over_budget",
       "reason_codes": [
         "over_budget"
       ],
-      "total_ms": 0.2089160000000021
+      "total_ms": 0.20570800000001555
     },
     {
       "event_id": "01M4YZAMJGC0GHNVFR2CQ6VR35",
@@ -1732,12 +1801,13 @@
         "version": 1
       },
       "budget_input": 65,
+      "compressed_count": 1,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 61,
-      "total_ms": 0.20383400000000051
+      "total_ms": 0.20266699999999105
     },
     {
       "event_id": "01M4YZ9Q90MSMNY0VX0THJB32N",
@@ -1752,12 +1822,13 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 2,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 62,
-      "total_ms": 0.26158399999999915
+      "total_ms": 0.29033300000000395
     },
     {
       "event_id": "01M4YZ8SZG9YKH15K74MK020CN",
@@ -1772,10 +1843,11 @@
         "version": 1
       },
       "budget_input": 60,
+      "compressed_count": 1,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 57,
-      "total_ms": 0.1840830000000011
+      "total_ms": 0.19916700000001697
     },
     {
       "event_id": "01M4YZ7WP0GCR82ZZ0V3CKGCP4",
@@ -1790,12 +1862,13 @@
         "version": 1
       },
       "budget_input": 53,
+      "compressed_count": 2,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 52,
-      "total_ms": 0.22912499999999625
+      "total_ms": 0.22024999999999295
     },
     {
       "event_id": "01M4YZ6ZCGM32T4P8M9HX235N1",
@@ -1810,12 +1883,13 @@
         "version": 1
       },
       "budget_input": 71,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 63,
-      "total_ms": 0.1927920000000114
+      "total_ms": 0.14554199999997763
     },
     {
       "event_id": "01M4YZ623016MM0ADVMBBK0XHJ",
@@ -1830,10 +1904,11 @@
         "version": 1
       },
       "budget_input": 55,
+      "compressed_count": 2,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 44,
-      "total_ms": 0.09158399999999745
+      "total_ms": 0.09850000000000136
     },
     {
       "event_id": "01M4YZ54SG1SC74T9WGDNB7HRS",
@@ -1848,12 +1923,13 @@
         "version": 1
       },
       "budget_input": 45,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 40,
-      "total_ms": 0.16545899999999847
+      "total_ms": 0.1767499999999984
     },
     {
       "event_id": "01M4YZ47G0W9XVMN7C968XY5A2",
@@ -1868,12 +1944,13 @@
         "version": 1
       },
       "budget_input": 60,
+      "compressed_count": 1,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 52,
-      "total_ms": 0.3803750000000008
+      "total_ms": 0.41687500000000455
     },
     {
       "event_id": "01M4YZ3A6G0ZAQV38VSS734DH9",
@@ -1888,12 +1965,13 @@
         "version": 1
       },
       "budget_input": 39,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 33,
-      "total_ms": 0.13470900000000086
+      "total_ms": 0.1295419999999865
     },
     {
       "event_id": "01M4YZ2CX0429NM3GG6S8ZYV05",
@@ -1908,10 +1986,11 @@
         "version": 1
       },
       "budget_input": 30,
+      "compressed_count": 0,
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.11562500000000853
+      "total_ms": 0.12379200000000878
     },
     {
       "event_id": "01M4YZ1FKGNGH2SV859W94MHA3",
@@ -1926,12 +2005,13 @@
         "version": 1
       },
       "budget_input": 60,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 52,
-      "total_ms": 0.13741600000000176
+      "total_ms": 0.14537500000000136
     },
     {
       "event_id": "01M4YZ0JA0V9WGXP5NY4Z5C3CA",
@@ -1946,12 +2026,13 @@
         "version": 1
       },
       "budget_input": 44,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 42,
-      "total_ms": 0.17508299999998655
+      "total_ms": 0.20983300000000327
     },
     {
       "event_id": "01M4YYZN0GKV7ZPC9NYXPXTX31",
@@ -1966,10 +2047,11 @@
         "version": 1
       },
       "budget_input": 4096,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 97,
-      "total_ms": 0.3981250000000074
+      "total_ms": 1.3080420000000004
     },
     {
       "event_id": "01M4YYYQQ0QERZ7R4AD74QJ481",
@@ -1984,12 +2066,13 @@
         "version": 1
       },
       "budget_input": 135,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "over_budget"
       ],
       "input_tokens": 118,
-      "total_ms": 0.6045830000000052
+      "total_ms": 0.6456249999999955
     },
     {
       "event_id": "01M4YYXTDGF2CR961DJS96NHR6",
@@ -2004,13 +2087,14 @@
         "version": 1
       },
       "budget_input": 8192,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "producer_slot_not_allowed",
         "capability_not_allowed"
       ],
       "input_tokens": 36,
-      "total_ms": 0.2162919999999957
+      "total_ms": 0.24841700000001765
     },
     {
       "event_id": "01M4YYWX40M0GZY8KQDZEF4C74",
@@ -2025,6 +2109,7 @@
         "version": 1
       },
       "budget_input": 8192,
+      "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [
         "producer_not_authenticated",
@@ -2055,7 +2140,7 @@
         "not_eligible"
       ],
       "input_tokens": 153,
-      "total_ms": 5.493207999999996
+      "total_ms": 5.847583
     }
   ],
   "facets": {
