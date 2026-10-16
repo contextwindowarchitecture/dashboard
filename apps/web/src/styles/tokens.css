@@ -457,3 +457,63 @@ a:hover {
   font-size: var(--fs-mono);
   white-space: nowrap;
 }
+
+/* --- Data regions and callouts (STYLE.md 6) ------------------------------------------------------ */
+
+[data-slot="note"] {
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 18px 20px;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+[data-slot="note"] p,
+[data-slot="note"] ul {
+  margin: 0;
+}
+[data-slot="note"] code,
+[data-slot="missing-panel"] code {
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  overflow-wrap: anywhere;
+}
+[data-slot="emphasis-panel"] {
+  border: 1px solid var(--fg);
+  background: var(--bg);
+  padding: 18px 20px;
+}
+[data-slot="missing-panel"] {
+  border: 1px dashed var(--line);
+  padding: 22px 16px;
+  color: var(--muted);
+}
+[data-slot="missing-panel"] p {
+  margin: 0;
+}
+[data-slot="empty-state"] {
+  border: 1px dashed var(--line);
+  background: var(--surface);
+  padding: 22px 16px;
+}
+[data-slot="empty-state"] h3 {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 12px;
+}
+[data-slot="empty-state-body"] {
+  color: var(--muted);
+  max-width: 70ch;
+}
+[data-slot="empty-state-body"] p {
+  margin: 0;
+}
+[data-slot="empty-state-action"] {
+  margin-top: 14px;
+}
+[data-slot="placeholder-block"] {
+  background: var(--surface);
+  min-height: 160px;
+}
