@@ -115,6 +115,25 @@
             "type": "string",
             "pattern": "^[0-9a-f]{40}$"
           },
+          "contract_files": {
+            "description": "When the service's contract lock is one the report's writer knows: how many files it pins, and those whose SHA-256 differs from the dashboard's copy or that the dashboard lacks. Absent when the lock is not known, so a different commit is never read as a different contract.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pinned", "differing"],
+            "properties": {
+              "pinned": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "differing": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "$ref": "#/$defs/nonblank"
+                }
+              }
+            }
+          },
           "contract_lock_sha256": {
             "type": "string",
             "pattern": "^[0-9a-f]{64}$"

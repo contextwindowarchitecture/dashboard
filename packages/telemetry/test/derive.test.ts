@@ -218,6 +218,47 @@ describe("buildSessions", () => {
   })
 })
 
+describe("serviceRows' contract files", () => {
+  const ours = {
+    "schema/a.json": "1".repeat(64),
+    "contract/b.json": "2".repeat(64),
+    "x.json": "9".repeat(64),
+  }
+  const known = (files: Record<string, string>) => ({
+    files: ours,
+    knownLocks: { ["d".repeat(64)]: files },
+  })
+
+  it("counts the files a known lock pins and names those that differ from the dashboard's or it lacks", () => {
+    const events = [event("fixture-three-slot", { service: { name: "a" } })]
+    expect(
+      serviceRows(
+        events,
+        known({ "schema/a.json": "1".repeat(64), "contract/b.json": "2".repeat(64) }),
+      )[0]!.contract_files,
+    ).toEqual({
+      pinned: 2,
+      differing: [],
+    })
+    expect(
+      serviceRows(
+        events,
+        known({
+          "schema/a.json": "1".repeat(64),
+          "contract/b.json": "3".repeat(64),
+          "new.json": "4".repeat(64),
+        }),
+      )[0]!.contract_files,
+    ).toEqual({ pinned: 3, differing: ["contract/b.json", "new.json"] })
+  })
+
+  it("leaves out what it cannot know: a lock it has not seen", () => {
+    const events = [event("fixture-three-slot", { service: { name: "a" } })]
+    expect(serviceRows(events, { files: ours, knownLocks: {} })[0]!.contract_files).toBeUndefined()
+    expect(serviceRows(events)[0]!.contract_files).toBeUndefined()
+  })
+})
+
 describe("latency", () => {
   it("takes nearest-rank percentiles", () => {
     const sorted = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

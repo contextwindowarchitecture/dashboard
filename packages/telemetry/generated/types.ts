@@ -290,6 +290,13 @@ export interface CWADashboardFleetReport {
      * The contract commit the service's assembler was built against, from its latest event; compared with contract.commit for parity.
      */
     contract_commit: string
+    /**
+     * When the service's contract lock is one the report's writer knows: how many files it pins, and those whose SHA-256 differs from the dashboard's copy or that the dashboard lacks. Absent when the lock is not known, so a different commit is never read as a different contract.
+     */
+    contract_files?: {
+      pinned: number
+      differing: string[]
+    }
     contract_lock_sha256: string
     routes: RoutePolicy["route"][]
     /**

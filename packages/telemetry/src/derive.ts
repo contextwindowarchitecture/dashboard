@@ -206,7 +206,27 @@ export function percentile(sorted: readonly number[], p: number): number {
 }
 
 /** Each service seen in the events: its assembler, contract lock, routes and measured latency. */
-export function serviceRows(events: readonly AssemblyEventV1[]): ServiceRow[] {
+/** The dashboard's contract files and the locks the writer knows, each by path with its SHA-256. */
+export interface ContractFiles {
+  readonly files: Readonly<Record<string, string>>
+  /** By the SHA-256 of the lock's bytes, as events carry it. */
+  readonly knownLocks: Readonly<Record<string, Readonly<Record<string, string>>>>
+}
+
+function compareFiles(lockSha256: string, contract: ContractFiles | undefined) {
+  const pinned = contract?.knownLocks[lockSha256]
+  if (pinned === undefined) return undefined
+  const paths = Object.keys(pinned).sort()
+  return {
+    pinned: paths.length,
+    differing: paths.filter((path) => contract!.files[path] !== pinned[path]),
+  }
+}
+
+export function serviceRows(
+  events: readonly AssemblyEventV1[],
+  contract?: ContractFiles,
+): ServiceRow[] {
   const byService = new Map<string, AssemblyEventV1[]>()
   for (const event of events) {
     const list = byService.get(event.service.name) ?? []
@@ -229,6 +249,10 @@ export function serviceRows(events: readonly AssemblyEventV1[]): ServiceRow[] {
         assembler_version: latest.assembler.version,
         contract_commit: latest.contract.commit,
         contract_lock_sha256: latest.contract.lock_sha256,
+        ...(() => {
+          const files = compareFiles(latest.contract.lock_sha256, contract)
+          return files === undefined ? {} : { contract_files: files }
+        })(),
         routes,
         latency_ms:
           timings.length === 0

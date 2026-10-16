@@ -342,6 +342,14 @@ describe("fleet-report v1", () => {
     ])
   })
 
+  it("compares a service's contract files only as counts and named paths", () => {
+    const known = clone(fleet)
+    ;(known.services[0] as unknown as Doc)["contract_files"] = { pinned: 303, differing: [] }
+    expectValid(validateFleetReportV1, known)
+    ;(known.services[0] as unknown as Doc)["contract_files"] = { pinned: -1, differing: [] }
+    expect(validateFleetReportV1(known)).toBe(false)
+  })
+
   it("names the contract commit each service's assembler was built against", () => {
     const copy = clone(fleet)
     delete (copy.services[0] as unknown as Doc)["contract_commit"]
