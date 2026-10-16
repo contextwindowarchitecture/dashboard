@@ -6,7 +6,7 @@ It is not an assembler, not a gateway and not a policy store. It never decides w
 
 ## Status
 
-Phase 1 is under way. Over the committed demo traffic (`packages/demo-traffic/fixtures`, produced by the real TypeScript assembler and labelled `demo`), the web app shows:
+Phase 1 is built (DP-0 to DP-7 of the working plan). Over the committed demo traffic (`packages/demo-traffic/fixtures`, produced by the real TypeScript assembler and labelled `demo`), the web app shows:
 
 - the overview and the trace stream, and each event in the trace inspector, with the stage walk;
 - the sessions, each with its turn timeline, turn detail and the played session;
@@ -17,6 +17,8 @@ Phase 1 is under way. Over the committed demo traffic (`packages/demo-traffic/fi
 - the glossary, the telemetry page and the about page.
 
 The ingest service also takes events (`POST /events`, with a bearer token) into the tree the app reads. Run it all with `pnpm install` and `pnpm dev`, or as containers with `podman compose up --build`; `deploy/README.md` covers both and the cluster. The three illustrations are deferred (`docs/adr/0006-illustrations-deferred.md`).
+
+The app is held to its performance budgets over a generated tree of 50,000 events (`pnpm --filter web test:perf`: a filter change on the stream's 20,000 rows within 100 ms, a 200-item replay within 500 ms) and to its bundle budgets (`pnpm --filter web budgets`). Its browser tests check every page type in both themes from 375 to 1440px with no sideways scroll, axe at WCAG 2.2 AA, the keyboard, focus restoration and forced colours. No screen reader run has been done yet.
 
 ## Working here
 
