@@ -4,6 +4,7 @@
 
 import {
   Boxes,
+  FlaskConical,
   Layers,
   LayoutDashboard,
   ListTree,
@@ -88,6 +89,19 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: "/fleet",
         icon: Boxes,
         patterns: ["/fleet", "/fleet/:language"],
+      },
+    ],
+  },
+  {
+    id: "replay",
+    label: "Replay",
+    items: [
+      {
+        id: "sandbox",
+        label: "Sandbox",
+        to: "/sandbox",
+        icon: FlaskConical,
+        patterns: ["/sandbox"],
       },
     ],
   },

@@ -362,3 +362,25 @@ test("the guardrails and a guardrail's page read in both themes and at a phone's
     await expectAccessible(page)
   }
 })
+
+test("the sandbox says when the replay service is not configured, and reads in both themes", async ({
+  page,
+}) => {
+  await page.goto("/traces?outcome=assembled")
+  await page
+    .getByRole("table", { name: "Trace stream" })
+    .getByRole("row")
+    .nth(1)
+    .getByRole("link")
+    .click()
+  await page.getByRole("link", { name: "Replay in the sandbox →" }).click()
+  await expect(page).toHaveURL(/\/sandbox\?event=[0-9A-Z]{26}$/)
+  await expect(page.getByRole("region", { name: "Replay service" })).toContainText("not configured")
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.reload()
+  await expect(page.getByRole("region", { name: "Replay service" })).toBeVisible()
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})

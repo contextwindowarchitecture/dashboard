@@ -4,7 +4,7 @@
 import { REASONS, SCOPE } from "@cwa-dashboard/contract/data"
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
 import type { ReactNode } from "react"
-import { useParams, useSearchParams } from "react-router"
+import { Link, useParams, useSearchParams } from "react-router"
 
 import { DashboardPage } from "../../../components/dashboard/dashboard-page"
 import { DataRegion } from "../../../components/dashboard/data-region"
@@ -249,6 +249,9 @@ function EventView({ event }: { readonly event: AssemblyEventV1 }) {
     <div data-slot="content">
       <OutcomeBanner event={event} />
       <Facts event={event} />
+      <p data-slot="panel-note">
+        <Link to={`/sandbox?event=${event.event_id}`}>Replay in the sandbox →</Link>
+      </p>
       {event.trace && event.snapshot ? (
         <div data-slot="panel" data-padded="">
           <BudgetBar event={event} />

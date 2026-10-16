@@ -894,6 +894,25 @@ a:hover {
   font-weight: 600;
 }
 
+/* The sandbox's trace diff: every line marked + or -, so colour is never the only signal. */
+[data-slot="diff"] {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  line-height: 1.5;
+}
+[data-slot="diff"] [data-row="removed"] {
+  color: var(--accent);
+}
+[data-slot="diff"] [data-row="added"] {
+  color: var(--fg);
+  font-weight: 600;
+}
+[data-slot="diff"] [data-row="same"],
+[data-slot="diff"] [data-row="skipped"] {
+  color: var(--muted);
+}
+
 /* A profile's placement: each slot with its wrap, in order. */
 [data-slot="placement-list"] {
   margin: 0;

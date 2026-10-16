@@ -7,6 +7,7 @@ import { AppProviders } from "./app/providers"
 import { ROUTES } from "./app/routes"
 import { ConfigError, loadConfig } from "./data/config"
 import { createFileSource } from "./data/source"
+import { createReplayClient } from "./features/sandbox/api/replay"
 import "./styles/globals.css"
 import "./styles/tokens.css"
 
@@ -26,6 +27,7 @@ loadConfig()
           source={createFileSource(config.dataRoot)}
           config={config}
           router={router}
+          replay={config.apiBase === undefined ? null : createReplayClient(config.apiBase)}
         />
       </StrictMode>,
     )

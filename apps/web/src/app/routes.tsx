@@ -121,6 +121,11 @@ export const ROUTES: RouteObject[] = [
         ],
       },
       {
+        path: "sandbox",
+        lazy: () => import("./pages/sandbox"),
+        handle: handle("Sandbox", () => "Sandbox"),
+      },
+      {
         path: "fleet",
         handle: handle("Fleet", () => "Fleet"),
         children: [

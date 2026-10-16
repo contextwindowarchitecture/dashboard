@@ -75,15 +75,18 @@ export interface Replayed {
   readonly snapshotDigest: string
 }
 
+interface Compared {
+  readonly crossImplementation: boolean
+  readonly recorded: { language: string; hash: string | null; digest: string | undefined }
+  readonly replayed: { hash: string | null; digest: string }
+  readonly note: string
+}
+
 export type Parity =
-  | {
-      readonly kind: "equal" | "differ"
-      readonly crossImplementation: boolean
-      readonly recorded: { language: string; hash: string | null; digest: string | undefined }
-      readonly replayed: { hash: string | null; digest: string }
-      readonly note: string
-    }
-  | { readonly kind: "edited" | "no-claim"; readonly note: string }
+  | ({ readonly kind: "equal" } & Compared)
+  | ({ readonly kind: "differ" } & Compared)
+  | { readonly kind: "edited"; readonly note: string }
+  | { readonly kind: "no-claim"; readonly note: string }
 
 export function parity(
   event: AssemblyEventV1,

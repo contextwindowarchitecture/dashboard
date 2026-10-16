@@ -1,10 +1,9 @@
 // The replay client (dashboard-plan.md 9): POST ${apiBase}/replay with a snapshot, and GET
 // ${apiBase}/replay/components. Every answer is read at the boundary: a replay's trace is checked
-// against the contract's schema with the precompiled validator (no eval, so the CSP holds), and
+// against the contract's schema with the precompiled validator (no eval, so the CSP holds), loaded
+// with the first answer so it stays out of the app's first chunk, and
 // each way the service can fail has a name the page can say. An aborted request rejects, so the
 // newer one wins.
-
-import { validateTrace } from "@cwa-dashboard/contract/validators"
 
 export type ReplayAnswer =
   | {
@@ -15,9 +14,14 @@ export type ReplayAnswer =
       readonly payloadBytes: number | null
       readonly snapshotDigest: string
     }
-  | { readonly kind: "rejected" | "unsupported"; readonly problems: readonly string[] }
-  | { readonly kind: "too-large" | "busy" | "timeout" | "unreachable"; readonly message: string }
+  // One member per kind, so a check of `kind` narrows to its fields.
+  | { readonly kind: "rejected"; readonly problems: readonly string[] }
+  | { readonly kind: "unsupported"; readonly problems: readonly string[] }
   | { readonly kind: "invalid-response"; readonly problems: readonly string[] }
+  | { readonly kind: "too-large"; readonly message: string }
+  | { readonly kind: "busy"; readonly message: string }
+  | { readonly kind: "timeout"; readonly message: string }
+  | { readonly kind: "unreachable"; readonly message: string }
 
 export interface Component {
   readonly id: string
@@ -43,7 +47,8 @@ const strings = (value: unknown) =>
 const isAbort = (error: unknown) =>
   typeof error === "object" && error !== null && (error as { name?: unknown }).name === "AbortError"
 
-function readReplayed(body: Raw): ReplayAnswer {
+async function readReplayed(body: Raw): Promise<ReplayAnswer> {
+  const { validateTrace } = await import("@cwa-dashboard/contract/validators")
   const { outcome, trace, payload_hash, payload_bytes, snapshot_digest } = body
   const problems: string[] = []
   if (outcome !== "assembled" && outcome !== "refused")
@@ -106,7 +111,7 @@ export function createReplayClient(apiBase: string, fetchFn: typeof fetch = fetc
       const message = strings(raw["problems"]).join(" ") || `HTTP ${response.status}`
       switch (response.status) {
         case 200:
-          return readReplayed(raw)
+          return await readReplayed(raw)
         case 400:
           if (raw["kind"] === "rejected")
             return { kind: "rejected", problems: strings(raw["problems"]) }
