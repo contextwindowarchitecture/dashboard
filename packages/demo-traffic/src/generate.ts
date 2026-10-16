@@ -8,9 +8,12 @@
 //   node src/generate.ts --out <dir> --events N --seed S
 //                                                a larger tree: N more events, the scenarios' turns
 //                                                replayed with jittered budgets and services
+//   node src/generate.ts --out <dir> --long      also a 400-row trace and a 60-turn session
+//                                                (src/long.ts), for the performance tests
 //
 // The tree:
-//   events/index.json        the index (events-index v1)
+//   events/index.json        the current window's index (events-index v1)
+//   events/index/<day>.json  the closed windows, when the tree holds more than one
 //   events/<event id>.json   one assembly event v1 each
 //   sessions/<id>.json       one session v1 per conversation
 //   fleet.json               the fleet report v1
@@ -47,6 +50,7 @@ import {
 } from "@cwa-dashboard/telemetry/derive"
 import type { AssemblyEventV1, FleetReportV1 } from "@cwa-dashboard/telemetry/types"
 
+import { longCalls } from "./long.ts"
 import { SCENARIOS } from "./scenarios/index.ts"
 import { record, ulid } from "./wrapper.ts"
 
@@ -66,6 +70,8 @@ export interface Options {
   readonly window?: { readonly hours: number; readonly max: number }
   /** More events beyond the committed set: the scenarios' turns replayed with jitter. */
   readonly events?: number
+  /** A 400-row trace and a 60-turn session, for performance and visual checks (src/long.ts). */
+  readonly long?: boolean
   readonly seed?: number
 }
 
@@ -184,7 +190,12 @@ const text = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`
 /** The tree, as paths relative to its root and their contents. */
 export function generateTree(options: Options = {}): Map<string, string> {
   const random = seeded(options.seed ?? 1)
-  const calls = [...committedCalls(), ...volumeCalls(options.events ?? 0, random)]
+  const long: Call[] = (options.long ? longCalls() : []).map((call) => ({
+    ...call,
+    service: { name: "support-assistant", environment: DEMO },
+    redaction: { mode: "full" },
+  }))
+  const calls = [...committedCalls(), ...volumeCalls(options.events ?? 0, random), ...long]
   const events = calls.map((call) => {
     const eventId = ulid(Date.parse(call.recordedAt), random)
     return record(call.snapshot, {
@@ -293,13 +304,16 @@ function main(argv: string[]) {
     return index >= 0 ? argv[index + 1] : undefined
   }
   const events = Number(option("--events") ?? 0)
+  const long = argv.includes("--long")
   const seed = Number(option("--seed") ?? 1)
   const out = resolve(option("--out") ?? FIXTURES)
-  if (out === FIXTURES && (events !== 0 || seed !== 1)) {
-    process.stderr.write("generate: the committed tree takes no --events or --seed; give --out\n")
+  if (out === FIXTURES && (events !== 0 || seed !== 1 || long)) {
+    process.stderr.write(
+      "generate: the committed tree takes no --events, --seed or --long; give --out\n",
+    )
     process.exit(2)
   }
-  const files = generateTree({ events, seed })
+  const files = generateTree({ events, seed, long })
   if (argv.includes("--check")) {
     const problems = differences(files, out)
     if (problems.length > 0) {
