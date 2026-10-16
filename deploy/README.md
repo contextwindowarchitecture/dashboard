@@ -59,9 +59,16 @@ oc -n cwa-dashboard create secret generic dashboard-ingest --from-literal=token=
 
 Without that secret the service still replays, and refuses every write.
 
+The images are private on Quay, so the overlay pulls with the secret `dashboard-pull`: the credentials of a Quay robot account with read access to `dashboard` and `dashboard-ingest` (the benchmark's robot, `contextwindowarchitecture+cwa`, once it is given that access):
+
+```sh
+oc -n cwa-dashboard create secret docker-registry dashboard-pull \
+  --docker-server=quay.io --docker-username='contextwindowarchitecture+<robot>' --docker-password='<token>'
+```
+
 A rollout:
 
-1. Build and push both images: run the `image` workflow on the commit. It tags each with the commit's 12-character SHA and `latest`.
+1. Build and push both images: run the `image` workflow on the commit, which tags each with the commit's 12-character SHA and `latest`; or build them by hand for the cluster's architecture (`podman build --platform linux/amd64 …`, then `podman push`), since a Mac builds arm64 by default.
 2. Set both `newTag`s in `deploy/overlays/prod/kustomization.yaml` to that SHA, and commit.
 3. `oc apply -k deploy/overlays/prod`, then `oc -n cwa-dashboard rollout status deployment/dashboard` and `deployment/dashboard-ingest`. A rollback is `oc rollout undo`.
 
