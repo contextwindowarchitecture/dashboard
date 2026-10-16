@@ -3513,6 +3513,7 @@
       "name": "conformance-suite",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "contract-fixture",
@@ -3520,144 +3521,153 @@
       ],
       "latency_ms": {
         "samples": 90,
-        "p50": 0.10829199999999162,
-        "p95": 0.47537499999999966,
-        "p99": 5.581458000000012
+        "p50": 0.11566700000000196,
+        "p95": 0.650999999999982,
+        "p99": 6.135834000000017
       }
     },
     {
       "name": "contract-fixture",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "contract-fixture"
       ],
       "latency_ms": {
         "samples": 2,
-        "p50": 0.029208000000011225,
-        "p95": 0.14837499999998727,
-        "p99": 0.14837499999998727
+        "p50": 0.03554199999999241,
+        "p95": 0.16058400000000006,
+        "p99": 0.16058400000000006
       }
     },
     {
       "name": "contract-reviewer",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "contract-review"
       ],
       "latency_ms": {
         "samples": 1,
-        "p50": 0.2272920000000056,
-        "p95": 0.2272920000000056,
-        "p99": 0.2272920000000056
+        "p50": 0.23050000000000637,
+        "p95": 0.23050000000000637,
+        "p99": 0.23050000000000637
       }
     },
     {
       "name": "intake-assistant",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "document-qa"
       ],
       "latency_ms": {
         "samples": 3,
-        "p50": 0.2460839999999962,
-        "p95": 0.2490410000000054,
-        "p99": 0.2490410000000054
+        "p50": 0.2552090000000078,
+        "p95": 0.2580000000000098,
+        "p99": 0.2580000000000098
       }
     },
     {
       "name": "investor-relations",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "long-context-qa"
       ],
       "latency_ms": {
         "samples": 3,
-        "p50": 0.32216600000000994,
-        "p95": 0.9475419999999986,
-        "p99": 0.9475419999999986
+        "p50": 0.3606670000000065,
+        "p95": 1.0487500000000125,
+        "p99": 1.0487500000000125
       }
     },
     {
       "name": "invoice-extractor",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "extract"
       ],
       "latency_ms": {
         "samples": 1,
-        "p50": 0.19416700000002152,
-        "p95": 0.19416700000002152,
-        "p99": 0.19416700000002152
+        "p50": 0.24191700000000083,
+        "p95": 0.24191700000000083,
+        "p99": 0.24191700000000083
       }
     },
     {
       "name": "policy-desk",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "policy-desk"
       ],
       "latency_ms": {
         "samples": 2,
-        "p50": 0.07983300000000781,
-        "p95": 0.12820899999999824,
-        "p99": 0.12820899999999824
+        "p50": 0.10291599999999335,
+        "p95": 0.11066700000000651,
+        "p99": 0.11066700000000651
       }
     },
     {
       "name": "review-agent",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "agent-loop"
       ],
       "latency_ms": {
         "samples": 2,
-        "p50": 0.21762499999999818,
-        "p95": 0.2464999999999975,
-        "p99": 0.2464999999999975
+        "p50": 0.22170800000000668,
+        "p95": 0.25087500000000773,
+        "p99": 0.25087500000000773
       }
     },
     {
       "name": "support-assistant",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "support-chat"
       ],
       "latency_ms": {
         "samples": 7,
-        "p50": 0.4254579999999919,
-        "p95": 0.6290830000000085,
-        "p99": 0.6290830000000085
+        "p50": 0.4222910000000013,
+        "p95": 0.7542080000000055,
+        "p99": 0.7542080000000055
       }
     },
     {
       "name": "support-assistant-canary",
       "language": "typescript",
       "assembler_version": "0.0.1",
+      "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
       "routes": [
         "support-chat"
       ],
       "latency_ms": {
         "samples": 1,
-        "p50": 0.14295799999999304,
-        "p95": 0.14295799999999304,
-        "p99": 0.14295799999999304
+        "p50": 0.14754100000001813,
+        "p95": 0.14754100000001813,
+        "p99": 0.14754100000001813
       }
     }
   ]

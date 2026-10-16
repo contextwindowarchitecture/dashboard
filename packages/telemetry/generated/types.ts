@@ -286,6 +286,10 @@ export interface CWADashboardFleetReport {
     name: string
     language: "python" | "typescript" | "go" | "rust"
     assembler_version: string
+    /**
+     * The contract commit the service's assembler was built against, from its latest event; compared with contract.commit for parity.
+     */
+    contract_commit: string
     contract_lock_sha256: string
     routes: RoutePolicy["route"][]
     /**

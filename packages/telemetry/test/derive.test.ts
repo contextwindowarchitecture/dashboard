@@ -237,6 +237,7 @@ describe("latency", () => {
     expect(rows[0]).toMatchObject({
       language: "typescript",
       assembler_version: "0.0.1",
+      contract_commit: "c".repeat(40),
       contract_lock_sha256: "d".repeat(64),
       routes: [
         ...new Set([

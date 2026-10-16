@@ -95,6 +95,7 @@
           "name",
           "language",
           "assembler_version",
+          "contract_commit",
           "contract_lock_sha256",
           "routes",
           "latency_ms"
@@ -108,6 +109,11 @@
           },
           "assembler_version": {
             "$ref": "#/$defs/nonblank"
+          },
+          "contract_commit": {
+            "description": "The contract commit the service's assembler was built against, from its latest event; compared with contract.commit for parity.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
           },
           "contract_lock_sha256": {
             "type": "string",

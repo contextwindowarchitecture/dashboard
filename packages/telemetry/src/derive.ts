@@ -227,6 +227,7 @@ export function serviceRows(events: readonly AssemblyEventV1[]): ServiceRow[] {
         name,
         language: latest.assembler.language,
         assembler_version: latest.assembler.version,
+        contract_commit: latest.contract.commit,
         contract_lock_sha256: latest.contract.lock_sha256,
         routes,
         latency_ms:

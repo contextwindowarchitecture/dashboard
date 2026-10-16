@@ -310,6 +310,7 @@ const fleet = {
       name: "refund-assistant",
       language: "typescript",
       assembler_version: "0.0.1",
+      contract_commit: "c".repeat(40),
       contract_lock_sha256: "a".repeat(64),
       routes: ["refund"],
       latency_ms: { samples: 3, p50: 2.1, p95: 3.9, p99: 4.0 },
@@ -318,6 +319,7 @@ const fleet = {
       name: "intake",
       language: "go",
       assembler_version: "0.0.1",
+      contract_commit: "d".repeat(40),
       contract_lock_sha256: "b".repeat(64),
       routes: ["clinical-intake"],
       latency_ms: { samples: 0 },
@@ -338,6 +340,15 @@ describe("fleet-report v1", () => {
       "implementations",
       "services",
     ])
+  })
+
+  it("names the contract commit each service's assembler was built against", () => {
+    const copy = clone(fleet)
+    delete (copy.services[0] as unknown as Doc)["contract_commit"]
+    expect(validateFleetReportV1(copy)).toBe(false)
+    const short = clone(fleet)
+    ;(short.services[0] as unknown as Doc)["contract_commit"] = "c252494"
+    expect(validateFleetReportV1(short)).toBe(false)
   })
 
   it("holds an implementation's report to the published schema", () => {
