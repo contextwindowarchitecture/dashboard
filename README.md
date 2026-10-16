@@ -6,7 +6,15 @@ It is not an assembler, not a gateway and not a policy store. It never decides w
 
 ## Status
 
-Planned; the workspace is being bootstrapped. Nothing runs yet.
+Phase 1 is under way. Over the committed demo traffic (`packages/demo-traffic/fixtures`, produced by the real TypeScript assembler and labelled `demo`), the web app shows:
+
+- the overview and the trace stream, and each event in the trace inspector, with the stage walk;
+- the sessions, each with its turn timeline, turn detail and the played session;
+- the registry's route policies and profiles, and the events that ran them pinned, drifted or unregistered;
+- the fleet: every implementation's conformance run, the services, their contract and latency;
+- the seven guardrails, each with its codes counted and linked to the stream.
+
+The sandbox replay, the ingest service and the deployment are not built yet. Run it with `pnpm install` and `pnpm dev`.
 
 ## Working here
 
