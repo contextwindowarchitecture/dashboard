@@ -754,6 +754,15 @@ a:hover {
   font-size: var(--fs-mono);
   overflow-wrap: anywhere;
 }
+/* In a table an identifier stays whole, so the columns are sized to it and a table wider than its
+   panel scrolls in its region; it breaks only if one id is wider than the panel itself. */
+[data-slot="table-cell"][data-mono] {
+  overflow-wrap: break-word;
+}
+/* A chip in a table stays on one line for the same reason. */
+[data-slot="table-cell"] [data-slot="badge"] {
+  flex-wrap: nowrap;
+}
 [data-slot="cell-note"] {
   color: var(--muted);
 }

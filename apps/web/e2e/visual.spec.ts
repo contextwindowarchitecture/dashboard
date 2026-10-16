@@ -77,3 +77,22 @@ for (const theme of ["light", "dark"] as const) {
     })
   }
 }
+
+test("a table keeps its identifiers and chips whole, and scrolls in its region instead", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto("/traces?outcome=refused")
+  const table = page.getByRole("table", { name: "Trace stream" })
+  await table.getByRole("row").nth(1).waitFor()
+  const broken = await table.evaluate((element) =>
+    [...element.querySelectorAll("tbody a, tbody [data-slot='badge']")]
+      .filter((cell) => {
+        const line = parseFloat(getComputedStyle(cell).lineHeight) || cell.clientHeight
+        return cell.getClientRects().length > 1 || cell.getBoundingClientRect().height > 2 * line
+      })
+      .map((cell) => cell.textContent),
+  )
+  expect(broken).toEqual([])
+  await expectNoSidewaysScroll(page)
+})
