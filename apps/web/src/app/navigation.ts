@@ -4,6 +4,8 @@
 
 import {
   BookOpen,
+  Info,
+  RadioTower,
   Boxes,
   FlaskConical,
   Layers,
@@ -116,6 +118,20 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: "/glossary",
         icon: BookOpen,
         patterns: ["/glossary"],
+      },
+      {
+        id: "telemetry",
+        label: "Telemetry",
+        to: "/telemetry",
+        icon: RadioTower,
+        patterns: ["/telemetry"],
+      },
+      {
+        id: "about",
+        label: "About",
+        to: "/about",
+        icon: Info,
+        patterns: ["/about"],
       },
     ],
   },

@@ -121,6 +121,16 @@ export const ROUTES: RouteObject[] = [
         ],
       },
       {
+        path: "telemetry",
+        lazy: async () => ({ Component: (await import("./pages/reference")).Telemetry }),
+        handle: handle("Telemetry", () => "Telemetry"),
+      },
+      {
+        path: "about",
+        lazy: async () => ({ Component: (await import("./pages/reference")).About }),
+        handle: handle("About", () => "About"),
+      },
+      {
         path: "glossary",
         lazy: () => import("./pages/glossary"),
         handle: handle("Glossary", () => "Glossary"),

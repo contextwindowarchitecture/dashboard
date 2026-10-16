@@ -664,6 +664,10 @@ a:hover {
   padding: 0 32px 32px;
   min-width: 0;
 }
+/* Its items shrink to the column, so a wide block scrolls or wraps in place, not the page. */
+[data-slot="content"] > * {
+  min-width: 0;
+}
 /* A column of blocks inside a page's content: its gap, none of the page's padding. */
 [data-slot="stack"] {
   display: grid;
@@ -1031,6 +1035,15 @@ a:hover {
 }
 [data-slot="glossary-entry"] p {
   margin: 0 0 6px;
+}
+
+/* The about page's list of what the dashboard never does. */
+[data-slot="never-list"] {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 8px;
+  max-width: 78ch;
 }
 
 /* A profile's placement: each slot with its wrap, in order. */

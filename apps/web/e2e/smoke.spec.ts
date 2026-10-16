@@ -506,3 +506,21 @@ test("a reason chip lands on its glossary entry, and the glossary reads at a pho
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
 })
+
+test("the telemetry and about pages read in both themes and at a phone's width", async ({
+  page,
+}) => {
+  for (const path of ["/telemetry", "/about"]) {
+    await page.goto(path)
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
+    await expectAccessible(page)
+  }
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  for (const path of ["/telemetry", "/about"]) {
+    await page.goto(path)
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
+    await expectNoSidewaysScroll(page)
+    await expectAccessible(page)
+  }
+})
