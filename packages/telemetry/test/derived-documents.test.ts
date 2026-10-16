@@ -167,6 +167,7 @@ const session = {
       event_id: "01JA2B3C4D5E6F7G8H9JKMNPQR",
       outcome: "assembled",
       input_tokens: 812,
+      budget_input: 1000,
       by_plane: { gov: 420, state: 60, evid: 210, inter: 90 },
       compressed_count: 0,
       over_budget_count: 0,
@@ -176,6 +177,7 @@ const session = {
       turn_index: 1,
       event_id: "01JA2B3C4D5E6F7G8H9JKMNPQS",
       outcome: "refused",
+      budget_input: 1000,
       by_plane: { gov: 0, state: 0, evid: 0, inter: 0 },
       compressed_count: 0,
       over_budget_count: 2,
@@ -221,6 +223,17 @@ describe("session v1", () => {
     const noTokens = clone(session)
     delete (noTokens.turns[0] as Doc)["input_tokens"]
     expect(validateSessionV1(noTokens)).toBe(false)
+  })
+
+  it("gives the budget of a turn that was assembled or refused, and none to a rejected one", () => {
+    for (const index of [0, 1]) {
+      const copy = clone(session)
+      delete (copy.turns[index] as Doc)["budget_input"]
+      expect(validateSessionV1(copy), String(index)).toBe(false)
+    }
+    const rejected = clone(session)
+    ;(rejected.turns[2] as Doc)["budget_input"] = 1000
+    expect(validateSessionV1(rejected)).toBe(false)
   })
 
   it("names the planes as contract/slot-defaults.json does, and no others", () => {

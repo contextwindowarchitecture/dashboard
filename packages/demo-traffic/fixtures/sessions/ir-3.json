@@ -13,6 +13,7 @@
       "event_id": "01M508QDMMT8Y1VM51Y0MQNXM2",
       "outcome": "assembled",
       "input_tokens": 331,
+      "budget_input": 500,
       "by_plane": {
         "gov": 100,
         "state": 0,
@@ -28,6 +29,7 @@
       "event_id": "01M5090JKMASM5529ABCF79QQZ",
       "outcome": "assembled",
       "input_tokens": 471,
+      "budget_input": 500,
       "by_plane": {
         "gov": 100,
         "state": 0,
@@ -44,6 +46,7 @@
       "event_id": "01M5099QJMHFG77A4K4QR3MSK2",
       "outcome": "assembled",
       "input_tokens": 493,
+      "budget_input": 500,
       "by_plane": {
         "gov": 100,
         "state": 0,

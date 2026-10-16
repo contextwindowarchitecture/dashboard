@@ -121,6 +121,7 @@ function sessionTurn(event: AssemblyEventV1): SessionTurn {
     ...(event.outcome === "assembled" && trace.result
       ? { input_tokens: trace.result.input_tokens }
       : {}),
+    budget_input: event.snapshot!.budget.input,
     by_plane,
     compressed_count: trace.compressed.length,
     over_budget_count: trace.excluded.filter((row) => row.reason === "over_budget").length,

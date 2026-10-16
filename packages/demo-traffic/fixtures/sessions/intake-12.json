@@ -13,6 +13,7 @@
       "event_id": "01M4ZG4ZM48MAN296TJPP3NVXM",
       "outcome": "assembled",
       "input_tokens": 160,
+      "budget_input": 4096,
       "by_plane": {
         "gov": 63,
         "state": 0,
@@ -28,6 +29,7 @@
       "event_id": "01M4ZGKMC4FAH0M12TN8R3QYPE",
       "outcome": "assembled",
       "input_tokens": 215,
+      "budget_input": 4096,
       "by_plane": {
         "gov": 63,
         "state": 0,
@@ -43,6 +45,7 @@
       "turn_index": 2,
       "event_id": "01M4ZHGXW4QVNQ7FTKA8D9EVT2",
       "outcome": "refused",
+      "budget_input": 4096,
       "by_plane": {
         "gov": 0,
         "state": 0,

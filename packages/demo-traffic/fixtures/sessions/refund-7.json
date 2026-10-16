@@ -13,6 +13,7 @@
       "event_id": "01M4ZCN9D4M5QNPFCQ5A2K3W6H",
       "outcome": "assembled",
       "input_tokens": 438,
+      "budget_input": 720,
       "by_plane": {
         "gov": 174,
         "state": 23,
@@ -28,6 +29,7 @@
       "event_id": "01M4ZCRYK48S5GFA51EDM9CYPS",
       "outcome": "assembled",
       "input_tokens": 510,
+      "budget_input": 720,
       "by_plane": {
         "gov": 174,
         "state": 23,
@@ -44,6 +46,7 @@
       "event_id": "01M4ZCWKS4HXMQBYHST49K7EYG",
       "outcome": "assembled",
       "input_tokens": 623,
+      "budget_input": 720,
       "by_plane": {
         "gov": 174,
         "state": 23,
@@ -60,6 +63,7 @@
       "event_id": "01M4ZD08Z4QNN8GJX11BSW64XE",
       "outcome": "assembled",
       "input_tokens": 585,
+      "budget_input": 720,
       "by_plane": {
         "gov": 70,
         "state": 23,
@@ -76,6 +80,7 @@
       "event_id": "01M4ZD3Y5439GVAR3H0FA56RD5",
       "outcome": "assembled",
       "input_tokens": 554,
+      "budget_input": 720,
       "by_plane": {
         "gov": 70,
         "state": 14,

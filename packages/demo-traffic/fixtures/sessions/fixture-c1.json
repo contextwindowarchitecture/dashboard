@@ -13,6 +13,7 @@
       "event_id": "01M4Z96GFMM96EVAPDB61FA3YM",
       "outcome": "assembled",
       "input_tokens": 34,
+      "budget_input": 8192,
       "by_plane": {
         "gov": 9,
         "state": 0,

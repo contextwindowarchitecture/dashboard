@@ -308,6 +308,10 @@ export type Turn = {
    */
   input_tokens?: number
   /**
+   * snapshot.budget.input: the budget the turn was assembled, or refused, against.
+   */
+  budget_input?: number
+  /**
    * The included tokens of each plane, by the short plane names of contract/slot-defaults.json; all zero for a refusal, whose trace includes nothing.
    */
   by_plane?: {

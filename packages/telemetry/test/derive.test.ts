@@ -155,6 +155,7 @@ describe("buildSessions", () => {
       const sums = { gov: 0, state: 0, evid: 0, inter: 0 } as Record<string, number>
       for (const inc of source.trace!.included) sums[planes(inc.slot)]! += inc.tokens
       expect(row.by_plane).toEqual(sums)
+      expect(row.budget_input).toBe(source.snapshot!.budget.input)
       expect(row.compressed_count).toBe(source.trace!.compressed.length)
       expect(row.over_budget_count).toBe(
         source.trace!.excluded.filter((r) => r.reason === "over_budget").length,

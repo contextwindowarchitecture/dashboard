@@ -87,6 +87,11 @@
           "type": "integer",
           "minimum": 0
         },
+        "budget_input": {
+          "description": "snapshot.budget.input: the budget the turn was assembled, or refused, against.",
+          "type": "integer",
+          "minimum": 0
+        },
         "by_plane": {
           "description": "The included tokens of each plane, by the short plane names of contract/slot-defaults.json; all zero for a refusal, whose trace includes nothing.",
           "type": "object",
@@ -145,7 +150,7 @@
             }
           },
           "then": {
-            "required": ["by_plane", "compressed_count", "over_budget_count"]
+            "required": ["budget_input", "by_plane", "compressed_count", "over_budget_count"]
           }
         },
         {
@@ -201,6 +206,9 @@
                 },
                 {
                   "required": ["by_plane"]
+                },
+                {
+                  "required": ["budget_input"]
                 },
                 {
                   "required": ["refused_reason"]

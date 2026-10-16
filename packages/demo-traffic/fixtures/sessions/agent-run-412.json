@@ -13,6 +13,7 @@
       "event_id": "01M4ZKH0N4HT508FAY0X5JVM7S",
       "outcome": "assembled",
       "input_tokens": 251,
+      "budget_input": 6000,
       "by_plane": {
         "gov": 83,
         "state": 11,
@@ -28,6 +29,7 @@
       "event_id": "01M4ZKRB14SW2GC3BS775AZDHG",
       "outcome": "assembled",
       "input_tokens": 265,
+      "budget_input": 6000,
       "by_plane": {
         "gov": 83,
         "state": 12,
