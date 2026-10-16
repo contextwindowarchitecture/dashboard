@@ -1,7 +1,7 @@
 // The sandbox (dashboard-plan.md 7.8): an event replayed through the real assembler on the replay
-// service (D12, ADR-0005), its outcome, its parity with what the event recorded and the trace diff.
-// What a replay may claim is fidelity.ts's to decide; the page says it. Without a configured service
-// the page says so and how to run one.
+// service (D12, ADR-0005), with the reader's controls applied, its outcome, its parity with what the
+// event recorded and the trace diff. What a replay may claim is fidelity.ts's to decide; the page
+// says it. Without a configured service the page says so and how to run one.
 
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
 import { useRef, useState } from "react"
@@ -14,13 +14,18 @@ import { useEvent } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import type { ReplayAnswer, ReplayClient } from "../api/replay"
 import { useReplayClient } from "../api/replay-context"
+import { applyControls } from "../model/controls"
 import { traceDiff } from "../model/diff"
 import { parity, replayable } from "../model/fidelity"
+import { controlsFromSearch, edited, searchWithControls } from "../model/url"
+import { ControlsForm } from "./controls-form"
 
 type Run =
   | { readonly status: "idle" }
   | { readonly status: "running" }
   | { readonly status: "done"; readonly answer: ReplayAnswer }
+
+type Replayed = Extract<ReplayAnswer, { kind: "replayed" }>
 
 function NotConfigured() {
   return (
@@ -41,9 +46,11 @@ function NotConfigured() {
 function ParityPanel({
   event,
   answer,
+  isEdited,
 }: {
   readonly event: AssemblyEventV1
-  readonly answer: Extract<ReplayAnswer, { kind: "replayed" }>
+  readonly answer: Replayed
+  readonly isEdited: boolean
 }) {
   if (event.outcome === "rejected") {
     return (
@@ -60,7 +67,7 @@ function ParityPanel({
       payloadHash: answer.payloadHash,
       snapshotDigest: answer.snapshotDigest,
     },
-    { edited: false },
+    { edited: isEdited },
   )
   if (check.kind === "edited" || check.kind === "no-claim") {
     return (
@@ -136,56 +143,74 @@ function DiffPanel({
   )
 }
 
-function Result({ event, run }: { readonly event: AssemblyEventV1; readonly run: Run }) {
+function Outcome({ answer }: { readonly answer: Replayed }) {
+  const trace = answer.trace as {
+    result?: { input_tokens: number } | null
+    refused: { reason: string | null }
+  }
+  return (
+    <StatusBadge
+      outcome={answer.outcome}
+      {...(trace.result ? { inputTokens: trace.result.input_tokens } : {})}
+      {...(trace.refused.reason ? { refusedReason: trace.refused.reason } : {})}
+    />
+  )
+}
+
+const FAILURE: Record<"rejected" | "unsupported" | "invalid-response", string> = {
+  rejected: "The snapshot was rejected before assembly:",
+  unsupported: "The assembler does not provide a tokenizer or renderer the snapshot names (R-16):",
+  "invalid-response": "The service's answer is not a replay:",
+}
+
+function Result({
+  event,
+  run,
+  isEdited,
+}: {
+  readonly event: AssemblyEventV1
+  readonly run: Run
+  readonly isEdited: boolean
+}) {
   if (run.status === "idle") return null
+  const body = () => {
+    if (run.status === "running") return <p data-slot="cell-note">Replaying…</p>
+    const { answer } = run
+    switch (answer.kind) {
+      case "replayed":
+        return (
+          <>
+            <Outcome answer={answer} />
+            <ParityPanel event={event} answer={answer} isEdited={isEdited} />
+            <DiffPanel recorded={event.trace} replayed={answer.trace} />
+          </>
+        )
+      case "rejected":
+      case "unsupported":
+      case "invalid-response":
+        return (
+          <div data-slot="note">
+            <p>{FAILURE[answer.kind]}</p>
+            <ul>
+              {answer.problems.map((problem) => (
+                <li key={problem}>
+                  <code>{problem}</code>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      default:
+        return (
+          <div data-slot="note">
+            <p>{answer.message}</p>
+          </div>
+        )
+    }
+  }
   return (
     <section aria-label="Replay result" aria-live="polite" data-slot="content">
-      {run.status === "running" ? (
-        <p data-slot="cell-note">Replaying…</p>
-      ) : run.answer.kind === "replayed" ? (
-        <>
-          <StatusBadge
-            outcome={run.answer.outcome}
-            {...((run.answer.trace as { result?: { input_tokens: number } }).result
-              ? {
-                  inputTokens: (run.answer.trace as { result: { input_tokens: number } }).result
-                    .input_tokens,
-                }
-              : {})}
-            {...((run.answer.trace as { refused: { reason: string | null } }).refused.reason
-              ? {
-                  refusedReason: (run.answer.trace as { refused: { reason: string } }).refused
-                    .reason,
-                }
-              : {})}
-          />
-          <ParityPanel event={event} answer={run.answer} />
-          <DiffPanel recorded={event.trace} replayed={run.answer.trace} />
-        </>
-      ) : run.answer.kind === "rejected" ||
-        run.answer.kind === "unsupported" ||
-        run.answer.kind === "invalid-response" ? (
-        <div data-slot="note">
-          <p>
-            {run.answer.kind === "rejected"
-              ? "The snapshot was rejected before assembly:"
-              : run.answer.kind === "unsupported"
-                ? "The assembler does not provide a tokenizer or renderer the snapshot names (R-16):"
-                : "The service's answer is not a replay:"}
-          </p>
-          <ul>
-            {run.answer.problems.map((problem) => (
-              <li key={problem}>
-                <code>{problem}</code>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <div data-slot="note">
-          <p>{run.answer.message}</p>
-        </div>
-      )}
+      {body()}
     </section>
   )
 }
@@ -199,6 +224,7 @@ function Replayer({
 }) {
   const source = replayable(event)
   const [run, setRun] = useState<Run>({ status: "idle" })
+  const [search, setSearch] = useSearchParams()
   const inFlight = useRef<AbortController | null>(null)
   if (source.kind === "none") {
     return (
@@ -207,13 +233,16 @@ function Replayer({
       </section>
     )
   }
+  const controls = controlsFromSearch(search)
+  const applied = applyControls(source.snapshot, controls)
+  const isEdited = edited(controls)
   const replay = async () => {
     inFlight.current?.abort()
     const controller = new AbortController()
     inFlight.current = controller
     setRun({ status: "running" })
     try {
-      const answer = await client.replay(source.snapshot, controller.signal)
+      const answer = await client.replay(applied.snapshot, controller.signal)
       if (!controller.signal.aborted) setRun({ status: "done", answer })
     } catch (error) {
       if (!controller.signal.aborted) throw error
@@ -226,17 +255,32 @@ function Replayer({
           <p>{source.reason}</p>
         </section>
       )}
+      <ControlsForm
+        snapshot={source.snapshot}
+        controls={controls}
+        onChange={(next) => setSearch(searchWithControls(search, next), { replace: true })}
+      />
+      {applied.problems.length > 0 ? (
+        <section aria-label="Control problems" data-slot="note">
+          <ul>
+            {applied.problems.map((problem) => (
+              <li key={problem}>{problem}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <div>
         <button
           type="button"
           data-slot="inverse-button"
           onClick={() => void replay()}
+          disabled={applied.problems.length > 0}
           aria-busy={run.status === "running"}
         >
           Replay
         </button>
       </div>
-      <Result event={event} run={run} />
+      <Result event={event} run={run} isEdited={isEdited} />
     </div>
   )
 }
