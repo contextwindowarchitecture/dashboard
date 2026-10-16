@@ -863,6 +863,26 @@ a:hover {
   display: block;
 }
 
+/* --- Outcome strip (STYLE.md 3, Outcomes; plan 8): ink for an assembly, the accent for a refusal,
+   a hollow accent mark for a rejection; the words beside it carry the same ---------------------- */
+
+[data-slot="outcome-strip"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+[data-slot="outcome-strip"] rect[data-outcome="assembled"] {
+  fill: var(--fg);
+}
+[data-slot="outcome-strip"] rect[data-outcome="refused"] {
+  fill: var(--accent);
+}
+[data-slot="outcome-strip"] rect[data-outcome="rejected"] {
+  fill: none;
+  stroke: var(--accent);
+}
+
 /* --- Excluded rows and conflict cards (STYLE.md 3, Outcomes; 5, Grid recipes) -------------------- */
 
 [data-slot="stage-groups"] {

@@ -207,3 +207,17 @@ test("the stage walk plays a refused trace to its refusal, in both motion prefer
     await expectAccessible(page)
   }
 })
+
+test("the sessions list reads in both themes and at a phone's width", async ({ page }) => {
+  await page.goto("/sessions")
+  const table = page.getByRole("table", { name: "Sessions" })
+  await expect(table.getByRole("link", { name: "refund-7" })).toBeVisible()
+  await expect(table).toContainText("25 of 66 parts")
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/sessions")
+  await expect(table).toContainText("25 of 66 parts")
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})
