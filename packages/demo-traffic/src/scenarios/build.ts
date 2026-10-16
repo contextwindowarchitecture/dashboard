@@ -24,6 +24,8 @@ export interface ScenarioTurn {
     readonly excluded?: readonly string[]
     /** The least number of compressed rows the trace must have. */
     readonly compressed?: number
+    /** Item ids the trace must include. */
+    readonly included?: readonly string[]
   }
 }
 

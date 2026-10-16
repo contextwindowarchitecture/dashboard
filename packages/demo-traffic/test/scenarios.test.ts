@@ -51,6 +51,10 @@ describe("the authored scenarios", () => {
           for (const code of turn.expect.excluded ?? []) {
             expect([...reasons], `${where} excludes ${code}`).toContain(code)
           }
+          const included = event.trace?.included.map((row) => row.item_id) ?? []
+          for (const id of turn.expect.included ?? []) {
+            expect(included, `${where} includes ${id}`).toContain(id)
+          }
           if (turn.expect.compressed !== undefined) {
             expect(event.trace?.compressed.length ?? 0, where).toBeGreaterThanOrEqual(
               turn.expect.compressed,
