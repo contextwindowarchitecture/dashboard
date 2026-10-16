@@ -11,7 +11,8 @@
       "default": "./generated/validators.js"
     },
     "./package.json": "./package.json",
-    "./derive": "./src/derive.ts"
+    "./derive": "./src/derive.ts",
+    "./canonical": "./src/canonical.ts"
   },
   "scripts": {
     "generate": "node scripts/generate.mjs",

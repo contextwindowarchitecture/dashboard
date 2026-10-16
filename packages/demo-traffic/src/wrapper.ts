@@ -14,6 +14,7 @@ import {
   UnsupportedComponentError,
   assemble,
 } from "@cwa-dashboard/assembler"
+import { canonicalJson } from "@cwa-dashboard/telemetry/canonical"
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
 
 export type RedactionMode = AssemblyEventV1["redaction_mode"]
@@ -192,24 +193,6 @@ function scrubText(text: string, terms: readonly string[]): string {
     if (term.length > 0) scrubbed = scrubbed.split(term).join("[name]")
   }
   return scrubbed
-}
-
-// --- RFC 8785 ------------------------------------------------------------------------------------
-
-/**
- * The RFC 8785 (JSON Canonicalization Scheme) serialization of a JSON value: object members sorted
- * by their names' UTF-16 code units, at every depth, with no whitespace; strings and numbers as
- * ECMAScript's JSON.stringify writes them, which is what the scheme specifies.
- */
-export function canonicalJson(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`
-  if (isRecord(value)) {
-    const members = Object.keys(value)
-      .sort()
-      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
-    return `{${members.join(",")}}`
-  }
-  return JSON.stringify(value)
 }
 
 // --- ULID ----------------------------------------------------------------------------------------
