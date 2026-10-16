@@ -221,3 +221,32 @@ test("the sessions list reads in both themes and at a phone's width", async ({ p
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
 })
+
+test("a session opens from the list, selects a turn, and reads in both themes and at 400px", async ({
+  page,
+}) => {
+  await page.goto("/sessions")
+  await page
+    .getByRole("table", { name: "Sessions" })
+    .getByRole("link", { name: "refund-7" })
+    .click()
+  await expect(page).toHaveURL(/\/sessions\/refund-7$/)
+  await expect(page.getByRole("img", { name: /5 turns/ })).toBeVisible()
+  await expect(page.getByRole("region", { name: "Turn 4" })).toBeVisible()
+  await page.getByRole("table", { name: "Turns" }).getByRole("link", { name: "Turn 3" }).click()
+  await expect(page).toHaveURL(/[?&]turn=3/)
+  await expect(page.getByRole("region", { name: "Turn 3" })).toContainText("over_budget")
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/sessions/intake-12?turn=2")
+  await expect(page.getByRole("region", { name: "Turn 2" })).toBeVisible()
+  // Drawn at its column's width, not clipped from the fallback's.
+  await expect
+    .poll(async () =>
+      Number(await page.locator("[data-slot=chart-frame] svg").getAttribute("width")),
+    )
+    .toBeLessThan(400)
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})

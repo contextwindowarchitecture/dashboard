@@ -38,7 +38,7 @@ export interface Firsts {
 }
 
 /** The words each first is known by: the trace's field, the contract's code, the outcome. */
-const FIRST_WORDS: Record<keyof Firsts, string> = {
+export const FIRST_WORDS: Record<keyof Firsts, string> = {
   compressed: "compressed",
   overBudget: "over_budget",
   refusal: "refused",
@@ -98,4 +98,10 @@ export function sessionModel(session: SessionV1): SessionModel {
         ? undefined
         : { comparedTurns: compared_turns, reusedParts: reused_parts, parts },
   }
+}
+
+/** The turn the URL names, if the session has it; otherwise the last. */
+export function selectedTurn(model: SessionModel, param: string | null): Turn | undefined {
+  const wanted = param !== null && /^\d+$/.test(param) ? Number(param) : undefined
+  return model.turns.find((t) => t.turn === wanted) ?? model.turns.at(-1)
 }

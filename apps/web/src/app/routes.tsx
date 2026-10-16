@@ -7,6 +7,7 @@ import { Shell } from "../components/layout/shell"
 import { InspectorPage } from "./pages/inspector"
 import { NotFoundPage } from "./pages/not-found"
 import { OverviewPage } from "./pages/overview"
+import { SessionPage } from "./pages/session"
 import { SessionsPage } from "./pages/sessions"
 import { TracesPage } from "./pages/traces"
 
@@ -48,7 +49,17 @@ export const ROUTES: RouteObject[] = [
       {
         path: "sessions",
         handle: handle("Sessions", () => "Sessions"),
-        children: [{ index: true, element: <SessionsPage />, handle: handle("Sessions") }],
+        children: [
+          { index: true, element: <SessionsPage />, handle: handle("Sessions") },
+          {
+            path: ":sessionId",
+            element: <SessionPage />,
+            handle: handle(
+              (params) => params["sessionId"] ?? "",
+              (params) => params["sessionId"] ?? "",
+            ),
+          },
+        ],
       },
       { path: "*", element: <NotFoundPage />, handle: handle("Page not found") },
     ],

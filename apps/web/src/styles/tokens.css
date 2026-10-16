@@ -1034,6 +1034,104 @@ a:hover {
   background: var(--surface);
   border-left: 1px dashed var(--fg);
 }
+/* The turn timeline (STYLE.md 6, Charts): planes as fills, the budget as a dashed ink rule, a refusal
+   hatched in the accent at 50%, the selected turn outlined in ink, each first a marker by shape. */
+[data-slot="session-layout"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+@media (min-width: 1100px) {
+  [data-slot="session-layout"] {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+/* The frame may shrink below the drawing's last width, so the chart is measured at its column's. */
+[data-slot="chart-frame"] {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+[data-slot="chart-frame"] svg {
+  display: block;
+  max-width: none;
+}
+[data-slot="turn-timeline"] {
+  margin: 0;
+  min-width: 0;
+}
+[data-slot="turn-timeline"] [data-slot="axis"] line {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+[data-slot="turn-timeline"] text {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--muted);
+}
+[data-slot="turn-timeline"] rect[data-segment="gov"] {
+  fill: var(--p-gov);
+}
+[data-slot="turn-timeline"] rect[data-segment="state"] {
+  fill: var(--p-state);
+}
+[data-slot="turn-timeline"] rect[data-segment="evid"] {
+  fill: var(--p-evid);
+}
+[data-slot="turn-timeline"] rect[data-segment="inter"] {
+  fill: var(--p-inter);
+}
+[data-slot="turn-timeline"] rect[data-segment="overhead"] {
+  fill: var(--muted);
+}
+[data-slot="turn-timeline"] rect[data-refused] {
+  opacity: 0.5;
+}
+[data-slot="turn-timeline"] [data-slot="hatch-line"] {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+[data-slot="turn-timeline"] [data-slot="budget-rule"] {
+  stroke: var(--fg);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+[data-slot="turn-timeline"] [data-slot="selected-mark"] {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+[data-slot="turn-timeline"] [data-marker] path {
+  fill: var(--fg);
+  stroke: var(--fg);
+  stroke-width: 1;
+}
+[data-slot="turn-timeline"] [data-marker="compressed"] path {
+  fill: var(--bg);
+}
+[data-slot="turn-timeline"] [data-marker="refusal"] path {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+[data-slot="chart-legend"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  color: var(--muted);
+}
+[data-slot="turn-timeline"] [data-slot="chart-legend"] svg {
+  display: inline;
+  vertical-align: middle;
+}
+tr[data-selected] {
+  background: var(--surface);
+}
 [data-slot="chart-summary"] {
   margin: 0;
   font-size: var(--fs-sm);
