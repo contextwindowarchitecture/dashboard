@@ -17,7 +17,11 @@ async function openPlayer(path = "/sessions/refund-7", strict = false) {
   const bars = () =>
     [...chart.querySelectorAll("[data-turn]")].map((g) => g.getAttribute("data-turn"))
   const marker = (kind: string) => chart.querySelector(`[data-marker="${kind}"]`)
-  return { ...app, player, chart, button, turn, bars, marker }
+  // The status renders in the same commit as the chart, so waiting on it never sees the URL ahead
+  // of the drawing; waitFor rechecks on every DOM change, so no turn slips past it.
+  const reached = (turn: number) =>
+    waitFor(() => expect(within(player).getByRole("status")).toHaveTextContent(`Turn ${turn} ·`))
+  return { ...app, player, chart, button, turn, bars, marker, reached }
 }
 
 describe("the played session", () => {
@@ -30,15 +34,15 @@ describe("the played session", () => {
   it("plays from the first turn, growing a bar and revealing each first per turn, and stops at the last", async () => {
     prefer(false)
     const user = userEvent.setup()
-    const { button, turn, bars, marker } = await openPlayer()
+    const { button, turn, bars, marker, reached } = await openPlayer()
     await user.click(button("Play"))
     expect(button("Play")).toHaveAttribute("aria-pressed", "true")
     expect(turn()).toBe("0")
     expect(bars()).toEqual(["0"])
-    await waitFor(() => expect(turn()).toBe("2"))
+    await reached(2)
     expect(bars()).toEqual(["0", "1", "2"])
     expect(marker("overBudget")).toBeNull()
-    await waitFor(() => expect(turn()).toBe("3"))
+    await reached(3)
     expect(marker("overBudget")).not.toBeNull()
     expect(marker("compressed")).toBeNull()
     await waitFor(() => expect(button("Play")).toHaveAttribute("aria-pressed", "false"))
