@@ -5,9 +5,10 @@
 //   a lazy chunk         every other script, each on its own
 //   a worker             a script named *.worker-*.js, each on its own
 //
-// It also fails on eval or new Function in any script, which the Content Security Policy would
-// refuse at runtime (dev/csp.ts); the TypeScript assembler compiles its validators that way, so
-// this also keeps it out of every browser chunk.
+// It fails when the initial JS holds a library budgets.json keeps out of it (`keptOut`: a name and a
+// string only that library's code carries), and on eval or new Function in any script, which the
+// Content Security Policy would refuse at runtime (dev/csp.ts); the TypeScript assembler compiles
+// its validators that way, so this also keeps it out of every browser chunk.
 //
 //   node scripts/check-budgets.mjs [--root <dir>]   (after `pnpm build`; the root holds budgets.json)
 
@@ -85,6 +86,14 @@ total("initial JS", initialJs, budgets.initialJsKb)
 total("initial CSS", initialCss, budgets.initialCssKb)
 each("lazy chunk", lazy, budgets.lazyChunkKb)
 each("worker", workers, budgets.workerKb)
+
+for (const [name, marker] of Object.entries(budgets.keptOut ?? {})) {
+  for (const path of initialJs) {
+    if (readFileSync(join(distDir, path), "utf8").includes(marker)) {
+      problems.push(`${path} holds ${name}, which belongs in a lazy chunk`)
+    }
+  }
+}
 
 for (const path of scripts) {
   const code = readFileSync(join(distDir, path), "utf8")

@@ -7,7 +7,13 @@ import { randomBytes } from "node:crypto"
 import { afterEach, describe, expect, it } from "vitest"
 
 const script = resolve(import.meta.dirname, "check-budgets.mjs")
-const BUDGETS = { initialJsKb: 1, initialCssKb: 1, lazyChunkKb: 1, workerKb: 2 }
+const BUDGETS = {
+  initialJsKb: 1,
+  initialCssKb: 1,
+  lazyChunkKb: 1,
+  workerKb: 2,
+  keptOut: { GSAP: "GreenSock" },
+}
 const dirs: string[] = []
 
 // A dist/ tree: index.html loading the entry and its stylesheet, and the other files as given.
@@ -80,6 +86,14 @@ describe("check-budgets", () => {
       expect(result.status).toBe(1)
       expect(result.stderr).toContain("assets/route-d.js")
     }
+  })
+
+  it("fails when a library kept out of the initial load is in it, and not when a lazy chunk has it", () => {
+    expect(run(dist({ "assets/motion-g.js": "/* GreenSock */" })).status).toBe(0)
+    const result = run(dist({ "assets/vendor-b.js": "/* GreenSock */" }))
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain("GSAP")
+    expect(result.stderr).toContain("assets/vendor-b.js")
   })
 
   it("fails when there is no build to check", () => {
