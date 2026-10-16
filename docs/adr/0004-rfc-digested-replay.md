@@ -9,7 +9,7 @@ The prototype that preceded this repository proposed a "digested candidate envel
 
 ## Decision
 
-The proposal is named **RFC-D1 · digested replay** and is written up in `docs/rfc-digested-replay.md` when the telemetry envelope lands (DP-1). It proposes a requirement; the specification assigns its number if it is taken up. The dashboard never shows "R-25" for it, and never cites a requirement number the vendored `contract/requirements.json` does not hold.
+The proposal is named **RFC-D1 · digested replay** and is written up in `docs/rfc-digested-replay.md`. It proposes a requirement; the specification assigns its number if it is taken up. The dashboard never shows "R-25" for it, and never cites a requirement number the vendored `contract/requirements.json` does not hold.
 
 ## Consequences
 
