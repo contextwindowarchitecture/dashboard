@@ -90,8 +90,8 @@ Authorization: Bearer <the deployment's INGEST_TOKEN>
             Span attributes
           </h2>
           <p data-slot="panel-note">
-            Each <code>gen_ai.cwa.*</code> attribute is one field of the assembly event, so a span
-            and an event say the same thing.
+            Each <code>cwa.*</code> attribute is one field of the assembly event, so a span and an
+            event say the same thing.
           </p>
           <DocTable heading="Attributes" label="Span attributes" />
         </section>

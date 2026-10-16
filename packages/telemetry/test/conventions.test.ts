@@ -4,7 +4,7 @@ import { join, resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 
 // docs/otel-semantic-conventions.md maps span attributes one to one onto assembly-event fields, so
-// the four wrappers and the collector exporter have one target. This test reads its table and
+// the four wrappers have one target. This test reads its table and
 // holds it to the event schema in both directions.
 
 const root = resolve(import.meta.dirname, "../../..")
@@ -115,12 +115,15 @@ describe("docs/otel-semantic-conventions.md", () => {
     expect(new Set(attributes).size).toBe(attributes.length)
   })
 
-  it("names CWA attributes under gen_ai.cwa., and otherwise only OpenTelemetry's own", () => {
+  // OpenTelemetry's naming guidance: "It is not recommended to use existing OpenTelemetry semantic
+  // convention namespace as a prefix" for a project's own attributes, so none sits under gen_ai.
+  it("names CWA attributes under cwa., never in an OpenTelemetry namespace, and otherwise only OpenTelemetry's own", () => {
     for (const { attribute } of table) {
       expect(attribute, attribute).toMatch(
-        /^(gen_ai\.cwa\.[a-z0-9_.]+|service\.name|service\.instance\.id|deployment\.environment\.name|\(span [a-z ]+\))$/,
+        /^(cwa\.[a-z0-9_.]+|service\.name|service\.instance\.id|deployment\.environment\.name|\(span [a-z ]+\))$/,
       )
     }
+    expect(doc).not.toMatch(/gen_ai\.cwa/)
   })
 
   it("types each attribute as OpenTelemetry can carry it", () => {

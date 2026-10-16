@@ -12,11 +12,16 @@ flowchart LR
   A --> T[trace + payload]
   T --> W2["wrapper: redact bodies, digest the payload parts, build the event"]
   W2 --> E["assembly event v1"]
-  W2 --> SP["span: gen_ai.cwa.* attributes"]
-  E -->|Phase 1| I["POST /events (apps/ingest)"]
-  E -->|Phase 2| C[OpenTelemetry collector]
-  SP --> C
+  W2 --> SP["span: cwa.* attributes"]
+  E --> I["POST /events (apps/ingest)"]
+  SP --> B["the service's own tracing backend, over OTLP"]
 ```
+
+The event travels by HTTP, never through an OpenTelemetry collector: it holds the whole snapshot, far over the size a span attribute or a log record carries in common backends. The span carries the summary below and the `event_id`, so a trace view links to the event.
+
+## Naming
+
+Every attribute this document defines is under `cwa.`. OpenTelemetry's naming guidance says "It is not recommended to use existing OpenTelemetry semantic convention namespace as a prefix" for a project's own attributes, since it "may result in a name clash in the future", so none sits under `gen_ai.` or any other namespace OpenTelemetry defines. Where OpenTelemetry defines an attribute with the same meaning, a wrapper sets it as well: `service.name`, `service.instance.id` and `deployment.environment.name` below, and, for a call in a session, the GenAI conventions' `gen_ai.conversation.id` ("the unique identifier for a conversation (session, thread)") with the value of `cwa.session.id`. `gen_ai.usage.input_tokens` is not reused: it counts a model call's tokens, and `cwa.result.input_tokens` counts what the assembler fitted.
 
 ## Attributes
 
@@ -24,7 +29,7 @@ One row per event field. A field path uses dots between properties and `[]` for 
 
 | Attribute | Event field | Type | Notes |
 | --- | --- | --- | --- |
-| `gen_ai.cwa.event_id` | `event_id` | string | A ULID |
+| `cwa.event_id` | `event_id` | string | A ULID |
 | `(span start time)` | `recorded_at` | timestamp | The span starts when the wrapper calls `assemble()` |
 | `(span duration)` | `timings_ms.total` | duration | The wrapper's measurement of the whole call |
 | `(span trace id)` | `otel.trace_id` | trace id | Shared with the model call the payload feeds, through `traceparent` |
@@ -32,36 +37,36 @@ One row per event field. A field path uses dots between properties and `[]` for 
 | `service.name` | `service.name` | string | OpenTelemetry's resource attribute |
 | `service.instance.id` | `service.instance` | string | OpenTelemetry's resource attribute |
 | `deployment.environment.name` | `service.environment` | string | `demo` for demo traffic |
-| `gen_ai.cwa.assembler.language` | `assembler.language` | string | `python`, `typescript`, `go` or `rust`, as `implementations/index.json` names them |
-| `gen_ai.cwa.assembler.name` | `assembler.name` | string | The package name |
-| `gen_ai.cwa.assembler.version` | `assembler.version` | string | |
-| `gen_ai.cwa.contract.repository` | `contract.repository` | string | |
-| `gen_ai.cwa.contract.commit` | `contract.commit` | string | The specification commit the assembler's lock pins |
-| `gen_ai.cwa.contract.lock_sha256` | `contract.lock_sha256` | string | See Contract lock |
-| `gen_ai.cwa.spec` | `trace.context.spec` | string | `cwa/draft` |
-| `gen_ai.cwa.session.id` | `session.id` | string | See Sessions |
-| `gen_ai.cwa.session.turn_index` | `session.turn_index` | int | From 0 |
-| `gen_ai.cwa.redaction_mode` | `redaction_mode` | string | See Redaction |
-| `gen_ai.cwa.outcome` | `outcome` | string | `assembled`, `refused` or `rejected` |
-| `gen_ai.cwa.trace_id` | `trace.trace_id` | string | The CWA trace's own id, not OpenTelemetry's |
-| `gen_ai.cwa.snapshot_digest` | `trace.context.snapshot_digest` | string | The digest `conformance/README.md` defines |
-| `gen_ai.cwa.route` | `snapshot.route_policy.route` | string | |
-| `gen_ai.cwa.route_policy.version` | `snapshot.route_policy.version` | string | |
-| `gen_ai.cwa.profile.id` | `snapshot.profile.id` | string | |
-| `gen_ai.cwa.profile.version` | `snapshot.profile.version` | int | |
-| `gen_ai.cwa.budget.input` | `trace.budget.input` | int | |
-| `gen_ai.cwa.result.input_tokens` | `trace.result.input_tokens` | int | Absent unless assembled |
-| `gen_ai.cwa.refused.reason` | `trace.refused.reason` | string | A refusal code of `contract/reasons.json`; absent unless refused |
-| `gen_ai.cwa.excluded.reason_codes` | `trace.excluded[].reason` | string[] | The distinct codes, in `contract/reasons.json` order |
-| `gen_ai.cwa.payload.sha256` | `payload.hash` | string | Equal to `trace.result.hash`; the payload itself is never emitted |
-| `gen_ai.cwa.payload.bytes` | `payload.bytes` | int | The payload's length in UTF-8 bytes |
-| `gen_ai.cwa.payload.part.sections` | `payload.parts[].section` | string[] | See Payload parts; one entry per part, in request order |
-| `gen_ai.cwa.payload.part.ids` | `payload.parts[].id` | string[] | An empty string for a part with no id |
-| `gen_ai.cwa.payload.part.sha256` | `payload.parts[].sha256` | string[] | |
-| `gen_ai.cwa.payload.part.bytes` | `payload.parts[].bytes` | int[] | |
-| `gen_ai.cwa.rejection.problems` | `rejection.problems` | string[] | The assembler's checks in words; only when rejected |
-| `gen_ai.cwa.vault.base` | `vault.base` | string | Phase 2 |
-| `gen_ai.cwa.vault.kms_key_id` | `vault.kms_key_id` | string | Phase 2 |
+| `cwa.assembler.language` | `assembler.language` | string | `python`, `typescript`, `go` or `rust`, as `implementations/index.json` names them |
+| `cwa.assembler.name` | `assembler.name` | string | The package name |
+| `cwa.assembler.version` | `assembler.version` | string | |
+| `cwa.contract.repository` | `contract.repository` | string | |
+| `cwa.contract.commit` | `contract.commit` | string | The specification commit the assembler's lock pins |
+| `cwa.contract.lock_sha256` | `contract.lock_sha256` | string | See Contract lock |
+| `cwa.spec` | `trace.context.spec` | string | `cwa/draft` |
+| `cwa.session.id` | `session.id` | string | See Sessions |
+| `cwa.session.turn_index` | `session.turn_index` | int | From 0 |
+| `cwa.redaction_mode` | `redaction_mode` | string | See Redaction |
+| `cwa.outcome` | `outcome` | string | `assembled`, `refused` or `rejected` |
+| `cwa.trace_id` | `trace.trace_id` | string | The CWA trace's own id, not OpenTelemetry's |
+| `cwa.snapshot_digest` | `trace.context.snapshot_digest` | string | The digest `conformance/README.md` defines |
+| `cwa.route` | `snapshot.route_policy.route` | string | |
+| `cwa.route_policy.version` | `snapshot.route_policy.version` | string | |
+| `cwa.profile.id` | `snapshot.profile.id` | string | |
+| `cwa.profile.version` | `snapshot.profile.version` | int | |
+| `cwa.budget.input` | `trace.budget.input` | int | |
+| `cwa.result.input_tokens` | `trace.result.input_tokens` | int | Absent unless assembled |
+| `cwa.refused.reason` | `trace.refused.reason` | string | A refusal code of `contract/reasons.json`; absent unless refused |
+| `cwa.excluded.reason_codes` | `trace.excluded[].reason` | string[] | The distinct codes, in `contract/reasons.json` order |
+| `cwa.payload.sha256` | `payload.hash` | string | Equal to `trace.result.hash`; the payload itself is never emitted |
+| `cwa.payload.bytes` | `payload.bytes` | int | The payload's length in UTF-8 bytes |
+| `cwa.payload.part.sections` | `payload.parts[].section` | string[] | See Payload parts; one entry per part, in request order |
+| `cwa.payload.part.ids` | `payload.parts[].id` | string[] | An empty string for a part with no id |
+| `cwa.payload.part.sha256` | `payload.parts[].sha256` | string[] | |
+| `cwa.payload.part.bytes` | `payload.parts[].bytes` | int[] | |
+| `cwa.rejection.problems` | `rejection.problems` | string[] | The assembler's checks in words; only when rejected |
+| `cwa.vault.base` | `vault.base` | string | Phase 2 |
+| `cwa.vault.kms_key_id` | `vault.kms_key_id` | string | Phase 2 |
 
 The snapshot and the trace are carried whole in the event, not as attributes: they are too large for a span, and the inspector joins them item by item.
 

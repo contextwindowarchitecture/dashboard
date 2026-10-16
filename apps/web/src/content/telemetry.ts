@@ -15,7 +15,7 @@ export const TELEMETRY = {
   phase2: [
     {
       name: "OpenTelemetry collector",
-      use: "Spans carrying the gen_ai.cwa.* attributes, exported over OTLP beside the model call they feed.",
+      use: "Spans carrying the cwa.* attributes, exported over OTLP beside the model call they feed.",
     },
     {
       name: "Event bus",
