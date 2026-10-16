@@ -1,0 +1,23 @@
+{
+  "name": "@cwa-dashboard/ingest",
+  "private": true,
+  "version": "0.0.0",
+  "description": "The Phase 1 Node service: POST /replay runs the pinned assembler over a snapshot for the sandbox (D12); POST /events writes an event into the tree (D9)",
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.ts",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@cwa-dashboard/assembler": "workspace:*",
+    "@cwa-dashboard/contract": "workspace:*",
+    "@cwa-dashboard/telemetry": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.2",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}

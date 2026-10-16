@@ -55,6 +55,7 @@ export default tseslint.config(
       "apps/web/dev/**/*.ts",
       "packages/assembler/index.js",
       "apps/web/e2e/**/*.ts",
+      "apps/ingest/src/**/*.ts",
     ],
     languageOptions: { globals: globals.node },
   },
