@@ -12,7 +12,8 @@
     },
     "./package.json": "./package.json",
     "./derive": "./src/derive.ts",
-    "./canonical": "./src/canonical.ts"
+    "./canonical": "./src/canonical.ts",
+    "./registry-digest": "./src/registry-digest.ts"
   },
   "scripts": {
     "generate": "node scripts/generate.mjs",

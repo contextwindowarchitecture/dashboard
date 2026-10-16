@@ -1,8 +1,21 @@
 // The smoke test: the built app loads under the production Content Security Policy in both themes,
 // axe finds nothing, and nothing scrolls sideways at a phone's width. It grows with every page.
 
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
+
 import { AxeBuilder } from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
+
+// The demo tree's event count, from its index, so the tests follow the tree when it grows.
+const TOTAL = (
+  JSON.parse(
+    readFileSync(
+      resolve(import.meta.dirname, "../../../packages/demo-traffic/fixtures/events/index.json"),
+      "utf8",
+    ),
+  ) as { events: unknown[] }
+).events.length
 
 // A CSP violation is a console error in Chromium; one anywhere fails the test, as does any
 // uncaught error on the page.
@@ -92,13 +105,13 @@ test("the trace stream lists the demo events and filters them through the URL", 
 }) => {
   await page.goto("/traces")
   const table = page.getByRole("table", { name: "Trace stream" })
-  await expect(table.getByRole("row")).toHaveCount(112)
+  await expect(table.getByRole("row")).toHaveCount(TOTAL + 1)
   await expect(page.getByRole("status", { name: "Stream status" })).toContainText(
-    "111 of 111 events",
+    `${TOTAL} of ${TOTAL} events`,
   )
   await page.goto("/traces?outcome=refused")
   await expect(page.getByRole("status", { name: "Stream status" })).toContainText(
-    /^\d+ of 111 events/,
+    new RegExp(`^\\d+ of ${TOTAL} events`),
   )
   const refusedRows = table.getByRole("row")
   await expect(refusedRows.nth(1)).toContainText("refused")
@@ -167,7 +180,7 @@ test("the overview sums the window and reads in both themes and at a phone's wid
   page,
 }) => {
   await page.goto("/")
-  await expect(page.getByRole("list", { name: "Metrics" })).toContainText("111")
+  await expect(page.getByRole("list", { name: "Metrics" })).toContainText(String(TOTAL))
   await expect(
     page.getByRole("list", { name: "Guardrails" }).getByRole("heading", { level: 3 }),
   ).toHaveCount(7)

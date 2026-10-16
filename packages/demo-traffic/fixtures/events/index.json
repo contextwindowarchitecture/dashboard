@@ -31,7 +31,7 @@
         "id": "ir-3",
         "turn_index": 2
       },
-      "total_ms": 0.8477910000000008
+      "total_ms": 0.9475419999999986
     },
     {
       "event_id": "01M5090JKMASM5529ABCF79QQZ",
@@ -58,7 +58,7 @@
         "id": "ir-3",
         "turn_index": 1
       },
-      "total_ms": 0.3310000000000173
+      "total_ms": 0.32216600000000994
     },
     {
       "event_id": "01M508QDMMT8Y1VM51Y0MQNXM2",
@@ -83,7 +83,7 @@
         "id": "ir-3",
         "turn_index": 0
       },
-      "total_ms": 0.1595000000000084
+      "total_ms": 0.16100000000000136
     },
     {
       "event_id": "01M504NDFMDGR1Q6EC4BTKCC5C",
@@ -104,7 +104,7 @@
       "outcome": "refused",
       "refused_reason": "slot_floor_over_budget",
       "reason_codes": [],
-      "total_ms": 0.21520900000001575
+      "total_ms": 0.2272920000000056
     },
     {
       "event_id": "01M5017HVM0ZA194R0PG8TD0HT",
@@ -125,7 +125,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.19074999999998
+      "total_ms": 0.19416700000002152
     },
     {
       "event_id": "01M4ZYYA3MV0M2RZBF1H40Y7MV",
@@ -150,7 +150,7 @@
         "id": "desk-agent-12",
         "turn_index": 1
       },
-      "total_ms": 0.07737500000001774
+      "total_ms": 0.07983300000000781
     },
     {
       "event_id": "01M4ZXSP7MKY2A3A6DG03DFCHK",
@@ -175,7 +175,7 @@
         "id": "desk-agent-12",
         "turn_index": 0
       },
-      "total_ms": 0.12195800000000645
+      "total_ms": 0.12820899999999824
     },
     {
       "event_id": "01M4ZTBTKMYHK0PXNZT3T5KPGM",
@@ -201,7 +201,30 @@
         "source_diversity_cap"
       ],
       "input_tokens": 75,
-      "total_ms": 0.22895800000000577
+      "total_ms": 0.24979200000001356
+    },
+    {
+      "event_id": "01M4ZTBTKMJGSXAR1DY556CNS2",
+      "recorded_at": "2026-10-15T13:00:00.500Z",
+      "service": "support-assistant-canary",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "route_policy_sha256": "bb3a4a4dcdb29c229a0a9da5ef31ae0f00513e0a93513da3ec3566cedc1aaa31",
+      "profile_sha256": "5b86d884b783533f3b9b75080be79cbed63a5e5efb35afe864fd34ffdf7c1fcf",
+      "budget_input": 4096,
+      "compressed_count": 0,
+      "outcome": "assembled",
+      "reason_codes": [
+        "below_threshold"
+      ],
+      "input_tokens": 40,
+      "total_ms": 0.14295799999999304
     },
     {
       "event_id": "01M4ZPXYZMMH9JA1A795GT6HGX",
@@ -224,7 +247,7 @@
         "conflict_lost"
       ],
       "input_tokens": 51,
-      "total_ms": 0.15395800000001714
+      "total_ms": 0.1736670000000231
     },
     {
       "event_id": "01M4ZKRB14SW2GC3BS775AZDHG",
@@ -253,7 +276,7 @@
         "id": "agent-run-412",
         "turn_index": 1
       },
-      "total_ms": 0.20545900000001893
+      "total_ms": 0.21762499999999818
     },
     {
       "event_id": "01M4ZKH0N4HT508FAY0X5JVM7S",
@@ -281,7 +304,7 @@
         "id": "agent-run-412",
         "turn_index": 0
       },
-      "total_ms": 0.23183299999999463
+      "total_ms": 0.2464999999999975
     },
     {
       "event_id": "01M4ZHGXW4QVNQ7FTKA8D9EVT2",
@@ -310,7 +333,7 @@
         "id": "intake-12",
         "turn_index": 2
       },
-      "total_ms": 0.19950000000000045
+      "total_ms": 0.20291599999998766
     },
     {
       "event_id": "01M4ZGKMC4FAH0M12TN8R3QYPE",
@@ -335,7 +358,7 @@
         "id": "intake-12",
         "turn_index": 1
       },
-      "total_ms": 0.22858299999998621
+      "total_ms": 0.2460839999999962
     },
     {
       "event_id": "01M4ZG4ZM48MAN296TJPP3NVXM",
@@ -360,7 +383,7 @@
         "id": "intake-12",
         "turn_index": 0
       },
-      "total_ms": 0.22954200000000924
+      "total_ms": 0.2490410000000054
     },
     {
       "event_id": "01M4ZD3Y5439GVAR3H0FA56RD5",
@@ -387,7 +410,7 @@
         "id": "refund-7",
         "turn_index": 4
       },
-      "total_ms": 0.6058329999999899
+      "total_ms": 0.6290830000000085
     },
     {
       "event_id": "01M4ZD08Z4QNN8GJX11BSW64XE",
@@ -414,7 +437,7 @@
         "id": "refund-7",
         "turn_index": 3
       },
-      "total_ms": 0.40608300000002373
+      "total_ms": 0.42462500000002024
     },
     {
       "event_id": "01M4ZCWKS4HXMQBYHST49K7EYG",
@@ -439,7 +462,7 @@
         "id": "refund-7",
         "turn_index": 2
       },
-      "total_ms": 0.40854199999998286
+      "total_ms": 0.4254579999999919
     },
     {
       "event_id": "01M4ZCRYK48S5GFA51EDM9CYPS",
@@ -464,7 +487,7 @@
         "id": "refund-7",
         "turn_index": 1
       },
-      "total_ms": 0.4105419999999924
+      "total_ms": 0.4294170000000008
     },
     {
       "event_id": "01M4ZCN9D4M5QNPFCQ5A2K3W6H",
@@ -489,7 +512,7 @@
         "id": "refund-7",
         "turn_index": 0
       },
-      "total_ms": 0.5084170000000086
+      "total_ms": 0.5858750000000157
     },
     {
       "event_id": "01M4Z98B2MXAHPP1FQV5R1P39M",
@@ -504,7 +527,7 @@
         "id": "fixture-c1",
         "turn_index": 1
       },
-      "total_ms": 0.02641700000000924
+      "total_ms": 0.029208000000011225
     },
     {
       "event_id": "01M4Z96GFMM96EVAPDB61FA3YM",
@@ -529,7 +552,7 @@
         "id": "fixture-c1",
         "turn_index": 0
       },
-      "total_ms": 0.15774999999999295
+      "total_ms": 0.14837499999998727
     },
     {
       "event_id": "01M4Z1ECHGYSY7KKBTESM2JNZ4",
@@ -540,7 +563,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.012167000000005146
+      "total_ms": 0.013666999999998097
     },
     {
       "event_id": "01M4Z1DF80KSXRNKR02TMX11VZ",
@@ -551,7 +574,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.037582999999997924
+      "total_ms": 0.023666999999989002
     },
     {
       "event_id": "01M4Z1CHYGZ36CBJC9BVENQNDM",
@@ -562,7 +585,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.010165999999998121
+      "total_ms": 0.012249999999994543
     },
     {
       "event_id": "01M4Z1BMN09W0J2BKMJA125KR2",
@@ -573,7 +596,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01300000000000523
+      "total_ms": 0.017583000000001903
     },
     {
       "event_id": "01M4Z1AQBG3H4238JWQY62EPD9",
@@ -584,7 +607,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.012208000000001107
+      "total_ms": 0.01604199999999878
     },
     {
       "event_id": "01M4Z19T20ASS5X8QB9YS79JAD",
@@ -595,7 +618,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.012042000000008102
+      "total_ms": 0.02054100000000858
     },
     {
       "event_id": "01M4Z18WRGV1ZV6DEMVF7FPDPT",
@@ -606,7 +629,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.012374999999991587
+      "total_ms": 0.05295900000001552
     },
     {
       "event_id": "01M4Z17ZF0YSHEDSMARM8NK98D",
@@ -617,7 +640,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01216599999999346
+      "total_ms": 0.013499999999993406
     },
     {
       "event_id": "01M4Z1725G0CBC4C6N6AHYNERB",
@@ -628,7 +651,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01491699999999696
+      "total_ms": 0.014417000000008784
     },
     {
       "event_id": "01M4Z164W0PGCFHGFQM3XPC4YF",
@@ -639,7 +662,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01258299999999224
+      "total_ms": 0.012499999999988631
     },
     {
       "event_id": "01M4Z157JG42VQWRZ3E1XF2YYB",
@@ -650,7 +673,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.022125000000002615
+      "total_ms": 0.023791000000016993
     },
     {
       "event_id": "01M4Z14A9076WEDG0CY9Q9PFNG",
@@ -661,7 +684,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.022832999999991443
+      "total_ms": 0.02533300000001759
     },
     {
       "event_id": "01M4Z13CZGMSD1YSRDDTFW9304",
@@ -672,7 +695,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01300000000000523
+      "total_ms": 0.013208999999989146
     },
     {
       "event_id": "01M4Z12FP04012M3JVECQ4CWZJ",
@@ -683,7 +706,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.013249999999999318
+      "total_ms": 0.013165999999984024
     },
     {
       "event_id": "01M4Z11JCGFY9PBJ2WMDME3M0R",
@@ -694,7 +717,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.026959000000005062
+      "total_ms": 0.0323749999999734
     },
     {
       "event_id": "01M4Z10N30PE2QB9MW3RR9FE5K",
@@ -705,7 +728,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.02558299999999747
+      "total_ms": 0.02225000000001387
     },
     {
       "event_id": "01M4Z0ZQSGAXEFXEVJN7KY3K73",
@@ -716,7 +739,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.023541999999991958
+      "total_ms": 0.025207999999992126
     },
     {
       "event_id": "01M4Z0YTG0XBMQ294BD4FB74XX",
@@ -727,7 +750,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.012916000000004146
+      "total_ms": 0.012500000000017053
     },
     {
       "event_id": "01M4Z0XX6G8FE8H18PH484RSE5",
@@ -738,7 +761,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.018584000000004153
+      "total_ms": 0.016291999999992868
     },
     {
       "event_id": "01M4Z0WZX0RM3WBR0S55GK9QKA",
@@ -749,7 +772,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.0171670000000006
+      "total_ms": 0.01712499999999295
     },
     {
       "event_id": "01M4Z0W2KGTKPJEDRCMD9JMYMT",
@@ -760,7 +783,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.01920800000000611
+      "total_ms": 0.01845900000000711
     },
     {
       "event_id": "01M4Z0V5A0E2ZHQMTVKKYX844Z",
@@ -771,7 +794,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.02462500000000034
+      "total_ms": 0.019749999999987722
     },
     {
       "event_id": "01M4Z0T80G94T8SYCR5HJXAK4W",
@@ -782,7 +805,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.02579099999999812
+      "total_ms": 0.044708999999983234
     },
     {
       "event_id": "01M4Z0SAQ0RSQD9VZQ7601ZAA6",
@@ -793,7 +816,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.04425000000000523
+      "total_ms": 0.04449999999999932
     },
     {
       "event_id": "01M4Z0RDDGDTWSSTP0YVFC0Q1P",
@@ -804,7 +827,7 @@
       "outcome": "rejected",
       "reason_codes": [],
       "problem_count": 1,
-      "total_ms": 0.08987500000000637
+      "total_ms": 0.11949999999998795
     },
     {
       "event_id": "01M4Z0QG40YTBN4W131SCZKA7M",
@@ -827,7 +850,7 @@
         "over_budget"
       ],
       "input_tokens": 116,
-      "total_ms": 0.13079199999999958
+      "total_ms": 0.13387499999998909
     },
     {
       "event_id": "01M4Z0PJTGX1QAR9JDAHHE46TJ",
@@ -851,7 +874,7 @@
         "over_budget"
       ],
       "input_tokens": 28,
-      "total_ms": 0.11354200000000958
+      "total_ms": 0.11933400000000915
     },
     {
       "event_id": "01M4Z0NNH03N8G97G375T4RR47",
@@ -874,7 +897,7 @@
         "superseded"
       ],
       "input_tokens": 83,
-      "total_ms": 0.25491700000000606
+      "total_ms": 0.26037500000001046
     },
     {
       "event_id": "01M4Z0MR7GAJN2TWFX1BZT7REK",
@@ -899,7 +922,7 @@
         "duplicate_content"
       ],
       "input_tokens": 51,
-      "total_ms": 0.21450000000000102
+      "total_ms": 0.22458400000002143
     },
     {
       "event_id": "01M4Z0KTY0KTQFJWBE5DHG6CEX",
@@ -922,7 +945,7 @@
       "reason_codes": [
         "superseded"
       ],
-      "total_ms": 0.11374999999999602
+      "total_ms": 0.12120799999999576
     },
     {
       "event_id": "01M4Z0JXMGCXBDFTTQT9TVK30T",
@@ -945,7 +968,7 @@
       "reason_codes": [
         "untrusted_in_governance"
       ],
-      "total_ms": 0.09833299999999667
+      "total_ms": 0.10670899999999506
     },
     {
       "event_id": "01M4Z0J0B0TTF352G3HGS6SAGC",
@@ -968,7 +991,7 @@
       "reason_codes": [
         "untrusted_in_governance"
       ],
-      "total_ms": 0.09462499999999352
+      "total_ms": 0.10899999999998045
     },
     {
       "event_id": "01M4Z0H31G05G7JTBY30GMNA0J",
@@ -989,7 +1012,7 @@
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 41,
-      "total_ms": 0.7345839999999981
+      "total_ms": 0.9159999999999968
     },
     {
       "event_id": "01M4Z0G5R0AGKZA0P14VWSNZ0Q",
@@ -1010,7 +1033,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.0746249999999975
+      "total_ms": 0.07791599999998766
     },
     {
       "event_id": "01M4Z0F8EG8CNWAWEFZDXGD0BF",
@@ -1031,7 +1054,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.05837499999999807
+      "total_ms": 0.058083999999979596
     },
     {
       "event_id": "01M4Z0EB508BQMN0WT7K65A25J",
@@ -1052,7 +1075,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.0774589999999904
+      "total_ms": 0.07675000000000409
     },
     {
       "event_id": "01M4Z0DDVGXRVJ9X6N3QP8PHW8",
@@ -1077,7 +1100,7 @@
         "slot_unplaced"
       ],
       "input_tokens": 43,
-      "total_ms": 0.13520799999999156
+      "total_ms": 0.13816700000000992
     },
     {
       "event_id": "01M4Z0CGJ0JPMVWXVNE66V47J0",
@@ -1098,7 +1121,7 @@
       "outcome": "refused",
       "refused_reason": "required_slot_missing",
       "reason_codes": [],
-      "total_ms": 0.05391699999999844
+      "total_ms": 0.053374999999988404
     },
     {
       "event_id": "01M4Z0BK8GMSAA4CTM7MKBZESW",
@@ -1121,7 +1144,7 @@
       "reason_codes": [
         "slot_unplaced"
       ],
-      "total_ms": 0.09270899999999926
+      "total_ms": 0.09141699999997854
     },
     {
       "event_id": "01M4Z0ANZ05N0B9CP2EE6P6Z5W",
@@ -1145,7 +1168,7 @@
         "over_budget"
       ],
       "input_tokens": 53,
-      "total_ms": 0.22633400000000847
+      "total_ms": 0.22450000000000614
     },
     {
       "event_id": "01M4Z09RNGQMCSN0NZPC5RAT7R",
@@ -1166,7 +1189,7 @@
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 65,
-      "total_ms": 0.08408299999999258
+      "total_ms": 0.08658300000001873
     },
     {
       "event_id": "01M4Z08VC0PZ8YDM9SEQKNS8A9",
@@ -1190,7 +1213,7 @@
         "capability_not_allowed"
       ],
       "input_tokens": 77,
-      "total_ms": 0.2083329999999961
+      "total_ms": 0.21083400000000552
     },
     {
       "event_id": "01M4Z07Y2G2M8Y42J3N90BBQRH",
@@ -1213,7 +1236,7 @@
         "over_budget"
       ],
       "input_tokens": 56,
-      "total_ms": 0.2306250000000034
+      "total_ms": 0.23291699999998627
     },
     {
       "event_id": "01M4Z070S0PZP2N8FCZGDY2CSY",
@@ -1237,7 +1260,7 @@
         "source_diversity_cap"
       ],
       "input_tokens": 83,
-      "total_ms": 0.1649579999999986
+      "total_ms": 0.1705830000000219
     },
     {
       "event_id": "01M4Z063FGBYR78A8N08ZD9NQ9",
@@ -1258,7 +1281,7 @@
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 64,
-      "total_ms": 0.15166700000000333
+      "total_ms": 0.1561670000000106
     },
     {
       "event_id": "01M4Z0566047KB1X12V54QJQ7N",
@@ -1281,7 +1304,7 @@
         "expired"
       ],
       "input_tokens": 34,
-      "total_ms": 0.10233399999999904
+      "total_ms": 0.10829199999999162
     },
     {
       "event_id": "01M4Z048WGEVHYBBG9CJEF38J1",
@@ -1304,7 +1327,7 @@
       "reason_codes": [
         "over_budget"
       ],
-      "total_ms": 0.11516699999999958
+      "total_ms": 0.11512500000000614
     },
     {
       "event_id": "01M4Z03BK0HK5Q5G86C31C1M59",
@@ -1328,7 +1351,7 @@
         "out_of_scope",
         "below_threshold"
       ],
-      "total_ms": 0.06670900000000302
+      "total_ms": 0.06974999999999909
     },
     {
       "event_id": "01M4Z02E9GH1ZHN0RSRXWN1NEY",
@@ -1351,7 +1374,7 @@
       "reason_codes": [
         "over_budget"
       ],
-      "total_ms": 0.14587500000000375
+      "total_ms": 0.1424159999999972
     },
     {
       "event_id": "01M4Z01H00SFASYX2TFC4DE7GZ",
@@ -1372,7 +1395,7 @@
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [],
-      "total_ms": 0.06558300000000372
+      "total_ms": 0.06645799999999724
     },
     {
       "event_id": "01M4Z00KPGJK3BNPBGPYMXRQAW",
@@ -1395,7 +1418,7 @@
       "reason_codes": [
         "over_budget"
       ],
-      "total_ms": 0.08120799999998951
+      "total_ms": 0.08420900000000131
     },
     {
       "event_id": "01M4YZZPD08K248PTFFZR2Y36H",
@@ -1418,7 +1441,7 @@
         "below_threshold"
       ],
       "input_tokens": 39,
-      "total_ms": 0.0886250000000075
+      "total_ms": 0.0874160000000046
     },
     {
       "event_id": "01M4YZYS3G6YPX5Z0E4K2K33AE",
@@ -1441,7 +1464,7 @@
         "below_threshold"
       ],
       "input_tokens": 47,
-      "total_ms": 0.08662499999999795
+      "total_ms": 0.09566700000000594
     },
     {
       "event_id": "01M4YZXVT0N9BECJFQPP1EDDVP",
@@ -1467,7 +1490,7 @@
         "source_diversity_cap"
       ],
       "input_tokens": 55,
-      "total_ms": 0.2004169999999874
+      "total_ms": 0.22095899999999347
     },
     {
       "event_id": "01M4YZWYGG6B0MYZ7SH7W121CT",
@@ -1490,7 +1513,7 @@
       "reason_codes": [
         "source_diversity_cap"
       ],
-      "total_ms": 0.10275000000000034
+      "total_ms": 0.1030410000000046
     },
     {
       "event_id": "01M4YZW170V4R2HB536DH4YA1E",
@@ -1514,7 +1537,7 @@
         "source_diversity_cap"
       ],
       "input_tokens": 83,
-      "total_ms": 0.19762499999998795
+      "total_ms": 0.21825000000001182
     },
     {
       "event_id": "01M4YZV3XGNVX2XMKA1S6NW9CY",
@@ -1537,7 +1560,7 @@
         "below_threshold"
       ],
       "input_tokens": 48,
-      "total_ms": 0.1128750000000025
+      "total_ms": 0.13470800000000338
     },
     {
       "event_id": "01M4YZT6M0TMR0MJ171Q2W6C1M",
@@ -1560,7 +1583,7 @@
         "duplicate_content"
       ],
       "input_tokens": 41,
-      "total_ms": 0.17470799999999542
+      "total_ms": 0.18462500000001114
     },
     {
       "event_id": "01M4YZS9AG8RWARWZVTED6WQ17",
@@ -1585,7 +1608,7 @@
         "duplicate_content"
       ],
       "input_tokens": 53,
-      "total_ms": 0.4297079999999909
+      "total_ms": 0.47537499999999966
     },
     {
       "event_id": "01M4YZRC10D9N71MHZSCFJM2MB",
@@ -1608,7 +1631,7 @@
         "duplicate_content"
       ],
       "input_tokens": 93,
-      "total_ms": 0.2809999999999917
+      "total_ms": 0.33099999999998886
     },
     {
       "event_id": "01M4YZQEQGCNCGBPXQ3A95H12A",
@@ -1631,7 +1654,7 @@
       "reason_codes": [
         "duplicate_content"
       ],
-      "total_ms": 0.193916999999999
+      "total_ms": 0.37341599999999175
     },
     {
       "event_id": "01M4YZPHE0Q49APBGFAPPZ2Z93",
@@ -1654,7 +1677,7 @@
         "over_budget"
       ],
       "input_tokens": 32,
-      "total_ms": 0.13137499999999136
+      "total_ms": 0.19020899999999585
     },
     {
       "event_id": "01M4YZNM4GRT2WHBVGBBTJV7WD",
@@ -1675,7 +1698,7 @@
       "outcome": "refused",
       "refused_reason": "required_slot_missing",
       "reason_codes": [],
-      "total_ms": 0.07187500000000568
+      "total_ms": 0.0714580000000069
     },
     {
       "event_id": "01M4YZMPV0BTVCRTK515MFGEAM",
@@ -1696,7 +1719,7 @@
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [],
-      "total_ms": 0.07508299999999224
+      "total_ms": 0.07545799999999758
     },
     {
       "event_id": "01M4YZKSHGKMG1A2MZXFSF08X1",
@@ -1719,7 +1742,7 @@
       "reason_codes": [
         "conflict_lost"
       ],
-      "total_ms": 0.09587499999999238
+      "total_ms": 0.09558400000000233
     },
     {
       "event_id": "01M4YZJW805SH6F04BJZCKGCC2",
@@ -1740,7 +1763,7 @@
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [],
-      "total_ms": 0.06995799999999974
+      "total_ms": 0.06754100000000562
     },
     {
       "event_id": "01M4YZHYYGC6H1HAH74899MJ2C",
@@ -1764,7 +1787,7 @@
         "conflict_deferred"
       ],
       "input_tokens": 227,
-      "total_ms": 0.45120800000000827
+      "total_ms": 0.44037499999998886
     },
     {
       "event_id": "01M4YZH1N0GES9SXD5HHBYMGF1",
@@ -1788,7 +1811,7 @@
         "conflict_lost"
       ],
       "input_tokens": 124,
-      "total_ms": 0.4101670000000013
+      "total_ms": 0.43112499999999443
     },
     {
       "event_id": "01M4YZG4BGXEXZK6MKKXBX1E70",
@@ -1811,7 +1834,7 @@
         "capability_not_allowed"
       ],
       "input_tokens": 16,
-      "total_ms": 0.07070799999999622
+      "total_ms": 0.07183299999999804
     },
     {
       "event_id": "01M4YZF720Q1719XADN4MSNF3D",
@@ -1834,7 +1857,7 @@
         "over_budget"
       ],
       "input_tokens": 61,
-      "total_ms": 0.13345800000000452
+      "total_ms": 0.13262500000000443
     },
     {
       "event_id": "01M4YZE9RGWCYGMD3RMR30SR7A",
@@ -1857,7 +1880,7 @@
         "over_budget"
       ],
       "input_tokens": 50,
-      "total_ms": 0.13212500000000205
+      "total_ms": 0.13295800000000213
     },
     {
       "event_id": "01M4YZDCF0Z5MWJJCKJSVCRP75",
@@ -1878,7 +1901,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.07537499999999397
+      "total_ms": 0.07591599999999232
     },
     {
       "event_id": "01M4YZCF5GKJ54Y80FAZMF0M1S",
@@ -1901,7 +1924,7 @@
         "over_budget"
       ],
       "input_tokens": 36,
-      "total_ms": 0.1885419999999982
+      "total_ms": 0.18925000000000125
     },
     {
       "event_id": "01M4YZBHW0P1SYAXVMEKD64YM1",
@@ -1924,7 +1947,7 @@
       "reason_codes": [
         "over_budget"
       ],
-      "total_ms": 0.21633400000000336
+      "total_ms": 0.21479200000000276
     },
     {
       "event_id": "01M4YZAMJGC0GHNVFR2CQ6VR35",
@@ -1947,7 +1970,7 @@
         "over_budget"
       ],
       "input_tokens": 61,
-      "total_ms": 0.2149169999999998
+      "total_ms": 0.21366700000000094
     },
     {
       "event_id": "01M4YZ9Q90MSMNY0VX0THJB32N",
@@ -1970,7 +1993,7 @@
         "over_budget"
       ],
       "input_tokens": 62,
-      "total_ms": 0.27841699999999037
+      "total_ms": 0.3049579999999992
     },
     {
       "event_id": "01M4YZ8SZG9YKH15K74MK020CN",
@@ -1991,7 +2014,7 @@
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 57,
-      "total_ms": 0.25566700000000253
+      "total_ms": 0.2887920000000008
     },
     {
       "event_id": "01M4YZ7WP0GCR82ZZ0V3CKGCP4",
@@ -2014,7 +2037,7 @@
         "over_budget"
       ],
       "input_tokens": 52,
-      "total_ms": 0.6352080000000058
+      "total_ms": 0.5951670000000036
     },
     {
       "event_id": "01M4YZ6ZCGM32T4P8M9HX235N1",
@@ -2037,7 +2060,7 @@
         "over_budget"
       ],
       "input_tokens": 63,
-      "total_ms": 0.12612500000000182
+      "total_ms": 0.12545800000000895
     },
     {
       "event_id": "01M4YZ623016MM0ADVMBBK0XHJ",
@@ -2058,7 +2081,7 @@
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 44,
-      "total_ms": 0.09333300000000122
+      "total_ms": 0.10495799999999633
     },
     {
       "event_id": "01M4YZ54SG1SC74T9WGDNB7HRS",
@@ -2081,7 +2104,7 @@
         "over_budget"
       ],
       "input_tokens": 40,
-      "total_ms": 0.15908300000000963
+      "total_ms": 0.17437499999999773
     },
     {
       "event_id": "01M4YZ47G0W9XVMN7C968XY5A2",
@@ -2104,7 +2127,7 @@
         "over_budget"
       ],
       "input_tokens": 52,
-      "total_ms": 0.38945800000000474
+      "total_ms": 0.3983750000000015
     },
     {
       "event_id": "01M4YZ3A6G0ZAQV38VSS734DH9",
@@ -2127,7 +2150,7 @@
         "over_budget"
       ],
       "input_tokens": 33,
-      "total_ms": 0.1337079999999986
+      "total_ms": 0.130541000000008
     },
     {
       "event_id": "01M4YZ2CX0429NM3GG6S8ZYV05",
@@ -2148,7 +2171,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
-      "total_ms": 0.11462500000000375
+      "total_ms": 0.1192089999999979
     },
     {
       "event_id": "01M4YZ1FKGNGH2SV859W94MHA3",
@@ -2171,7 +2194,7 @@
         "over_budget"
       ],
       "input_tokens": 52,
-      "total_ms": 0.13916700000000048
+      "total_ms": 0.14554100000000858
     },
     {
       "event_id": "01M4YZ0JA0V9WGXP5NY4Z5C3CA",
@@ -2194,7 +2217,7 @@
         "over_budget"
       ],
       "input_tokens": 42,
-      "total_ms": 0.1748750000000001
+      "total_ms": 0.18116700000000208
     },
     {
       "event_id": "01M4YYZN0GKV7ZPC9NYXPXTX31",
@@ -2215,7 +2238,7 @@
       "outcome": "assembled",
       "reason_codes": [],
       "input_tokens": 97,
-      "total_ms": 0.403624999999991
+      "total_ms": 0.4076250000000101
     },
     {
       "event_id": "01M4YYYQQ0QERZ7R4AD74QJ481",
@@ -2238,7 +2261,7 @@
         "over_budget"
       ],
       "input_tokens": 118,
-      "total_ms": 0.5965839999999929
+      "total_ms": 0.6033749999999998
     },
     {
       "event_id": "01M4YYXTDGF2CR961DJS96NHR6",
@@ -2262,7 +2285,7 @@
         "capability_not_allowed"
       ],
       "input_tokens": 36,
-      "total_ms": 0.21966700000000117
+      "total_ms": 0.22816699999999912
     },
     {
       "event_id": "01M4YYWX40M0GZY8KQDZEF4C74",
@@ -2310,24 +2333,24 @@
         "not_eligible"
       ],
       "input_tokens": 153,
-      "total_ms": 5.387041999999994
+      "total_ms": 5.581458000000012
     }
   ],
   "facets": {
     "outcome": {
-      "assembled": 59,
+      "assembled": 60,
       "refused": 26,
       "rejected": 26
     },
     "language": {
-      "typescript": 111
+      "typescript": 112
     },
     "route": {
       "long-context-qa": 3,
       "contract-review": 1,
       "extract": 1,
       "policy-desk": 2,
-      "support-chat": 71,
+      "support-chat": 72,
       "agent-loop": 2,
       "document-qa": 3,
       "contract-fixture": 2
@@ -2338,7 +2361,7 @@
       "protected_content_over_budget": 6,
       "conflict_unresolved": 4,
       "stale_state": 2,
-      "below_threshold": 9,
+      "below_threshold": 10,
       "duplicate_content": 9,
       "source_diversity_cap": 5,
       "conflict_lost": 6,
@@ -2379,6 +2402,7 @@
       "invoice-extractor": 1,
       "policy-desk": 2,
       "support-assistant": 7,
+      "support-assistant-canary": 1,
       "review-agent": 2,
       "intake-assistant": 3,
       "contract-fixture": 2,

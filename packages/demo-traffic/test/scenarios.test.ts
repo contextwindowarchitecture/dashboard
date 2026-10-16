@@ -3,6 +3,7 @@ import { join, resolve } from "node:path"
 
 import { REGISTRY } from "@cwa-dashboard/contract/registry"
 import { validateSnapshot } from "@cwa-dashboard/contract/validators"
+import { routePolicyDigest } from "@cwa-dashboard/telemetry/registry-digest"
 import { describe, expect, it } from "vitest"
 
 import { SCENARIOS } from "../src/scenarios/index.ts"
@@ -93,6 +94,17 @@ describe("the scenarios cover what exists today", () => {
   it("every profile in the published registry", () => {
     const profiles = new Set(snapshots.map((s) => s.profile.id))
     for (const profile of REGISTRY.profiles) expect([...profiles], profile.id).toContain(profile.id)
+  })
+
+  it("a route policy pinned by the lock, and one whose content changed under a pinned version (R-20)", () => {
+    const digests = snapshots.map((s) => ({
+      pinned: REGISTRY.lock.route_policies.find(
+        (e) => e.route === s.route_policy.route && e.version === s.route_policy.version,
+      )?.sha256,
+      actual: routePolicyDigest(s.route_policy),
+    }))
+    expect(digests.some((d) => d.pinned === d.actual)).toBe(true)
+    expect(digests.some((d) => d.pinned !== undefined && d.pinned !== d.actual)).toBe(true)
   })
 
   it("every redaction mode and every outcome", () => {

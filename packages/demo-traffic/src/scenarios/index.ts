@@ -5,6 +5,7 @@ import { billingFacts } from "./billing-facts.ts"
 import type { Scenario } from "./build.ts"
 import { clinicalIntake } from "./clinical-intake.ts"
 import { contractReview } from "./contract-review.ts"
+import { driftedPolicy } from "./drifted-policy.ts"
 import { extractionOverflow } from "./extraction-overflow.ts"
 import { fixtureRoute } from "./fixture-route.ts"
 import { knowledgeFlood } from "./knowledge-flood.ts"
@@ -23,4 +24,5 @@ export const SCENARIOS: readonly Scenario[] = [
   contractReview,
   annualReport,
   fixtureRoute,
+  driftedPolicy,
 ]
