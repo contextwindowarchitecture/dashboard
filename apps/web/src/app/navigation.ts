@@ -9,6 +9,7 @@ import {
   ListTree,
   MessagesSquare,
   ScrollText,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react"
 import { matchPath } from "react-router"
@@ -47,6 +48,13 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: "/sessions",
         icon: MessagesSquare,
         patterns: ["/sessions", "/sessions/:sessionId"],
+      },
+      {
+        id: "guardrails",
+        label: "Guardrails",
+        to: "/guardrails",
+        icon: ShieldCheck,
+        patterns: ["/guardrails", "/guardrails/:number"],
       },
     ],
   },

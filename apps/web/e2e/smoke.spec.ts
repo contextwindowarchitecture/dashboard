@@ -344,3 +344,21 @@ test("the fleet and an implementation's cases read in both themes and at a phone
     await expectAccessible(page)
   }
 })
+
+test("the guardrails and a guardrail's page read in both themes and at a phone's width", async ({
+  page,
+}) => {
+  await page.goto("/guardrails")
+  await page.getByRole("link", { name: "05 · Displacement under budget" }).click()
+  await expect(page).toHaveURL(/\/guardrails\/05$/)
+  await expect(page.getByRole("table", { name: "Codes" })).toBeVisible()
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  for (const path of ["/guardrails", "/guardrails/05", "/guardrails/06"]) {
+    await page.goto(path)
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
+    await expectNoSidewaysScroll(page)
+    await expectAccessible(page)
+  }
+})

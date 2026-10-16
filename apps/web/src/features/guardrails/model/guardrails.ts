@@ -125,3 +125,21 @@ export function guardrailCounts(rows: readonly Row[]): Map<string, number> {
   }
   return counts
 }
+
+const records = (row: Row, code: string) =>
+  row.reason_codes.includes(code) || row.refused_reason === code
+
+/** Each of a guardrail's codes with its events, counted as the stream's reason filter finds them. */
+export function codeCounts(guardrail: Guardrail, rows: readonly Row[]) {
+  return guardrail.codes.map((code) => ({
+    code,
+    events: rows.filter((row) => records(row, code)).length,
+  }))
+}
+
+/** The events behind a guardrail's count, newest first. */
+export function guardrailRows(guardrail: Guardrail, rows: readonly Row[]): Row[] {
+  return rows
+    .filter((row) => guardrail.codes.some((code) => records(row, code)))
+    .sort((a, b) => (a.recorded_at < b.recorded_at ? 1 : a.recorded_at > b.recorded_at ? -1 : 0))
+}
