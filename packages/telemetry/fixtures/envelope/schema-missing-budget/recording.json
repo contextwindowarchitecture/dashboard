@@ -1,0 +1,18 @@
+{
+  "case": "conformance/rejections/schema-missing-budget",
+  "event_id": "01JA3000000000000000000006",
+  "recorded_at": "2026-10-15T06:00:30.000Z",
+  "service": {
+    "name": "envelope-conformance",
+    "environment": "demo"
+  },
+  "session": {
+    "id": "envelope-conformance",
+    "turn_index": 6
+  },
+  "trace_id": "envelope-schema-missing-budget",
+  "scrub": [
+    "Pro",
+    "Northwind"
+  ]
+}

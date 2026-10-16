@@ -1,0 +1,18 @@
+{
+  "case": "conformance/cases/budget-variant-choice",
+  "event_id": "01JA3000000000000000000003",
+  "recorded_at": "2026-10-15T06:00:15.000Z",
+  "service": {
+    "name": "envelope-conformance",
+    "environment": "demo"
+  },
+  "session": {
+    "id": "envelope-conformance",
+    "turn_index": 3
+  },
+  "trace_id": "envelope-budget-variant-choice",
+  "scrub": [
+    "Pro",
+    "Northwind"
+  ]
+}

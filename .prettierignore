@@ -5,3 +5,4 @@ packages/contract/vendor/
 apps/web/src/styles/tokens.css
 apps/web/src/components/ui/
 apps/web/src/hooks/use-mobile.ts
+**/fixtures/

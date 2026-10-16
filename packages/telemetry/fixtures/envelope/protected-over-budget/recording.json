@@ -1,0 +1,18 @@
+{
+  "case": "conformance/cases/protected-over-budget",
+  "event_id": "01JA3000000000000000000004",
+  "recorded_at": "2026-10-15T06:00:20.000Z",
+  "service": {
+    "name": "envelope-conformance",
+    "environment": "demo"
+  },
+  "session": {
+    "id": "envelope-conformance",
+    "turn_index": 4
+  },
+  "trace_id": "envelope-protected-over-budget",
+  "scrub": [
+    "Pro",
+    "Northwind"
+  ]
+}

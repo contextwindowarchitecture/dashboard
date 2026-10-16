@@ -1,0 +1,18 @@
+{
+  "case": "conformance/cases/fixture-three-slot",
+  "event_id": "01JA3000000000000000000000",
+  "recorded_at": "2026-10-15T06:00:00.000Z",
+  "service": {
+    "name": "envelope-conformance",
+    "environment": "demo"
+  },
+  "session": {
+    "id": "envelope-conformance",
+    "turn_index": 0
+  },
+  "trace_id": "envelope-fixture-three-slot",
+  "scrub": [
+    "Pro",
+    "Northwind"
+  ]
+}

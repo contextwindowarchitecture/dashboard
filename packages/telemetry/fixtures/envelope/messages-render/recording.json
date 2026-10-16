@@ -1,0 +1,18 @@
+{
+  "case": "conformance/cases/messages-render",
+  "event_id": "01JA3000000000000000000001",
+  "recorded_at": "2026-10-15T06:00:05.000Z",
+  "service": {
+    "name": "envelope-conformance",
+    "environment": "demo"
+  },
+  "session": {
+    "id": "envelope-conformance",
+    "turn_index": 1
+  },
+  "trace_id": "envelope-messages-render",
+  "scrub": [
+    "Pro",
+    "Northwind"
+  ]
+}

@@ -1,0 +1,658 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01JA3000000000000000000002",
+  "recorded_at": "2026-10-15T06:00:10.000Z",
+  "service": {
+    "name": "envelope-conformance",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "session": {
+    "id": "envelope-conformance",
+    "turn_index": 2
+  },
+  "redaction_mode": "digest_only",
+  "timings_ms": {
+    "total": 0
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-09-22T12:00:00Z",
+    "scope": {
+      "tenant": "acme",
+      "user": "u_91",
+      "session": "s_7",
+      "task": "refund_request"
+    },
+    "budget": {
+      "input": 4096,
+      "reserved_output": 1024
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "blocks-render",
+      "version": 1,
+      "route": "support-chat",
+      "model_family": null,
+      "route_policy_version": "blocks-render/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "governance.capabilities",
+          "wrap": "tools"
+        },
+        {
+          "slot": "governance.examples",
+          "wrap": "xml:examples"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:user_profile"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:history"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "support-chat",
+      "version": "blocks-render/v1",
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.examples",
+            "governance.instructions",
+            "governance.output_contract"
+          ]
+        },
+        "cap-policy": {
+          "kind": "capability_policy",
+          "slots": [
+            "governance.capabilities"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.task",
+            "state.user"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.5,
+          "required_scope": [
+            "tenant"
+          ]
+        }
+      },
+      "on_unresolved_instruction": "surface"
+    },
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "cwa-message-blocks/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "cap-policy",
+          "kind": "capability_policy"
+        },
+        "items": [
+          {
+            "id": "cap:issue_refund",
+            "slot": "governance.capabilities",
+            "source": "src:cap:issue_refund",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "b4a7d30ded2ffbb40598030bcc2787eae9e083e3f5cb1719feba72eb2a0d951a",
+              "token_counts": {
+                "fixture-whitespace/v1": 5
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:16",
+            "slot": "interaction.history",
+            "source": "src:turn:16",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:56:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "62ca4d856e318dfdaf2f25397f522928a7dc2e05e40bba74b4b0c4dd8a8c18e5",
+              "token_counts": {
+                "fixture-whitespace/v1": 7
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "turn:17",
+            "slot": "interaction.history",
+            "source": "src:turn:17",
+            "source_version": "1",
+            "authority": "untrusted",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:57:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "7d064a6a057b98d986da3a13ff73ad12ffd9721c6ccaa42b947e07290fc835bc",
+              "token_counts": {
+                "fixture-whitespace/v1": 5
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "generated",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "turn:18",
+            "slot": "interaction.query",
+            "source": "src:turn:18",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "8b0a0d7081e77cde7972a2df83ea6c98cd7250e5f937d9eaa3b1a17680dcb807",
+              "token_counts": {
+                "fixture-whitespace/v1": 6
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "kb:inject",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:inject",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "fa4bd15c0d7acd9f55adecbff8e04d604956ceefb6e41cfd19690fcb489f7c51",
+              "token_counts": {
+                "fixture-whitespace/v1": 4
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.9
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:v12",
+            "slot": "governance.instructions",
+            "source": "src:policy:v12",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "28228205c3f61a5765e145ddd74bbd3a0c961cc53e30860187dc2538856a9efa",
+              "token_counts": {
+                "fixture-whitespace/v1": 14
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          },
+          {
+            "id": "policy:cite",
+            "slot": "governance.instructions",
+            "source": "src:policy:cite",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "91531b5209f4753d4bb94d4f3eb9ae9c4f1a88a79714db6b4b4148aa3854e825",
+              "token_counts": {
+                "fixture-whitespace/v1": 6
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          },
+          {
+            "id": "policy:nocite",
+            "slot": "governance.instructions",
+            "source": "src:policy:nocite",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "5788d77232106eeac881978fde93537036e42a3c1ec300cacb7cae011484d204",
+              "token_counts": {
+                "fixture-whitespace/v1": 5
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          },
+          {
+            "id": "ex:formal",
+            "slot": "governance.examples",
+            "source": "src:ex:formal",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "78315c8bbe3e77e3311f8070bf914f52d11456afe733d8c392ec2e56c2b58669",
+              "token_counts": {
+                "fixture-whitespace/v1": 6
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          },
+          {
+            "id": "ex:casual",
+            "slot": "governance.examples",
+            "source": "src:ex:casual",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "315f6f47b80f07d812694757459a7dc276267e6df1a5067db3696e6a9655b266",
+              "token_counts": {
+                "fixture-whitespace/v1": 6
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "state-svc",
+          "kind": "state"
+        },
+        "items": [
+          {
+            "id": "user:plan",
+            "slot": "state.user",
+            "source": "src:user:plan",
+            "source_version": "1",
+            "authority": "state",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "3c5bc9960ab3142ac921bf8479fddd2946702654f35abee6c2435057d6f255f6",
+              "token_counts": {
+                "fixture-whitespace/v1": 2
+              }
+            },
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "extracted",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "g-cite",
+        "kind": "instruction",
+        "items": [
+          "policy:cite",
+          "policy:nocite"
+        ]
+      },
+      {
+        "id": "g-register",
+        "kind": "instruction",
+        "items": [
+          "ex:casual",
+          "ex:formal"
+        ]
+      }
+    ],
+    "capabilities": {
+      "policy_producer": "cap-policy",
+      "allow_list_version": "v3",
+      "allowed_ids": [
+        "cap:issue_refund"
+      ]
+    }
+  },
+  "trace": {
+    "trace_id": "envelope-blocks-render",
+    "profile": {
+      "id": "blocks-render",
+      "version": 1
+    },
+    "budget": {
+      "input": 4096,
+      "reserved_output": 1024
+    },
+    "result": {
+      "input_tokens": 97,
+      "hash": "e4e9a4e2cbbcbf01459e9a15f175b16d86ad9be4f843cc9c4d60e8886081b6a5"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:cite",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:nocite",
+        "tokens": 5,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:v12",
+        "tokens": 14,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.capabilities",
+        "item_id": "cap:issue_refund",
+        "tokens": 5,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.examples",
+        "item_id": "ex:casual",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.examples",
+        "item_id": "ex:formal",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "state.user",
+        "item_id": "user:plan",
+        "tokens": 2,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:inject",
+        "tokens": 4,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:16",
+        "tokens": 7,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:17",
+        "tokens": 5,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:18",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [],
+    "conflicts": [
+      {
+        "group_id": "g-cite",
+        "kind": "instruction",
+        "items": [
+          "policy:cite",
+          "policy:nocite"
+        ],
+        "resolution": "surfaced",
+        "decided_by": "escalated"
+      },
+      {
+        "group_id": "g-register",
+        "kind": "instruction",
+        "items": [
+          "ex:casual",
+          "ex:formal"
+        ],
+        "resolution": "surfaced",
+        "decided_by": "escalated"
+      }
+    ],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-09-22T12:00:00Z",
+      "route_policy_version": "blocks-render/v1",
+      "tokenizer": "fixture-whitespace/v1",
+      "renderer": "cwa-message-blocks/v1",
+      "snapshot_digest": "fd5f8925ba661c5fbc580319f8c280d56d0f0c4785ae03a13eda239ad55727d0"
+    },
+    "defaults_filled": []
+  },
+  "payload": {
+    "hash": "e4e9a4e2cbbcbf01459e9a15f175b16d86ad9be4f843cc9c4d60e8886081b6a5",
+    "bytes": 1418,
+    "parts": [
+      {
+        "section": "system",
+        "id": "policy:cite",
+        "sha256": "2a38a186d1f48f017ac60d32bcfe4704b993bfe56b2e584ebe63350c19bb66f2",
+        "bytes": 68
+      },
+      {
+        "section": "system",
+        "id": "policy:nocite",
+        "sha256": "8cc633bf8c3725007093846f3028b5eee6c0a9f96a869f78a1c24f784dfe6b61",
+        "bytes": 74
+      },
+      {
+        "section": "system",
+        "id": "policy:v12",
+        "sha256": "28228205c3f61a5765e145ddd74bbd3a0c961cc53e30860187dc2538856a9efa",
+        "bytes": 88
+      },
+      {
+        "section": "tools",
+        "id": "cap:issue_refund",
+        "sha256": "b4a7d30ded2ffbb40598030bcc2787eae9e083e3f5cb1719feba72eb2a0d951a",
+        "bytes": 62
+      },
+      {
+        "section": "content",
+        "id": "ex:casual",
+        "sha256": "88d4e20d7eb3fc37cbb8232ef5fc5e34a53067a1df33aaf453a61e99e404d9e3",
+        "bytes": 97
+      },
+      {
+        "section": "content",
+        "id": "ex:formal",
+        "sha256": "fa9f49cece43852be6a5df8b5e5f2382090475151c9c761c0ddc2bd153e36674",
+        "bytes": 97
+      },
+      {
+        "section": "content",
+        "id": "user:plan",
+        "sha256": "b8f0c4c7f29b3956ed20b9ff6bf7a492b90e3d574318bd5a0492fe15f515e36b",
+        "bytes": 66
+      },
+      {
+        "section": "content",
+        "id": "kb:inject",
+        "sha256": "a8d29ef6f2c370165cd3d0da2849f8ede3e67eaeeff79dbc35afdb16c6a06770",
+        "bytes": 107
+      },
+      {
+        "section": "content",
+        "id": "turn:16",
+        "sha256": "8f412f74e06cfb49c2cf68bcef57061ee1ae6ba538869b87bf9de328c1c9f41b",
+        "bytes": 82
+      },
+      {
+        "section": "content",
+        "id": "turn:17",
+        "sha256": "29ac3f8dde4a93cf88b360bcdfafa834b8ba8abc04ae5001e058624c827bb8dd",
+        "bytes": 81
+      },
+      {
+        "section": "content",
+        "id": "turn:18",
+        "sha256": "00082cd3a8b712788aefb51e7097e8228ae11299844d1b10d4f7b67573b73f3c",
+        "bytes": 56
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "case": "conformance/cases/admission-reasons",
+  "event_id": "01JA3000000000000000000005",
+  "recorded_at": "2026-10-15T06:00:25.000Z",
+  "service": {
+    "name": "envelope-conformance",
+    "environment": "demo"
+  },
+  "session": {
+    "id": "envelope-conformance",
+    "turn_index": 5
+  },
+  "trace_id": "envelope-admission-reasons",
+  "scrub": [
+    "Pro",
+    "Northwind"
+  ]
+}
