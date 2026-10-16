@@ -4,7 +4,15 @@ import { join, resolve } from "node:path"
 import { REASONS, SLOT_DEFAULTS } from "@cwa-dashboard/contract/data"
 import { describe, expect, it } from "vitest"
 
-import { buildIndex, buildSessions, indexRow, percentile, serviceRows } from "../src/derive.ts"
+import {
+  buildIndex,
+  buildSessions,
+  indexFromRows,
+  indexRow,
+  percentile,
+  serviceRows,
+  windowRows,
+} from "../src/derive.ts"
 import { profileDigest, routePolicyDigest } from "../src/registry-digest.ts"
 import type { AssemblyEventV1 } from "../generated/types.ts"
 import { validateEventsIndexV1, validateSessionV1 } from "../generated/validators.js"
@@ -139,6 +147,59 @@ describe("buildIndex", () => {
     )
     expect(index.facets.reason).toEqual(reasonCount)
     expect(index.window).toEqual({ from: times.at(-1), to: times[0] })
+  })
+})
+
+describe("indexFromRows", () => {
+  it("builds the same index from rows as buildIndex does from their events", () => {
+    const events = [
+      event("fixture-three-slot"),
+      event("protected-over-budget"),
+      event("budget-margin"),
+    ]
+    const at = "2026-10-15T10:00:00.000Z"
+    expect(indexFromRows([...events].reverse().map(indexRow), at)).toEqual(buildIndex(events, at))
+  })
+})
+
+describe("windowRows", () => {
+  const row = (recorded_at: string, n: number) => ({
+    ...indexRow(event("fixture-three-slot")),
+    recorded_at,
+    event_id: `01JA2B3C4D5E6F7G8H9JKM${String(n).padStart(4, "0")}`,
+  })
+
+  it("keeps the newest 24 hours in the current window and closes older rows by their UTC day", () => {
+    const rows = [
+      row("2026-10-15T09:00:00.000Z", 1),
+      row("2026-10-14T10:00:00.000Z", 2),
+      row("2026-10-14T08:59:59.000Z", 3),
+      row("2026-10-12T23:00:00.000Z", 4),
+    ]
+    const { current, closed } = windowRows(rows, { hours: 24, max: 100 })
+    expect(current.map((r) => r.event_id)).toEqual([rows[0]!.event_id, rows[1]!.event_id])
+    expect([...closed.keys()]).toEqual(["2026-10-14", "2026-10-12"])
+    expect(closed.get("2026-10-14")!.map((r) => r.event_id)).toEqual([rows[2]!.event_id])
+  })
+
+  it("closes the oldest rows beyond the cap even inside 24 hours", () => {
+    const rows = [1, 2, 3].map((n) => row(`2026-10-15T09:0${n}:00.000Z`, n))
+    const { current, closed } = windowRows(rows, { hours: 24, max: 2 })
+    expect(current.map((r) => r.recorded_at)).toEqual([
+      "2026-10-15T09:03:00.000Z",
+      "2026-10-15T09:02:00.000Z",
+    ])
+    expect(closed.get("2026-10-15")!).toHaveLength(1)
+  })
+
+  it("closes a row into its UTC day whatever offset it was written with", () => {
+    const rows = [row("2026-10-15T09:00:00.000Z", 1), row("2026-10-14T01:30:00+05:00", 2)]
+    const { closed } = windowRows(rows, { hours: 1, max: 10 })
+    expect([...closed.keys()]).toEqual(["2026-10-13"])
+  })
+
+  it("has nothing to close for no rows", () => {
+    expect(windowRows([], { hours: 24, max: 10 })).toEqual({ current: [], closed: new Map() })
   })
 })
 

@@ -70,37 +70,67 @@ const count = (values: Iterable<string>) => {
   return counts
 }
 
-/** The index of a window's events, newest first, with the facet counts over them. */
-export function buildIndex(events: readonly AssemblyEventV1[], generatedAt: string): EventsIndexV1 {
-  const rows = events
-    .map(indexRow)
-    .sort((a, b) =>
-      a.recorded_at < b.recorded_at
+const newestFirst = (a: IndexRow, b: IndexRow) =>
+  a.recorded_at < b.recorded_at
+    ? 1
+    : a.recorded_at > b.recorded_at
+      ? -1
+      : a.event_id < b.event_id
         ? 1
-        : a.recorded_at > b.recorded_at
-          ? -1
-          : a.event_id < b.event_id
-            ? 1
-            : -1,
-    )
+        : -1
+
+/** The index of a window's rows, newest first, with the facet counts over them. */
+export function indexFromRows(rows: readonly IndexRow[], generatedAt: string): EventsIndexV1 {
+  const ordered = [...rows].sort(newestFirst)
   const reasonsOf = (row: IndexRow) =>
     new Set([...row.reason_codes, ...(row.refused_reason ? [row.refused_reason] : [])])
   return {
     $schema: "cwa-dashboard/events-index/v1",
     generated_at: generatedAt,
     window: {
-      from: rows.at(-1)?.recorded_at ?? generatedAt,
-      to: rows[0]?.recorded_at ?? generatedAt,
+      from: ordered.at(-1)?.recorded_at ?? generatedAt,
+      to: ordered[0]?.recorded_at ?? generatedAt,
     },
-    events: rows,
+    events: ordered,
     facets: {
-      outcome: count(rows.map((row) => row.outcome)),
-      language: count(rows.map((row) => row.language)),
-      route: count(rows.flatMap((row) => (row.route ? [row.route] : []))),
-      reason: count(rows.flatMap((row) => [...reasonsOf(row)])),
-      service: count(rows.map((row) => row.service)),
+      outcome: count(ordered.map((row) => row.outcome)),
+      language: count(ordered.map((row) => row.language)),
+      route: count(ordered.flatMap((row) => (row.route ? [row.route] : []))),
+      reason: count(ordered.flatMap((row) => [...reasonsOf(row)])),
+      service: count(ordered.map((row) => row.service)),
     },
   }
+}
+
+/** The index of a window's events, newest first, with the facet counts over them. */
+export function buildIndex(events: readonly AssemblyEventV1[], generatedAt: string): EventsIndexV1 {
+  return indexFromRows(events.map(indexRow), generatedAt)
+}
+
+/**
+ * The current window and the closed ones (dashboard-plan.md 3): the rows within `hours` of the
+ * newest, at most `max` of them, stay current; every other row closes into its UTC day, newest day
+ * first.
+ */
+export function windowRows(
+  rows: readonly IndexRow[],
+  { hours, max }: { readonly hours: number; readonly max: number },
+): { current: IndexRow[]; closed: Map<string, IndexRow[]> } {
+  const ordered = [...rows].sort(newestFirst)
+  const newest = ordered[0]
+  const since = newest === undefined ? 0 : Date.parse(newest.recorded_at) - hours * 3_600_000
+  const current: IndexRow[] = []
+  const closed = new Map<string, IndexRow[]>()
+  for (const row of ordered) {
+    if (current.length < max && Date.parse(row.recorded_at) >= since) {
+      current.push(row)
+      continue
+    }
+    // The UTC day, whatever offset the wrapper wrote the instant with.
+    const day = new Date(row.recorded_at).toISOString().slice(0, 10)
+    closed.set(day, [...(closed.get(day) ?? []), row])
+  }
+  return { current, closed }
 }
 
 // --- sessions ------------------------------------------------------------------------------------
