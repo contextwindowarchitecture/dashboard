@@ -85,3 +85,8 @@ jobs:
       - name: Browser tests
         working-directory: dashboard
         run: pnpm --filter web test:e2e
+
+      # The manifests render: the base and the production overlay, as `oc apply -k` would build them.
+      - name: Render the deployment
+        working-directory: dashboard
+        run: kubectl kustomize deploy/overlays/prod > /dev/null

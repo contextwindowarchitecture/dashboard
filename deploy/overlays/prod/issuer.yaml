@@ -1,0 +1,15 @@
+# Let's Encrypt over ACME with the HTTP-01 challenge: cert-manager answers it through an Ingress of the router's class,
+# so the host must already resolve to the router. A namespaced Issuer, and no account e-mail.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: openshift-default

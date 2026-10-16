@@ -1,0 +1,29 @@
+# The dashboard on OpenShift (dashboard-plan.md 11; D11): the web Deployment serving the event tree read-only, the
+# ingest service writing into it and replaying snapshots, their Services, the Route, the volume, the runtime config
+# and the nginx configuration. An overlay sets the namespace, the host, the image tags and the storage class.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/part-of: cwa-dashboard
+
+resources:
+  - pvc.yaml
+  - web.yaml
+  - ingest.yaml
+  - route.yaml
+
+configMapGenerator:
+  # What the app reads at startup: the tree at /data and the ingest service at /api. A change rolls the pods, since
+  # the name carries a content hash.
+  - name: dashboard-config
+    files:
+      - config.json
+  # The server configuration from deploy/base/nginx, the /api/ proxy included, since the service runs beside it.
+  - name: dashboard-nginx
+    files:
+      - nginx/dashboard.conf
+      - nginx/headers.inc
+      - nginx/ingest-proxy.conf

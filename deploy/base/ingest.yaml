@@ -1,0 +1,88 @@
+# The ingest service (D9, D12): POST /events writes into the tree and POST /replay replays snapshots through the
+# pinned assembler. One replica, recreated rather than rolled: the tree has one writer, and the service keeps the
+# index's rows in memory. The token comes from the secret dashboard-ingest (key token), which deploy/README.md says
+# how to create; without it the service still replays, and refuses every write.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-ingest
+  labels:
+    app.kubernetes.io/name: dashboard-ingest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dashboard-ingest
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dashboard-ingest
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ingest
+          image: quay.io/contextwindowarchitecture/dashboard-ingest:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8090
+              protocol: TCP
+          env:
+            - name: EVENTS_DIR
+              value: /srv/data
+            - name: INGEST_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-ingest
+                  key: token
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: events
+              mountPath: /srv/data
+      volumes:
+        - name: events
+          persistentVolumeClaim:
+            claimName: dashboard-events
+---
+# Reached by the web pods' nginx at /api/ (deploy/base/nginx/ingest-proxy.conf names this Service), never by a Route
+# of its own.
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-ingest
+  labels:
+    app.kubernetes.io/name: dashboard-ingest
+spec:
+  selector:
+    app.kubernetes.io/name: dashboard-ingest
+  ports:
+    - name: http
+      port: 8090
+      targetPort: http
+      protocol: TCP

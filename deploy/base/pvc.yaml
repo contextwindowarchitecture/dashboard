@@ -1,0 +1,13 @@
+# The event tree: events/, sessions/ and fleet.json, written by the ingest service as events arrive and by
+# deploy/publish.sh, and served read-only by the web pods. ReadWriteMany, so the web and ingest pods can sit on
+# different nodes; a cluster without an RWX class patches it to ReadWriteOnce, as overlays/prod does.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dashboard-events
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

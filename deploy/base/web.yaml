@@ -1,0 +1,93 @@
+# The web pods: nginx serving the built app, the event tree read-only and the runtime config, proxying /api/ to the
+# ingest service. Rolling updates with no unavailable replica. The pods run under OpenShift's restricted profile; the
+# image accepts any UID with GID 0.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  labels:
+    app.kubernetes.io/name: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dashboard
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dashboard
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: web
+          image: quay.io/contextwindowarchitecture/dashboard:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: events
+              mountPath: /srv/data
+              readOnly: true
+            - name: config
+              mountPath: /opt/app-root/src/config.json
+              subPath: config.json
+              readOnly: true
+            - name: nginx
+              mountPath: /opt/app-root/etc/nginx.default.d
+              readOnly: true
+      volumes:
+        - name: events
+          persistentVolumeClaim:
+            claimName: dashboard-events
+        - name: config
+          configMap:
+            name: dashboard-config
+        - name: nginx
+          configMap:
+            name: dashboard-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard
+  labels:
+    app.kubernetes.io/name: dashboard
+spec:
+  selector:
+    app.kubernetes.io/name: dashboard
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

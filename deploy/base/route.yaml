@@ -1,0 +1,16 @@
+# TLS ends at the router's edge and plain HTTP redirects. The overlay sets the host and the certificate.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: dashboard
+  labels:
+    app.kubernetes.io/name: dashboard
+spec:
+  to:
+    kind: Service
+    name: dashboard
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

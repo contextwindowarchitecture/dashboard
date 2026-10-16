@@ -1,0 +1,49 @@
+# Builds the dashboard's two images and pushes them to Quay, by hand only (workflow_dispatch), like CI. The tags are
+# the commit's 12-character SHA and `latest`; the production overlay pins a SHA. Needs the repository secrets
+# QUAY_USERNAME and QUAY_PASSWORD: a robot account with write access to quay.io/contextwindowarchitecture/dashboard
+# and dashboard-ingest. The ingest image's build clones the pinned assembler tag from GitHub (ADR-0003).
+name: image
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "The commit or branch to build (default: the ref the workflow runs on)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - image: dashboard
+            containerfile: deploy/Containerfile
+          - image: dashboard-ingest
+            containerfile: deploy/Containerfile.ingest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - id: meta
+        run: echo "sha=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: redhat-actions/buildah-build@v2
+        id: build
+        with:
+          image: ${{ matrix.image }}
+          tags: ${{ steps.meta.outputs.sha }} latest
+          containerfiles: ${{ matrix.containerfile }}
+          context: .
+          build-args: BUILD_COMMIT=${{ steps.meta.outputs.sha }}
+          oci: true
+      - uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: quay.io/contextwindowarchitecture
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}

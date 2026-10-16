@@ -1,0 +1,60 @@
+# dashboard.contextwindowarchitecture.io (D11): demo traffic only, on the cluster that serves the benchmark site. A
+# rollout sets the two `newTag`s to the images' git SHA (deploy/README.md), then `oc apply -k deploy/overlays/prod`.
+#
+# The cluster is a single node whose only storage class, lvms-nvme-vg, provisions node-local ReadWriteOnce volumes, so
+# the event tree's claim is patched to ReadWriteOnce: the web and ingest pods all land on that node, where a
+# ReadWriteOnce volume mounts in any number of pods.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cwa-dashboard
+
+resources:
+  - ../../base
+  - issuer.yaml
+  - certificate.yaml
+  - router-secret-reader.yaml
+
+images:
+  - name: quay.io/contextwindowarchitecture/dashboard
+    newTag: latest # set to the 12-character git SHA the image was built from
+  - name: quay.io/contextwindowarchitecture/dashboard-ingest
+    newTag: latest # set to the 12-character git SHA the image was built from
+
+patches:
+  - target:
+      kind: Route
+      name: dashboard
+    patch: |
+      - op: add
+        path: /spec/host
+        value: dashboard.contextwindowarchitecture.io
+  # The Route reads its certificate from the secret cert-manager keeps (certificate.yaml); the nulls clear one set by
+  # hand, which the API refuses beside the reference.
+  - target:
+      kind: Route
+      name: dashboard
+    patch: |
+      - op: add
+        path: /spec/tls/externalCertificate
+        value:
+          name: dashboard-tls
+      - op: add
+        path: /spec/tls/certificate
+        value: null
+      - op: add
+        path: /spec/tls/key
+        value: null
+      - op: add
+        path: /spec/tls/caCertificate
+        value: null
+  - target:
+      kind: PersistentVolumeClaim
+      name: dashboard-events
+    patch: |
+      - op: replace
+        path: /spec/accessModes
+        value: [ReadWriteOnce]
+      - op: add
+        path: /spec/storageClassName
+        value: lvms-nvme-vg
