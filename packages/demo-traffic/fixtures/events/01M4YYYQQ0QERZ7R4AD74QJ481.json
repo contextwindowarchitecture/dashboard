@@ -1,0 +1,480 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4YYYQQ0QERZ7R4AD74QJ481",
+  "recorded_at": "2026-10-15T05:01:00.000Z",
+  "service": {
+    "name": "conformance-suite",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.6045830000000052
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-09-22T12:00:00Z",
+    "scope": {
+      "tenant": "acme",
+      "user": "u_91",
+      "session": "s_7",
+      "task": "refund_request"
+    },
+    "budget": {
+      "input": 135,
+      "reserved_output": 1024
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "blocks-budget",
+      "version": 1,
+      "route": "support-chat",
+      "model_family": null,
+      "route_policy_version": "blocks-budget/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:user_profile"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:history"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "support-chat",
+      "version": "blocks-budget/v1",
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.examples",
+            "governance.instructions",
+            "governance.output_contract"
+          ]
+        },
+        "cap-policy": {
+          "kind": "capability_policy",
+          "slots": [
+            "governance.capabilities"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.task",
+            "state.user"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.5,
+          "required_scope": [
+            "tenant"
+          ]
+        },
+        "interaction.history": {
+          "priority": -1
+        }
+      }
+    },
+    "tokenizer": "estimate-utf8/v1",
+    "renderer": "cwa-message-blocks/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:12",
+            "slot": "interaction.history",
+            "source": "src:turn:12",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:52:00Z",
+            "body": "Hi.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "turn:13",
+            "slot": "interaction.history",
+            "source": "src:turn:13",
+            "source_version": "1",
+            "authority": "untrusted",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:53:00Z",
+            "body": "Hello! How can I help?",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "generated",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "turn:14",
+            "slot": "interaction.history",
+            "source": "src:turn:14",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:54:00Z",
+            "body": "A question about billing.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "turn:15",
+            "slot": "interaction.history",
+            "source": "src:turn:15",
+            "source_version": "1",
+            "authority": "untrusted",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:55:00Z",
+            "body": "Sure, go ahead.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "generated",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "turn:16",
+            "slot": "interaction.history",
+            "source": "src:turn:16",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:56:00Z",
+            "body": "I bought the Pro plan last week.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "turn:17",
+            "slot": "interaction.history",
+            "source": "src:turn:17",
+            "source_version": "1",
+            "authority": "untrusted",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:57:00Z",
+            "body": "Which order is this about?",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "generated",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "turn:18",
+            "slot": "interaction.query",
+            "source": "src:turn:18",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Can I refund my Pro plan?",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "kb:a",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:a",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Pro plans refund in full within 30 days of purchase.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.9
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:v12",
+            "slot": "governance.instructions",
+            "source": "src:policy:v12",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Follow verified refund policy & cite the evidence you use. Never quote <internal> notes.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "state-svc",
+          "kind": "state"
+        },
+        "items": [
+          {
+            "id": "user:plan",
+            "slot": "state.user",
+            "source": "src:user:plan",
+            "source_version": "1",
+            "authority": "state",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "plan=pro; region=eu; locale=en-GB; seats=4",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "extracted",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m4yyyqq0qerz7r4ad74qj481",
+    "profile": {
+      "id": "blocks-budget",
+      "version": 1
+    },
+    "budget": {
+      "input": 135,
+      "reserved_output": 1024
+    },
+    "result": {
+      "input_tokens": 118,
+      "hash": "614f10a7c406d198a4b840b5bc26141f1eedc33b0c3a4bed1cb6f27ce5fb19f0"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:v12",
+        "tokens": 22,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:a",
+        "tokens": 13,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:15",
+        "tokens": 4,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:16",
+        "tokens": 8,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:17",
+        "tokens": 7,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:18",
+        "tokens": 7,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [
+      {
+        "item_id": "user:plan",
+        "reason": "over_budget",
+        "stage": "assembler",
+        "slot": "state.user"
+      },
+      {
+        "item_id": "turn:12",
+        "reason": "over_budget",
+        "stage": "assembler",
+        "slot": "interaction.history"
+      },
+      {
+        "item_id": "turn:13",
+        "reason": "over_budget",
+        "stage": "assembler",
+        "slot": "interaction.history"
+      },
+      {
+        "item_id": "turn:14",
+        "reason": "over_budget",
+        "stage": "assembler",
+        "slot": "interaction.history"
+      }
+    ],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-09-22T12:00:00Z",
+      "route_policy_version": "blocks-budget/v1",
+      "tokenizer": "estimate-utf8/v1",
+      "renderer": "cwa-message-blocks/v1",
+      "snapshot_digest": "3587084c9bdfc745da752c50b8ea5b9240bc4a281b8196cf8b66395afa2a244c"
+    },
+    "defaults_filled": [],
+    "timings": {
+      "admission": 0.04600000000000648,
+      "conflicts": 0.00216700000000003,
+      "supersession": 0.0029580000000066775,
+      "deduplication": 0.0020000000000095497,
+      "diversity": 0.002124999999992383,
+      "fitting": 0.4094169999999906
+    }
+  },
+  "payload": {
+    "hash": "614f10a7c406d198a4b840b5bc26141f1eedc33b0c3a4bed1cb6f27ce5fb19f0",
+    "bytes": 720,
+    "parts": [
+      {
+        "section": "system",
+        "id": "policy:v12",
+        "sha256": "28228205c3f61a5765e145ddd74bbd3a0c961cc53e30860187dc2538856a9efa",
+        "bytes": 88
+      },
+      {
+        "section": "content",
+        "id": "kb:a",
+        "sha256": "ac5767aed6761963e261794bcfdc0a413df81c307049157b121f80824227432a",
+        "bytes": 86
+      },
+      {
+        "section": "content",
+        "id": "turn:15",
+        "sha256": "5d460365446bd70e8923530106264f867afe6ec7b82bc6cddddd055c0febe319",
+        "bytes": 70
+      },
+      {
+        "section": "content",
+        "id": "turn:16",
+        "sha256": "8f412f74e06cfb49c2cf68bcef57061ee1ae6ba538869b87bf9de328c1c9f41b",
+        "bytes": 82
+      },
+      {
+        "section": "content",
+        "id": "turn:17",
+        "sha256": "29ac3f8dde4a93cf88b360bcdfafa834b8ba8abc04ae5001e058624c827bb8dd",
+        "bytes": 81
+      },
+      {
+        "section": "content",
+        "id": "turn:18",
+        "sha256": "00082cd3a8b712788aefb51e7097e8228ae11299844d1b10d4f7b67573b73f3c",
+        "bytes": 56
+      }
+    ]
+  }
+}

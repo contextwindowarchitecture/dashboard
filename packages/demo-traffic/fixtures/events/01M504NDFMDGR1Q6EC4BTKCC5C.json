@@ -1,0 +1,387 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M504NDFMDGR1Q6EC4BTKCC5C",
+  "recorded_at": "2026-10-15T16:00:00.500Z",
+  "service": {
+    "name": "contract-reviewer",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.22074999999998113
+  },
+  "outcome": "refused",
+  "snapshot": {
+    "assembly_time": "2026-10-15T16:00:00Z",
+    "scope": {
+      "tenant": "meridian-legal",
+      "task": "review_msa_2026_114"
+    },
+    "budget": {
+      "input": 130,
+      "reserved_output": 2000
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "contract-review",
+      "version": 1,
+      "route": "contract-review",
+      "model_family": null,
+      "route_policy_version": "review/v2",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:clauses"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "contract-review",
+      "version": "review/v2",
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions"
+          ]
+        },
+        "clause-index": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.4,
+          "required_scope": [
+            "tenant"
+          ],
+          "min_tokens": 80
+        }
+      }
+    },
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "cwa-message-blocks/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:review-v2",
+            "slot": "governance.instructions",
+            "source": "policy-registry",
+            "source_version": "review-v2",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-01T00:00:00Z",
+            "body": "You review commercial contracts for Meridian Legal. Flag every clause that shifts liability, limits remedies or renews automatically, and quote it."
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "clause-index",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "msa-2026-114#c7",
+            "slot": "evidence.knowledge",
+            "source": "msa-2026-114",
+            "source_version": "signed",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-08-30T00:00:00Z",
+            "body": "Either party may terminate for convenience on ninety days written notice, provided that all fees for the then-current term remain payable in full.",
+            "relevance": 0.92,
+            "scope": {
+              "tenant": "meridian-legal"
+            }
+          },
+          {
+            "id": "msa-2026-114#c12",
+            "slot": "evidence.knowledge",
+            "source": "msa-2026-114",
+            "source_version": "signed",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-08-30T00:00:00Z",
+            "body": "Supplier's aggregate liability under this Agreement shall not exceed the fees paid in the twelve months preceding the claim, except for breach of confidentiality.",
+            "relevance": 0.95,
+            "scope": {
+              "tenant": "meridian-legal"
+            }
+          },
+          {
+            "id": "msa-2026-114#c18",
+            "slot": "evidence.knowledge",
+            "source": "msa-2026-114",
+            "source_version": "signed",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-08-30T00:00:00Z",
+            "body": "This Agreement renews automatically for successive one-year terms unless either party gives notice of non-renewal at least sixty days before the end of the term.",
+            "relevance": 0.9,
+            "scope": {
+              "tenant": "meridian-legal"
+            }
+          },
+          {
+            "id": "msa-2026-114#c21",
+            "slot": "evidence.knowledge",
+            "source": "msa-2026-114",
+            "source_version": "signed",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-08-30T00:00:00Z",
+            "body": "Customer shall indemnify Supplier against third-party claims arising from Customer Data, including claims caused by Supplier's processing of it.",
+            "relevance": 0.88,
+            "scope": {
+              "tenant": "meridian-legal"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "review:114",
+            "slot": "interaction.query",
+            "source": "review-queue:114",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T15:59:59Z",
+            "body": "Review MSA 2026-114 for liability, remedies and renewal risk."
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m504ndfmdgr1q6ec4btkcc5c",
+    "profile": {
+      "id": "contract-review",
+      "version": 1
+    },
+    "budget": {
+      "input": 130,
+      "reserved_output": 2000
+    },
+    "result": null,
+    "included": [],
+    "compressed": [],
+    "excluded": [],
+    "conflicts": [],
+    "refused": {
+      "bool": true,
+      "reason": "slot_floor_over_budget"
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-10-15T16:00:00Z",
+      "route_policy_version": "review/v2",
+      "tokenizer": "fixture-whitespace/v1",
+      "renderer": "cwa-message-blocks/v1",
+      "snapshot_digest": "20636506c77799a5d2bef725c6d66eaa7dd3162427b5ee218b76d15476d201b1"
+    },
+    "defaults_filled": [
+      {
+        "item_id": "msa-2026-114#c12",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "msa-2026-114#c12",
+        "field": "variants"
+      },
+      {
+        "item_id": "msa-2026-114#c12",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "msa-2026-114#c12",
+        "field": "lineage"
+      },
+      {
+        "item_id": "msa-2026-114#c12",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "msa-2026-114#c12",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "msa-2026-114#c18",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "msa-2026-114#c18",
+        "field": "variants"
+      },
+      {
+        "item_id": "msa-2026-114#c18",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "msa-2026-114#c18",
+        "field": "lineage"
+      },
+      {
+        "item_id": "msa-2026-114#c18",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "msa-2026-114#c18",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "msa-2026-114#c21",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "msa-2026-114#c21",
+        "field": "variants"
+      },
+      {
+        "item_id": "msa-2026-114#c21",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "msa-2026-114#c21",
+        "field": "lineage"
+      },
+      {
+        "item_id": "msa-2026-114#c21",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "msa-2026-114#c21",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "msa-2026-114#c7",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "msa-2026-114#c7",
+        "field": "variants"
+      },
+      {
+        "item_id": "msa-2026-114#c7",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "msa-2026-114#c7",
+        "field": "lineage"
+      },
+      {
+        "item_id": "msa-2026-114#c7",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "msa-2026-114#c7",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "policy:review-v2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "policy:review-v2",
+        "field": "variants"
+      },
+      {
+        "item_id": "policy:review-v2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "policy:review-v2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "policy:review-v2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "policy:review-v2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "review:114",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "review:114",
+        "field": "variants"
+      },
+      {
+        "item_id": "review:114",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "review:114",
+        "field": "lineage"
+      },
+      {
+        "item_id": "review:114",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "review:114",
+        "field": "injection_risk"
+      }
+    ],
+    "timings": {
+      "admission": 0.035790999999989026,
+      "conflicts": 0.0005409999999983484,
+      "supersession": 0.0006249999999852207,
+      "deduplication": 0.0005409999999983484,
+      "diversity": 0.0013329999999882602,
+      "fitting": 0.12933400000000006
+    }
+  }
+}

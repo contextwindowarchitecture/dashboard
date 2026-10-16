@@ -1,0 +1,318 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4ZYYA3MV0M2RZBF1H40Y7MV",
+  "recorded_at": "2026-10-15T14:20:00.500Z",
+  "service": {
+    "name": "policy-desk",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "session": {
+    "id": "desk-agent-12",
+    "turn_index": 1
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.09341699999998809
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-10-15T14:20:00Z",
+    "scope": {
+      "tenant": "northwind",
+      "user": "agent_12",
+      "task": "policy_lookup"
+    },
+    "budget": {
+      "input": 4096,
+      "reserved_output": 800
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "policy-desk",
+      "version": 1,
+      "route": "policy-desk",
+      "model_family": null,
+      "route_policy_version": "desk/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "policy-desk",
+      "version": "desk/v1",
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.5,
+          "required_scope": [
+            "tenant"
+          ]
+        }
+      },
+      "on_unresolved_instruction": "request_context"
+    },
+    "tokenizer": "estimate-utf8/v1",
+    "renderer": "cwa-messages/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:no-internal-ids",
+            "slot": "governance.instructions",
+            "source": "policy-registry",
+            "source_version": "privacy-v3",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-10T00:00:00Z",
+            "body": "Never mention internal document ids to anyone.",
+            "conflict_policy": "governs"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "travel-policy:v4#p2",
+            "slot": "evidence.knowledge",
+            "source": "travel-policy:v4",
+            "source_version": "v4",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-09-01T00:00:00Z",
+            "body": "Economy class is required for flights under six hours.",
+            "relevance": 0.9,
+            "scope": {
+              "tenant": "northwind"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "q:2026-10-15T14:20:00Z",
+            "slot": "interaction.query",
+            "source": "conversation:agent_12",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T14:20:00Z",
+            "body": "Can I fly business class to Berlin, and where does it say so?"
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m4zyya3mv0m2rzbf1h40y7mv",
+    "profile": {
+      "id": "policy-desk",
+      "version": 1
+    },
+    "budget": {
+      "input": 4096,
+      "reserved_output": 800
+    },
+    "result": {
+      "input_tokens": 65,
+      "hash": "05aa56cd62d36285617490971bf9aac3740e81c4100f7549e0d9589cbec63cd8"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:no-internal-ids",
+        "tokens": 12,
+        "source_version": "privacy-v3",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "travel-policy:v4#p2",
+        "tokens": 14,
+        "source_version": "v4",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "q:2026-10-15T14:20:00Z",
+        "tokens": 16,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-10-15T14:20:00Z",
+      "route_policy_version": "desk/v1",
+      "tokenizer": "estimate-utf8/v1",
+      "renderer": "cwa-messages/v1",
+      "snapshot_digest": "6cc16bc2420bde0df8483cf5d4b52610cb944e461f09586a09bac333ac14d22b"
+    },
+    "defaults_filled": [
+      {
+        "item_id": "policy:no-internal-ids",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "policy:no-internal-ids",
+        "field": "variants"
+      },
+      {
+        "item_id": "policy:no-internal-ids",
+        "field": "lineage"
+      },
+      {
+        "item_id": "policy:no-internal-ids",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "policy:no-internal-ids",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "q:2026-10-15T14:20:00Z",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "q:2026-10-15T14:20:00Z",
+        "field": "variants"
+      },
+      {
+        "item_id": "q:2026-10-15T14:20:00Z",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "q:2026-10-15T14:20:00Z",
+        "field": "lineage"
+      },
+      {
+        "item_id": "q:2026-10-15T14:20:00Z",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "q:2026-10-15T14:20:00Z",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "travel-policy:v4#p2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "travel-policy:v4#p2",
+        "field": "variants"
+      },
+      {
+        "item_id": "travel-policy:v4#p2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "travel-policy:v4#p2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "travel-policy:v4#p2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "travel-policy:v4#p2",
+        "field": "injection_risk"
+      }
+    ],
+    "timings": {
+      "admission": 0.027666000000010627,
+      "conflicts": 0.00041699999999877946,
+      "supersession": 0.00045800000000895125,
+      "deduplication": 0.00041699999999877946,
+      "diversity": 0.0004160000000013042,
+      "fitting": 0.02208300000000918
+    }
+  },
+  "payload": {
+    "hash": "05aa56cd62d36285617490971bf9aac3740e81c4100f7549e0d9589cbec63cd8",
+    "bytes": 373,
+    "parts": [
+      {
+        "section": "system",
+        "id": "policy:no-internal-ids",
+        "sha256": "1cec7b3b56e92b405c30f65bac8071c673b38a9ec69cd6ece5f1979300778a8a",
+        "bytes": 46
+      },
+      {
+        "section": "content",
+        "sha256": "04d87a3cbd699051be986c3fad08198ff5802510e0ef441112e7ec0146960c36",
+        "bytes": 210
+      }
+    ]
+  }
+}

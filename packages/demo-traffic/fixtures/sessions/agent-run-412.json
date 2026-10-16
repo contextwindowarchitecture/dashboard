@@ -1,0 +1,48 @@
+{
+  "$schema": "cwa-dashboard/session/v1",
+  "session_id": "agent-run-412",
+  "route": "agent-loop",
+  "service": "review-agent",
+  "profile": {
+    "id": "tool-agent",
+    "version": 1
+  },
+  "turns": [
+    {
+      "turn_index": 0,
+      "event_id": "01M4ZKH0N4HT508FAY0X5JVM7S",
+      "outcome": "assembled",
+      "input_tokens": 251,
+      "by_plane": {
+        "gov": 83,
+        "state": 11,
+        "evid": 101,
+        "inter": 4
+      },
+      "compressed_count": 0,
+      "over_budget_count": 0,
+      "parts": 8
+    },
+    {
+      "turn_index": 1,
+      "event_id": "01M4ZKRB14SW2GC3BS775AZDHG",
+      "outcome": "assembled",
+      "input_tokens": 265,
+      "by_plane": {
+        "gov": 83,
+        "state": 12,
+        "evid": 105,
+        "inter": 12
+      },
+      "compressed_count": 0,
+      "over_budget_count": 0,
+      "parts": 8,
+      "reused_parts": 3
+    }
+  ],
+  "part_reuse": {
+    "compared_turns": 1,
+    "reused_parts": 3,
+    "parts": 8
+  }
+}

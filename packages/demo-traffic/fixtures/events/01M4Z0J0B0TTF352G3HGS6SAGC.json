@@ -1,0 +1,275 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4Z0J0B0TTF352G3HGS6SAGC",
+  "recorded_at": "2026-10-15T05:29:00.000Z",
+  "service": {
+    "name": "conformance-suite",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.055165999999999826
+  },
+  "outcome": "refused",
+  "snapshot": {
+    "assembly_time": "2026-09-22T12:00:00Z",
+    "scope": {
+      "tenant": "acme",
+      "user": "u_91",
+      "session": "s_7",
+      "task": "refund_request"
+    },
+    "budget": {
+      "input": 4096,
+      "reserved_output": 1024
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "required-instructions-missing",
+      "version": 1,
+      "route": "support-chat",
+      "model_family": null,
+      "route_policy_version": "required-instructions-missing/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "xml:governance.instructions"
+        },
+        {
+          "slot": "governance.examples",
+          "wrap": "xml:governance.examples"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:governance.output_contract"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:state.user"
+        },
+        {
+          "slot": "state.task",
+          "wrap": "xml:state.task"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence.knowledge"
+        },
+        {
+          "slot": "evidence.tool_results",
+          "wrap": "xml:evidence.tool_results"
+        },
+        {
+          "slot": "interaction.memory",
+          "wrap": "xml:interaction.memory"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:interaction.history"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:interaction.query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "support-chat",
+      "version": "required-instructions-missing/v1",
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.examples",
+            "governance.instructions",
+            "governance.output_contract"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.task",
+            "state.user"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "crm-mcp": {
+          "kind": "mcp",
+          "slots": [
+            "evidence.tool_results"
+          ]
+        },
+        "memory-svc": {
+          "kind": "memory",
+          "slots": [
+            "interaction.memory"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.5,
+          "required_scope": [
+            "tenant"
+          ]
+        }
+      }
+    },
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "fixture-xml/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:18",
+            "slot": "interaction.query",
+            "source": "src:turn:18",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Can I refund my Pro plan?",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "kb:a",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:a",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Pro plans refund in full within 30 days.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.9
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:v12",
+            "slot": "governance.instructions",
+            "source": "src:policy:v12",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Follow verified refund policy and cite the evidence you use.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m4z0j0b0ttf352g3hgs6sagc",
+    "profile": {
+      "id": "required-instructions-missing",
+      "version": 1
+    },
+    "budget": {
+      "input": 4096,
+      "reserved_output": 1024
+    },
+    "result": null,
+    "included": [],
+    "compressed": [],
+    "excluded": [
+      {
+        "item_id": "policy:v12",
+        "reason": "untrusted_in_governance",
+        "stage": "assembler",
+        "slot": "governance.instructions"
+      }
+    ],
+    "conflicts": [],
+    "refused": {
+      "bool": true,
+      "reason": "required_slot_missing"
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-09-22T12:00:00Z",
+      "route_policy_version": "required-instructions-missing/v1",
+      "tokenizer": "fixture-whitespace/v1",
+      "renderer": "fixture-xml/v1",
+      "snapshot_digest": "b2ecf2cf1afec02c6ad57a79b012885fa58f971c296fa416585fa52e43703844"
+    },
+    "defaults_filled": [],
+    "timings": {
+      "admission": 0.012000000000000455,
+      "conflicts": 0.0004160000000013042,
+      "supersession": 0.0005000000000023874,
+      "deduplication": 0.00033299999999769625,
+      "diversity": 0.0006249999999994316
+    }
+  }
+}

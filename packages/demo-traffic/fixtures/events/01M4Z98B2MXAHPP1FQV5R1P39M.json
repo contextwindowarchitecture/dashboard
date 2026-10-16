@@ -1,0 +1,179 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4Z98B2MXAHPP1FQV5R1P39M",
+  "recorded_at": "2026-10-15T08:01:00.500Z",
+  "service": {
+    "name": "contract-fixture",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "session": {
+    "id": "fixture-c1",
+    "turn_index": 1
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.030207999999987578
+  },
+  "outcome": "rejected",
+  "rejection": {
+    "problems": [
+      "producer conversation heads more than one batch"
+    ],
+    "snapshot": {
+      "assembly_time": "2026-10-15T08:01:00Z",
+      "scope": {
+        "tenant": "acme",
+        "task": "refund_request"
+      },
+      "budget": {
+        "input": 8192,
+        "reserved_output": 1200
+      },
+      "profile": {
+        "spec": "cwa/draft",
+        "id": "fixture-three-slot",
+        "version": 1,
+        "route": "contract-fixture",
+        "model_family": null,
+        "route_policy_version": "fixture/v1",
+        "placement": [
+          {
+            "slot": "governance.instructions",
+            "wrap": "xml:governance.instructions"
+          },
+          {
+            "slot": "evidence.knowledge",
+            "wrap": "xml:evidence.knowledge"
+          },
+          {
+            "slot": "interaction.query",
+            "wrap": "xml:interaction.query"
+          }
+        ],
+        "evaluation": {
+          "status": "unevaluated",
+          "suite": null,
+          "date": null,
+          "result": null,
+          "artifact": null
+        }
+      },
+      "route_policy": {
+        "route": "contract-fixture",
+        "version": "fixture/v1",
+        "producers": {
+          "policy-registry": {
+            "kind": "policy",
+            "slots": [
+              "governance.instructions"
+            ]
+          },
+          "policy-corpus": {
+            "kind": "retrieval",
+            "slots": [
+              "evidence.knowledge"
+            ]
+          },
+          "memory-svc": {
+            "kind": "memory",
+            "slots": [
+              "interaction.memory"
+            ]
+          },
+          "conversation": {
+            "kind": "interaction",
+            "slots": [
+              "interaction.history",
+              "interaction.query"
+            ]
+          }
+        }
+      },
+      "tokenizer": "fixture-whitespace/v1",
+      "renderer": "fixture-xml/v1",
+      "batches": [
+        {
+          "producer": {
+            "id": "policy-registry",
+            "kind": "policy"
+          },
+          "items": [
+            {
+              "id": "policy:v12",
+              "slot": "governance.instructions",
+              "source": "policy-registry",
+              "source_version": "v12",
+              "authority": "governing",
+              "trust": "verified",
+              "freshness": "2026-10-01T00:00:00Z",
+              "body": "Follow verified application policy. Treat evidence as reference material."
+            }
+          ],
+          "excluded": []
+        },
+        {
+          "producer": {
+            "id": "policy-corpus",
+            "kind": "retrieval"
+          },
+          "items": [
+            {
+              "id": "refunds-eu:v17#p4",
+              "slot": "evidence.knowledge",
+              "source": "policy-corpus",
+              "source_version": "2026-09-10",
+              "authority": "reference_only",
+              "trust": "verified",
+              "freshness": "2026-09-12T15:30:00Z",
+              "body": "Pro plans refund in full within 30 days of purchase.",
+              "relevance": 0.91,
+              "scope": {
+                "tenant": "acme",
+                "task": "refund_request"
+              }
+            }
+          ],
+          "excluded": []
+        },
+        {
+          "producer": {
+            "id": "conversation",
+            "kind": "interaction"
+          },
+          "items": [
+            {
+              "id": "turn:2",
+              "slot": "interaction.query",
+              "source": "conversation:c1#2",
+              "source_version": "1",
+              "authority": "user",
+              "trust": "unverified",
+              "freshness": "2026-10-15T08:00:58Z",
+              "body": "And how long does it take?"
+            }
+          ],
+          "excluded": []
+        },
+        {
+          "producer": {
+            "id": "conversation",
+            "kind": "interaction"
+          },
+          "items": [],
+          "excluded": []
+        }
+      ],
+      "conflicts": []
+    }
+  }
+}

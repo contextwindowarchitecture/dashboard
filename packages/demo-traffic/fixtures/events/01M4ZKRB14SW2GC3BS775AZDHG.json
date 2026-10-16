@@ -1,0 +1,846 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4ZKRB14SW2GC3BS775AZDHG",
+  "recorded_at": "2026-10-15T11:04:30.500Z",
+  "service": {
+    "name": "review-agent",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "session": {
+    "id": "agent-run-412",
+    "turn_index": 1
+  },
+  "redaction_mode": "digest_only",
+  "timings_ms": {
+    "total": 0.2060419999999965
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-10-15T11:04:30Z",
+    "scope": {
+      "tenant": "acme-eng",
+      "user": "bot_review",
+      "session": "agent-run-412",
+      "task": "review_pr_412"
+    },
+    "budget": {
+      "input": 6000,
+      "reserved_output": 1500
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "tool-agent",
+      "version": 1,
+      "route": "agent-loop",
+      "model_family": null,
+      "route_policy_version": "illustrative/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "governance.capabilities",
+          "wrap": "tools"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:user_profile"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "interaction.memory",
+          "wrap": "xml:memory"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:history"
+        },
+        {
+          "slot": "state.task",
+          "wrap": "xml:task"
+        },
+        {
+          "slot": "evidence.tool_results",
+          "wrap": "xml:observation"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:format"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "agent-loop",
+      "version": "illustrative/v1",
+      "clock_skew_seconds": 5,
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions",
+            "governance.output_contract"
+          ]
+        },
+        "capability-policy": {
+          "kind": "capability_policy",
+          "slots": [
+            "governance.capabilities"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.user",
+            "state.task"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "tools-mcp": {
+          "kind": "mcp",
+          "slots": [
+            "evidence.tool_results"
+          ]
+        },
+        "memory-svc": {
+          "kind": "memory",
+          "slots": [
+            "interaction.memory"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "state.task": {
+          "max_age_seconds": 60,
+          "required_scope": [
+            "tenant",
+            "task"
+          ]
+        },
+        "evidence.knowledge": {
+          "min_relevance": 0.5,
+          "required_scope": [
+            "tenant"
+          ]
+        },
+        "evidence.tool_results": {
+          "max_age_seconds": 3600,
+          "supersede": "source"
+        },
+        "interaction.memory": {
+          "source_prefix": "turn:"
+        }
+      }
+    },
+    "tokenizer": "estimate-utf8/v1",
+    "renderer": "cwa-message-blocks/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:review-v5",
+            "slot": "governance.instructions",
+            "source": "policy-registry",
+            "source_version": "review-v5",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-01T00:00:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "e11f5078c3950853c4eed8574263dcfe58c9d7120a7b10e9327c67658edfc264",
+              "token_counts": {
+                "estimate-utf8/v1": 30
+              }
+            }
+          },
+          {
+            "id": "format:review",
+            "slot": "governance.output_contract",
+            "source": "policy-registry",
+            "source_version": "review-v5",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-01T00:00:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "5ec12c816e28e1e4de0aa8423b03de61c576f51273930c2e4023ef41e36aa115",
+              "token_counts": {
+                "estimate-utf8/v1": 20
+              }
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "capability-policy",
+          "kind": "capability_policy"
+        },
+        "items": [
+          {
+            "id": "tool:read_diff",
+            "slot": "governance.capabilities",
+            "source": "capability-policy",
+            "source_version": "agent-v2",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-15T11:00:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "c70fd4b98281ddca65372cc2739e62005c43caccf37020d0b825bef7864d24af",
+              "token_counts": {
+                "estimate-utf8/v1": 14
+              }
+            }
+          },
+          {
+            "id": "tool:comment_pr",
+            "slot": "governance.capabilities",
+            "source": "capability-policy",
+            "source_version": "agent-v2",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-15T11:00:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "bf8a35aeb4fd530c4fe18390b6f551bc6ddfbcdfd40a9feae995a72a82a1ca01",
+              "token_counts": {
+                "estimate-utf8/v1": 19
+              }
+            }
+          },
+          {
+            "id": "tool:approve_pr",
+            "slot": "governance.capabilities",
+            "source": "capability-policy",
+            "source_version": "agent-v2",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-15T11:00:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "b682ea3455f172f4a136a8ec4eaa9aa17d7fd9309e6fab1933502fedaf2667b6",
+              "token_counts": {
+                "estimate-utf8/v1": 14
+              }
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "state-svc",
+          "kind": "state"
+        },
+        "items": [
+          {
+            "id": "task:review_pr_412",
+            "slot": "state.task",
+            "source": "state-svc",
+            "source_version": "1",
+            "authority": "state",
+            "trust": "verified",
+            "freshness": "2026-10-15T11:04:00Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "d56c89af822924020ba1736e75653a572486fe73ff4d3ac5978215e0ac1053ae",
+              "token_counts": {
+                "estimate-utf8/v1": 12
+              }
+            },
+            "scope": {
+              "tenant": "acme-eng",
+              "task": "review_pr_412"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "tools-mcp",
+          "kind": "mcp"
+        },
+        "items": [
+          {
+            "id": "obs:pr-412-diff",
+            "slot": "evidence.tool_results",
+            "source": "github:acme/billing#412",
+            "source_version": "c4f19e2",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-10-15T11:00:10Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "313c8e844dbfe7265adb17ec800453038bc05a378700b34b0333dc8b8ae5d219",
+              "token_counts": {
+                "estimate-utf8/v1": 74
+              }
+            }
+          },
+          {
+            "id": "obs:ci-412-run-1",
+            "slot": "evidence.tool_results",
+            "source": "ci:acme/billing#412",
+            "source_version": "run-1",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-10-15T11:00:20Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "60c7b3016cb2655c2be360b9dc702e4601bba8566392cce85e716ed9716d0816",
+              "token_counts": {
+                "estimate-utf8/v1": 25
+              }
+            }
+          },
+          {
+            "id": "obs:ci-412-run-2",
+            "slot": "evidence.tool_results",
+            "source": "ci:acme/billing#412",
+            "source_version": "run-2",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-10-15T11:04:10Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "386bcb04c946815ffb1d838eab3791e3a8c3b6eefdb1f904b72d4eef9f25a06f",
+              "token_counts": {
+                "estimate-utf8/v1": 29
+              }
+            }
+          },
+          {
+            "id": "tool:merge_pr",
+            "slot": "governance.capabilities",
+            "source": "github:acme/billing",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-15T11:00:10Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "59da068b6768f1d1b353536a8998e8ca9fa998c073b7c752e72f6bc08b8627d4",
+              "token_counts": {
+                "estimate-utf8/v1": 14
+              }
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "step:2",
+            "slot": "interaction.query",
+            "source": "agent-run-412#2",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T11:04:05Z",
+            "body": {
+              "redacted": "digest_only",
+              "content_sha256": "cd2adfcfe1ca3d87a2416190c7bfa1e1343f50c180b89ad9eec91e22e45b9ae2",
+              "token_counts": {
+                "estimate-utf8/v1": 12
+              }
+            }
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": [],
+    "capabilities": {
+      "policy_producer": "capability-policy",
+      "allow_list_version": "agent-v2",
+      "allowed_ids": [
+        "tool:read_diff",
+        "tool:comment_pr"
+      ]
+    }
+  },
+  "trace": {
+    "trace_id": "trace-01m4zkrb14sw2gc3bs775azdhg",
+    "profile": {
+      "id": "tool-agent",
+      "version": 1
+    },
+    "budget": {
+      "input": 6000,
+      "reserved_output": 1500
+    },
+    "result": {
+      "input_tokens": 265,
+      "hash": "7f8fb100e2fa86f655a36ca8a3416b42fcd4bd132d13cba487b84f677632718a"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:review-v5",
+        "tokens": 30,
+        "source_version": "review-v5",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.capabilities",
+        "item_id": "tool:comment_pr",
+        "tokens": 19,
+        "source_version": "agent-v2",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.capabilities",
+        "item_id": "tool:read_diff",
+        "tokens": 14,
+        "source_version": "agent-v2",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "state.task",
+        "item_id": "task:review_pr_412",
+        "tokens": 12,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.tool_results",
+        "item_id": "obs:ci-412-run-2",
+        "tokens": 29,
+        "source_version": "run-2",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.tool_results",
+        "item_id": "obs:pr-412-diff",
+        "tokens": 76,
+        "source_version": "c4f19e2",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.output_contract",
+        "item_id": "format:review",
+        "tokens": 20,
+        "source_version": "review-v5",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "step:2",
+        "tokens": 12,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [
+      {
+        "item_id": "tool:approve_pr",
+        "reason": "capability_not_allowed",
+        "stage": "assembler",
+        "slot": "governance.capabilities"
+      },
+      {
+        "item_id": "tool:merge_pr",
+        "reason": "producer_slot_not_allowed",
+        "stage": "assembler",
+        "slot": "governance.capabilities"
+      },
+      {
+        "item_id": "obs:ci-412-run-1",
+        "reason": "superseded",
+        "stage": "assembler",
+        "slot": "evidence.tool_results",
+        "superseded_by": "obs:ci-412-run-2"
+      }
+    ],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-10-15T11:04:30Z",
+      "route_policy_version": "illustrative/v1",
+      "tokenizer": "estimate-utf8/v1",
+      "renderer": "cwa-message-blocks/v1",
+      "snapshot_digest": "26c47b9f3fcc676f6d6d0f376f33627218616338e1b649a7a889e42d5d4ae2f1"
+    },
+    "defaults_filled": [
+      {
+        "item_id": "format:review",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "format:review",
+        "field": "variants"
+      },
+      {
+        "item_id": "format:review",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "format:review",
+        "field": "lineage"
+      },
+      {
+        "item_id": "format:review",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "format:review",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "obs:ci-412-run-1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "obs:ci-412-run-1",
+        "field": "variants"
+      },
+      {
+        "item_id": "obs:ci-412-run-1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "obs:ci-412-run-1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "obs:ci-412-run-1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "obs:ci-412-run-1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "obs:ci-412-run-2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "obs:ci-412-run-2",
+        "field": "variants"
+      },
+      {
+        "item_id": "obs:ci-412-run-2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "obs:ci-412-run-2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "obs:ci-412-run-2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "obs:ci-412-run-2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "obs:pr-412-diff",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "obs:pr-412-diff",
+        "field": "variants"
+      },
+      {
+        "item_id": "obs:pr-412-diff",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "obs:pr-412-diff",
+        "field": "lineage"
+      },
+      {
+        "item_id": "obs:pr-412-diff",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "obs:pr-412-diff",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "policy:review-v5",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "policy:review-v5",
+        "field": "variants"
+      },
+      {
+        "item_id": "policy:review-v5",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "policy:review-v5",
+        "field": "lineage"
+      },
+      {
+        "item_id": "policy:review-v5",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "policy:review-v5",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "step:2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "step:2",
+        "field": "variants"
+      },
+      {
+        "item_id": "step:2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "step:2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "step:2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "step:2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "task:review_pr_412",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "task:review_pr_412",
+        "field": "variants"
+      },
+      {
+        "item_id": "task:review_pr_412",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "task:review_pr_412",
+        "field": "lineage"
+      },
+      {
+        "item_id": "task:review_pr_412",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "task:review_pr_412",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "tool:approve_pr",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "tool:approve_pr",
+        "field": "variants"
+      },
+      {
+        "item_id": "tool:approve_pr",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "tool:approve_pr",
+        "field": "lineage"
+      },
+      {
+        "item_id": "tool:approve_pr",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "tool:approve_pr",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "tool:comment_pr",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "tool:comment_pr",
+        "field": "variants"
+      },
+      {
+        "item_id": "tool:comment_pr",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "tool:comment_pr",
+        "field": "lineage"
+      },
+      {
+        "item_id": "tool:comment_pr",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "tool:comment_pr",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "tool:merge_pr",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "tool:merge_pr",
+        "field": "variants"
+      },
+      {
+        "item_id": "tool:merge_pr",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "tool:merge_pr",
+        "field": "lineage"
+      },
+      {
+        "item_id": "tool:merge_pr",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "tool:merge_pr",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "tool:read_diff",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "tool:read_diff",
+        "field": "variants"
+      },
+      {
+        "item_id": "tool:read_diff",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "tool:read_diff",
+        "field": "lineage"
+      },
+      {
+        "item_id": "tool:read_diff",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "tool:read_diff",
+        "field": "injection_risk"
+      }
+    ],
+    "timings": {
+      "admission": 0.06837500000000318,
+      "conflicts": 0.0007090000000005148,
+      "supersession": 0.009375000000005684,
+      "deduplication": 0.0007080000000030395,
+      "diversity": 0.0006659999999953925,
+      "fitting": 0.05237500000001205
+    }
+  },
+  "payload": {
+    "hash": "7f8fb100e2fa86f655a36ca8a3416b42fcd4bd132d13cba487b84f677632718a",
+    "bytes": 1433,
+    "parts": [
+      {
+        "section": "system",
+        "id": "policy:review-v5",
+        "sha256": "e11f5078c3950853c4eed8574263dcfe58c9d7120a7b10e9327c67658edfc264",
+        "bytes": 118
+      },
+      {
+        "section": "tools",
+        "id": "tool:comment_pr",
+        "sha256": "bf8a35aeb4fd530c4fe18390b6f551bc6ddfbcdfd40a9feae995a72a82a1ca01",
+        "bytes": 73
+      },
+      {
+        "section": "tools",
+        "id": "tool:read_diff",
+        "sha256": "c70fd4b98281ddca65372cc2739e62005c43caccf37020d0b825bef7864d24af",
+        "bytes": 54
+      },
+      {
+        "section": "content",
+        "id": "task:review_pr_412",
+        "sha256": "f2afe6d78c5038ae42611585505b99fc1dfa35a21bd37433de3aeb857fc053d6",
+        "bytes": 85
+      },
+      {
+        "section": "content",
+        "id": "obs:ci-412-run-2",
+        "sha256": "1d85883e6812cf9e0e37cdf0e4dd4a414e528d879ad01ebc726a56ea6c09e3be",
+        "bytes": 165
+      },
+      {
+        "section": "content",
+        "id": "obs:pr-412-diff",
+        "sha256": "55fd2c2d006bd75355fc7b9e926f2d5af821541a3a6295f5f741469184e33e1d",
+        "bytes": 352
+      },
+      {
+        "section": "content",
+        "id": "format:review",
+        "sha256": "679447f7a7f40bf55a745a0c5f31d55ec7a742c7d1267687ca2a00ede591c0a7",
+        "bytes": 118
+      },
+      {
+        "section": "content",
+        "id": "step:2",
+        "sha256": "9d6e0c5c555eef5d20d43746c23639ba75aa76da00289a1ab9ca1394c94941a8",
+        "bytes": 78
+      }
+    ]
+  }
+}

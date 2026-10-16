@@ -1,0 +1,46 @@
+{
+  "$schema": "cwa-dashboard/session/v1",
+  "session_id": "desk-agent-12",
+  "route": "policy-desk",
+  "service": "policy-desk",
+  "profile": {
+    "id": "policy-desk",
+    "version": 1
+  },
+  "turns": [
+    {
+      "turn_index": 0,
+      "event_id": "01M4ZXSP7MKY2A3A6DG03DFCHK",
+      "outcome": "refused",
+      "by_plane": {
+        "gov": 0,
+        "state": 0,
+        "evid": 0,
+        "inter": 0
+      },
+      "compressed_count": 0,
+      "over_budget_count": 0,
+      "refused_reason": "conflict_unresolved"
+    },
+    {
+      "turn_index": 1,
+      "event_id": "01M4ZYYA3MV0M2RZBF1H40Y7MV",
+      "outcome": "assembled",
+      "input_tokens": 65,
+      "by_plane": {
+        "gov": 12,
+        "state": 0,
+        "evid": 14,
+        "inter": 16
+      },
+      "compressed_count": 0,
+      "over_budget_count": 0,
+      "parts": 2
+    }
+  ],
+  "part_reuse": {
+    "compared_turns": 0,
+    "reused_parts": 0,
+    "parts": 0
+  }
+}

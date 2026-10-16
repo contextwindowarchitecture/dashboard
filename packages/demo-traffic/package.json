@@ -5,6 +5,7 @@
   "description": "Demo traffic: authored scenarios and the vendored conformance cases run through the pinned assembler into an event tree",
   "type": "module",
   "scripts": {
+    "generate": "node src/generate.ts",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json",

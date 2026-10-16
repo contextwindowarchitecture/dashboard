@@ -1,0 +1,1001 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M5099QJMHFG77A4K4QR3MSK2",
+  "recorded_at": "2026-10-15T17:21:00.500Z",
+  "service": {
+    "name": "investor-relations",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "session": {
+    "id": "ir-3",
+    "turn_index": 2
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.9214579999999728
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-10-15T17:21:00Z",
+    "scope": {
+      "tenant": "fjord-capital",
+      "user": "analyst_3",
+      "session": "ir-3",
+      "task": "report_qa"
+    },
+    "budget": {
+      "input": 500,
+      "reserved_output": 1500
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "long-context-reinforced",
+      "version": 1,
+      "route": "long-context-qa",
+      "model_family": null,
+      "route_policy_version": "illustrative/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "evidence.tool_results",
+          "wrap": "xml:observation"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:user_profile"
+        },
+        {
+          "slot": "state.task",
+          "wrap": "xml:task"
+        },
+        {
+          "slot": "interaction.memory",
+          "wrap": "xml:memory"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:history"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:format"
+        },
+        {
+          "slot": "governance.instructions",
+          "wrap": "xml:instructions"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "long-context-qa",
+      "version": "illustrative/v1",
+      "requires_evidence": true,
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions",
+            "governance.output_contract"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.user",
+            "state.task"
+          ]
+        },
+        "document-index": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "docs-mcp": {
+          "kind": "mcp",
+          "slots": [
+            "evidence.tool_results"
+          ]
+        },
+        "memory-svc": {
+          "kind": "memory",
+          "slots": [
+            "interaction.memory"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.2,
+          "min_included": 1,
+          "required_scope": [
+            "tenant"
+          ],
+          "dedupe": "exact",
+          "max_per_source": 8
+        },
+        "evidence.tool_results": {
+          "supersede": "source"
+        },
+        "interaction.memory": {
+          "source_prefix": "turn:"
+        }
+      }
+    },
+    "tokenizer": "estimate-utf8/v1",
+    "renderer": "cwa-message-blocks/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:ir-v1",
+            "slot": "governance.instructions",
+            "source": "policy-registry",
+            "source_version": "ir-v1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-01T00:00:00Z",
+            "body": "You answer analysts' questions about Fjord Capital's published reports. Use only the report excerpts in the evidence, give figures with their units, and say when the report does not cover a question."
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "document-index",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "annual-report-2025#s1",
+            "slot": "evidence.knowledge",
+            "source": "annual-report-2025",
+            "source_version": "final",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-03-14T00:00:00Z",
+            "body": "Revenue grew 11 percent to NOK 4.2 billion, driven by the Nordic payments business, which added 38,000 merchants. Card volumes rose 17 percent while transaction margins narrowed by four basis points under competitive pricing in Sweden and Denmark. Recurring software revenue reached 31 percent of the total, up from 26 percent.",
+            "relevance": 0.91,
+            "scope": {
+              "tenant": "fjord-capital"
+            },
+            "variants": [
+              {
+                "id": "annual-report-2025#s1/summary",
+                "body": "Revenue +11% to NOK 4.2bn; Nordic payments added 38,000 merchants; margins down 4bp.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          },
+          {
+            "id": "annual-report-2025#s2",
+            "slot": "evidence.knowledge",
+            "source": "annual-report-2025",
+            "source_version": "final",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-03-14T00:00:00Z",
+            "body": "Operating costs rose 9 percent, mainly from 240 new engineering hires and the migration of the core ledger to a cloud provider, which ran three months late. The board expects the migration's double-running costs of NOK 85 million to end in the second quarter of 2026.",
+            "relevance": 0.86,
+            "scope": {
+              "tenant": "fjord-capital"
+            },
+            "variants": [
+              {
+                "id": "annual-report-2025#s2/summary",
+                "body": "Costs +9% from hiring and a late ledger migration; NOK 85m double-running ends Q2 2026.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          },
+          {
+            "id": "annual-report-2025#s3",
+            "slot": "evidence.knowledge",
+            "source": "annual-report-2025",
+            "source_version": "final",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-03-14T00:00:00Z",
+            "body": "Credit losses on the merchant lending book increased to 1.9 percent of loans from 1.2 percent, concentrated in hospitality merchants in Norway. Provisions were raised by NOK 60 million and new lending to the segment was paused in October.",
+            "relevance": 0.84,
+            "scope": {
+              "tenant": "fjord-capital"
+            },
+            "variants": [
+              {
+                "id": "annual-report-2025#s3/summary",
+                "body": "Merchant credit losses 1.9% (from 1.2%), Norwegian hospitality; NOK 60m provisions; lending paused.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          },
+          {
+            "id": "annual-report-2025#s4",
+            "slot": "evidence.knowledge",
+            "source": "annual-report-2025",
+            "source_version": "final",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-03-14T00:00:00Z",
+            "body": "The company holds NOK 1.1 billion in cash and an undrawn revolving facility of NOK 500 million. The board proposes a dividend of NOK 2.40 per share and a buyback of up to NOK 300 million over twelve months.",
+            "relevance": 0.8,
+            "scope": {
+              "tenant": "fjord-capital"
+            },
+            "variants": [
+              {
+                "id": "annual-report-2025#s4/summary",
+                "body": "Cash NOK 1.1bn plus NOK 500m undrawn facility; dividend NOK 2.40; buyback up to NOK 300m.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          },
+          {
+            "id": "annual-report-2025#s5",
+            "slot": "evidence.knowledge",
+            "source": "annual-report-2025",
+            "source_version": "final",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-03-14T00:00:00Z",
+            "body": "Regulatory risk centres on the revised Payment Services Directive, which will require changes to strong customer authentication flows. The company estimates compliance costs of NOK 40 million across 2026 and 2027.",
+            "relevance": 0.78,
+            "scope": {
+              "tenant": "fjord-capital"
+            },
+            "variants": [
+              {
+                "id": "annual-report-2025#s5/summary",
+                "body": "PSD revision needs SCA changes; NOK 40m compliance cost over 2026-2027.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          },
+          {
+            "id": "annual-report-2025#s6",
+            "slot": "evidence.knowledge",
+            "source": "annual-report-2025",
+            "source_version": "final",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-03-14T00:00:00Z",
+            "body": "Employee engagement scored 78 out of 100 in the annual survey, and voluntary attrition fell to 8 percent. The company opened an office in Tallinn with 60 staff.",
+            "relevance": 0.62,
+            "scope": {
+              "tenant": "fjord-capital"
+            },
+            "variants": [
+              {
+                "id": "annual-report-2025#s6/summary",
+                "body": "Engagement 78/100; attrition 8%; new Tallinn office with 60 staff.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "docs-mcp",
+          "kind": "mcp"
+        },
+        "items": [
+          {
+            "id": "obs:report-pages-1",
+            "slot": "evidence.tool_results",
+            "source": "docs-mcp:annual-report-2025",
+            "source_version": "reading-1",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:05:00Z",
+            "body": "{\"document\": \"annual-report-2025\", \"pages\": 212}"
+          },
+          {
+            "id": "obs:report-pages-2",
+            "slot": "evidence.tool_results",
+            "source": "docs-mcp:annual-report-2025",
+            "source_version": "reading-2",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:20:50Z",
+            "body": "{\"document\": \"annual-report-2025\", \"pages\": 214}"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:1",
+            "slot": "interaction.history",
+            "source": "conversation:ir-3#1",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:10:10Z",
+            "body": "What drove revenue growth last year?",
+            "lineage": "verbatim"
+          },
+          {
+            "id": "turn:2",
+            "slot": "interaction.history",
+            "source": "conversation:ir-3#2",
+            "source_version": "1",
+            "authority": "untrusted",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:10:40Z",
+            "body": "Revenue grew 11 percent to NOK 4.2 billion, mainly from the Nordic payments business adding 38,000 merchants.",
+            "lineage": "generated"
+          },
+          {
+            "id": "turn:3",
+            "slot": "interaction.history",
+            "source": "conversation:ir-3#3",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:15:10Z",
+            "body": "And what is happening with costs and credit losses?",
+            "lineage": "verbatim"
+          },
+          {
+            "id": "turn:4",
+            "slot": "interaction.history",
+            "source": "conversation:ir-3#4",
+            "source_version": "1",
+            "authority": "untrusted",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:15:40Z",
+            "body": "Costs rose 9 percent from hiring and a late ledger migration, and merchant credit losses rose to 1.9 percent of loans.",
+            "lineage": "generated"
+          },
+          {
+            "id": "turn:5",
+            "slot": "interaction.query",
+            "source": "conversation:ir-3#5",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:20:55Z",
+            "body": "Given all that, how safe is the proposed dividend?"
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m5099qjmhfg77a4k4qr3msk2",
+    "profile": {
+      "id": "long-context-reinforced",
+      "version": 1
+    },
+    "budget": {
+      "input": 500,
+      "reserved_output": 1500
+    },
+    "result": {
+      "input_tokens": 493,
+      "hash": "e066e32e0d5a9e35bef8308c5ff95de1207f8b5cbae322492fc61711e0d9eaa4"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:ir-v1",
+        "tokens": 50,
+        "source_version": "ir-v1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s1",
+        "tokens": 21,
+        "source_version": "final",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s2",
+        "tokens": 22,
+        "source_version": "final",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s3",
+        "tokens": 25,
+        "source_version": "final",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s4",
+        "tokens": 23,
+        "source_version": "final",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s5",
+        "tokens": 18,
+        "source_version": "final",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s6",
+        "tokens": 17,
+        "source_version": "final",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.tool_results",
+        "item_id": "obs:report-pages-2",
+        "tokens": 12,
+        "source_version": "reading-2",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:1",
+        "tokens": 9,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:2",
+        "tokens": 28,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:3",
+        "tokens": 13,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:4",
+        "tokens": 30,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:ir-v1",
+        "tokens": 50,
+        "source_version": "ir-v1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:5",
+        "tokens": 13,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s1",
+        "from": 82,
+        "to": 21,
+        "method": "summary",
+        "variant_id": "annual-report-2025#s1/summary"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s2",
+        "from": 67,
+        "to": 22,
+        "method": "summary",
+        "variant_id": "annual-report-2025#s2/summary"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s3",
+        "from": 60,
+        "to": 25,
+        "method": "summary",
+        "variant_id": "annual-report-2025#s3/summary"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s4",
+        "from": 52,
+        "to": 23,
+        "method": "summary",
+        "variant_id": "annual-report-2025#s4/summary"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s5",
+        "from": 54,
+        "to": 18,
+        "method": "summary",
+        "variant_id": "annual-report-2025#s5/summary"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s6",
+        "from": 40,
+        "to": 17,
+        "method": "summary",
+        "variant_id": "annual-report-2025#s6/summary"
+      }
+    ],
+    "excluded": [
+      {
+        "item_id": "obs:report-pages-1",
+        "reason": "superseded",
+        "stage": "assembler",
+        "slot": "evidence.tool_results",
+        "superseded_by": "obs:report-pages-2"
+      }
+    ],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-10-15T17:21:00Z",
+      "route_policy_version": "illustrative/v1",
+      "tokenizer": "estimate-utf8/v1",
+      "renderer": "cwa-message-blocks/v1",
+      "snapshot_digest": "a0f551b3a7b66633e6879774083017428babf698eb3bac7f67fa49555c00c8cb"
+    },
+    "defaults_filled": [
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "annual-report-2025#s3",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "annual-report-2025#s3",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "annual-report-2025#s3",
+        "field": "lineage"
+      },
+      {
+        "item_id": "annual-report-2025#s3",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "annual-report-2025#s3",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "annual-report-2025#s4",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "annual-report-2025#s4",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "annual-report-2025#s4",
+        "field": "lineage"
+      },
+      {
+        "item_id": "annual-report-2025#s4",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "annual-report-2025#s4",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "annual-report-2025#s5",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "annual-report-2025#s5",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "annual-report-2025#s5",
+        "field": "lineage"
+      },
+      {
+        "item_id": "annual-report-2025#s5",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "annual-report-2025#s5",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "annual-report-2025#s6",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "annual-report-2025#s6",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "annual-report-2025#s6",
+        "field": "lineage"
+      },
+      {
+        "item_id": "annual-report-2025#s6",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "annual-report-2025#s6",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "variants"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "obs:report-pages-2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "obs:report-pages-2",
+        "field": "variants"
+      },
+      {
+        "item_id": "obs:report-pages-2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "obs:report-pages-2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "obs:report-pages-2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "obs:report-pages-2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "variants"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:4",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:4",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:4",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:4",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:4",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:5",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:5",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:5",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:5",
+        "field": "lineage"
+      },
+      {
+        "item_id": "turn:5",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:5",
+        "field": "injection_risk"
+      }
+    ],
+    "timings": {
+      "admission": 0.07441699999998264,
+      "conflicts": 0.0009579999999971278,
+      "supersession": 0.007167000000009693,
+      "deduplication": 0.01937499999999659,
+      "diversity": 0.004333000000002585,
+      "fitting": 0.7162910000000124
+    }
+  },
+  "payload": {
+    "hash": "e066e32e0d5a9e35bef8308c5ff95de1207f8b5cbae322492fc61711e0d9eaa4",
+    "bytes": 2573,
+    "parts": [
+      {
+        "section": "system",
+        "id": "policy:ir-v1",
+        "sha256": "edd4868a7c7ec5737fd21091491f92cbb65886cb55d781e04627c34cc1ebbf63",
+        "bytes": 199
+      },
+      {
+        "section": "content",
+        "id": "annual-report-2025#s1",
+        "sha256": "0ca175a47a2eff02e9a58054d7108e3869ce0f5e0e51d348ec688463e5a21051",
+        "bytes": 135
+      },
+      {
+        "section": "content",
+        "id": "annual-report-2025#s2",
+        "sha256": "614abea9202ac42baec1edc2e8a30cafca9a453c7c948ae55a5f112cf6be218e",
+        "bytes": 138
+      },
+      {
+        "section": "content",
+        "id": "annual-report-2025#s3",
+        "sha256": "08b3d866733972b82329857c9939dfea0f4f601e498c338477761d35b6a7733d",
+        "bytes": 150
+      },
+      {
+        "section": "content",
+        "id": "annual-report-2025#s4",
+        "sha256": "289638673640f538bfae1deb51e7dc41e7abde8210edc8b9d74c934610e67c71",
+        "bytes": 140
+      },
+      {
+        "section": "content",
+        "id": "annual-report-2025#s5",
+        "sha256": "0d9a5c2898cd8f7dd15a1ef632d8530eb6f91084e3d5bd314991c07a5e3d8c36",
+        "bytes": 122
+      },
+      {
+        "section": "content",
+        "id": "annual-report-2025#s6",
+        "sha256": "64c2221f8e332b40addc7a08b352b661521150fca464582ad2786224f371437a",
+        "bytes": 117
+      },
+      {
+        "section": "content",
+        "id": "obs:report-pages-2",
+        "sha256": "e44dcd2bf0dbf7725a8d3afbd71a6dd7b661716656cea9a7c19af85f48e5e446",
+        "bytes": 102
+      },
+      {
+        "section": "content",
+        "id": "turn:1",
+        "sha256": "386d2a9b8b9b3be27e0b24fd11275c6da911674ff3b57544bea7b2a9d4162b8b",
+        "bytes": 85
+      },
+      {
+        "section": "content",
+        "id": "turn:2",
+        "sha256": "09e3feaed965851f1d03c205592843020ca2075ec39a97ef458ddec1e7124e82",
+        "bytes": 163
+      },
+      {
+        "section": "content",
+        "id": "turn:3",
+        "sha256": "1d9aa2d28656bcbd21c2f3939a34cd19c15e2eb33ced30494f9de0c0ca51dc5f",
+        "bytes": 100
+      },
+      {
+        "section": "content",
+        "id": "turn:4",
+        "sha256": "820c4c7cae9143e9c85faa6a3c49ca098e9ea00bca5ebf8e869fb45293a16150",
+        "bytes": 172
+      },
+      {
+        "section": "content",
+        "id": "policy:ir-v1",
+        "sha256": "ed596858c62806fd9bfec47693374d826d8328c1619941052cc8d4081dbd7ecd",
+        "bytes": 249
+      },
+      {
+        "section": "content",
+        "id": "turn:5",
+        "sha256": "26da9a3e4ee478b71edce737065bfc5ba28cc34657e2f42f36c6f3c12bf30cff",
+        "bytes": 80
+      }
+    ]
+  }
+}

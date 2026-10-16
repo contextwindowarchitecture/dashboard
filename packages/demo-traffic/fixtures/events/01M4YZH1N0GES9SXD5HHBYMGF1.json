@@ -1,0 +1,953 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4YZH1N0GES9SXD5HHBYMGF1",
+  "recorded_at": "2026-10-15T05:11:00.000Z",
+  "service": {
+    "name": "conformance-suite",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.40791600000000017
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-09-22T12:00:00Z",
+    "scope": {
+      "tenant": "acme",
+      "user": "u_91",
+      "session": "s_7",
+      "task": "refund_request"
+    },
+    "budget": {
+      "input": 4000,
+      "reserved_output": 1024
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "conflict-fact",
+      "version": 1,
+      "route": "support-chat",
+      "model_family": null,
+      "route_policy_version": "conflict-fact/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "xml:governance.instructions"
+        },
+        {
+          "slot": "governance.examples",
+          "wrap": "xml:governance.examples"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:governance.output_contract"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:state.user"
+        },
+        {
+          "slot": "state.task",
+          "wrap": "xml:state.task"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence.knowledge"
+        },
+        {
+          "slot": "evidence.tool_results",
+          "wrap": "xml:evidence.tool_results"
+        },
+        {
+          "slot": "interaction.memory",
+          "wrap": "xml:interaction.memory"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:interaction.history"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:interaction.query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "support-chat",
+      "version": "conflict-fact/v1",
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.examples",
+            "governance.instructions",
+            "governance.output_contract"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.task",
+            "state.user"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "wiki-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "crm-mcp": {
+          "kind": "mcp",
+          "slots": [
+            "evidence.tool_results"
+          ]
+        },
+        "memory-svc": {
+          "kind": "memory",
+          "slots": [
+            "interaction.memory"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.5,
+          "required_scope": [
+            "tenant"
+          ]
+        }
+      },
+      "facts": {
+        "refund.window": {
+          "precedence": [
+            "policy-corpus",
+            "wiki-corpus"
+          ],
+          "scope": [
+            "tenant"
+          ],
+          "on_unresolved": "surface"
+        },
+        "refund.fee": {
+          "precedence": [
+            "crm-mcp"
+          ],
+          "freshness_tiebreak": true,
+          "on_unresolved": "surface"
+        },
+        "order.status": {
+          "precedence": [
+            "crm-mcp",
+            "policy-corpus"
+          ],
+          "scope": [
+            "user"
+          ],
+          "on_unresolved": "surface"
+        },
+        "plan.price": {
+          "precedence": [
+            "policy-corpus"
+          ],
+          "on_unresolved": "surface"
+        },
+        "refund.channel": {
+          "precedence": [
+            "crm-mcp"
+          ],
+          "on_unresolved": "surface"
+        },
+        "task.stage": {
+          "precedence": [
+            "crm-mcp",
+            "state-svc"
+          ],
+          "on_unresolved": "surface"
+        },
+        "refund.limit": {
+          "precedence": [
+            "policy-corpus"
+          ],
+          "on_unresolved": "surface"
+        },
+        "refund.method": {
+          "precedence": [
+            "crm-mcp"
+          ],
+          "freshness_tiebreak": true,
+          "on_unresolved": "surface"
+        }
+      }
+    },
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "fixture-xml/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:18",
+            "slot": "interaction.query",
+            "source": "src:turn:18",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Can I refund my Pro plan?",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "crm-mcp",
+          "kind": "mcp"
+        },
+        "items": [
+          {
+            "id": "obs:fee-a",
+            "slot": "evidence.tool_results",
+            "source": "src:obs:fee-a",
+            "source_version": "1",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:00:00.0000001Z",
+            "body": "refund fee: 5 EUR",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "obs:fee-b",
+            "slot": "evidence.tool_results",
+            "source": "src:obs:fee-b",
+            "source_version": "1",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:00:00.0000002Z",
+            "body": "refund fee: none",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "obs:status",
+            "slot": "evidence.tool_results",
+            "source": "src:obs:status",
+            "source_version": "1",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "order 42: shipped",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "obs:stage",
+            "slot": "evidence.tool_results",
+            "source": "src:obs:stage",
+            "source_version": "1",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "refund request 8821: approved",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "obs:method-a",
+            "slot": "evidence.tool_results",
+            "source": "src:obs:method-a",
+            "source_version": "1",
+            "authority": "observation",
+            "trust": "verified",
+            "freshness": "2026-09-22T10:00:00Z",
+            "body": "refund method: bank transfer",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          },
+          {
+            "id": "obs:method-b",
+            "slot": "evidence.tool_results",
+            "source": "src:obs:method-b",
+            "source_version": "1",
+            "authority": "observation",
+            "trust": "untrusted",
+            "freshness": "2026-09-22T10:05:00Z",
+            "body": "refund method: original card",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "kb:window",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:window",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Pro plans refund in full within 30 days.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8
+          },
+          {
+            "id": "kb:fee",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:fee",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:30:00Z",
+            "body": "A 10 EUR fee applies to every refund.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8
+          },
+          {
+            "id": "kb:status",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:status",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Order 42 for this customer is awaiting pickup.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme",
+              "user": "u_91"
+            },
+            "relevance": 0.8
+          },
+          {
+            "id": "kb:price-1",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:price-1",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Pro costs 20 EUR a month.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8
+          },
+          {
+            "id": "kb:price-2",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:price-2",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Pro costs 24 EUR a month.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8
+          },
+          {
+            "id": "kb:channel-1",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:channel-1",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Refunds go back to the original card.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8
+          },
+          {
+            "id": "kb:limit-old",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:limit-old",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Refunds are capped at 100 EUR.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8,
+            "expires": "2026-09-01T00:00:00Z"
+          },
+          {
+            "id": "kb:limit",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:limit",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Refunds are capped at 500 EUR.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:v12",
+            "slot": "governance.instructions",
+            "source": "src:policy:v12",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Follow verified refund policy and cite the evidence you use.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "state-svc",
+          "kind": "state"
+        },
+        "items": [
+          {
+            "id": "task:8821",
+            "slot": "state.task",
+            "source": "src:task:8821",
+            "source_version": "1",
+            "authority": "state",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "refund request 8821: awaiting approval",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "extracted",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "wiki-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "wiki:window",
+            "slot": "evidence.knowledge",
+            "source": "policy-corpus:refunds",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-21T00:00:00Z",
+            "body": "Refunds are possible for 14 days.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8
+          },
+          {
+            "id": "wiki:channel-2",
+            "slot": "evidence.knowledge",
+            "source": "src:wiki:channel-2",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Refunds are paid as store credit.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.8
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "f-precedence",
+        "kind": "fact",
+        "fact": "refund.window",
+        "items": [
+          "wiki:window",
+          "kb:window"
+        ]
+      },
+      {
+        "id": "f-freshness",
+        "kind": "fact",
+        "fact": "refund.fee",
+        "items": [
+          "obs:fee-a",
+          "obs:fee-b",
+          "kb:fee"
+        ]
+      },
+      {
+        "id": "f-scope",
+        "kind": "fact",
+        "fact": "order.status",
+        "items": [
+          "obs:status",
+          "kb:status"
+        ]
+      },
+      {
+        "id": "f-tie",
+        "kind": "fact",
+        "fact": "plan.price",
+        "items": [
+          "kb:price-1",
+          "kb:price-2"
+        ]
+      },
+      {
+        "id": "f-ineligible",
+        "kind": "fact",
+        "fact": "refund.channel",
+        "items": [
+          "kb:channel-1",
+          "wiki:channel-2"
+        ]
+      },
+      {
+        "id": "f-protected",
+        "kind": "fact",
+        "fact": "task.stage",
+        "items": [
+          "task:8821",
+          "obs:stage"
+        ]
+      },
+      {
+        "id": "f-moot",
+        "kind": "fact",
+        "fact": "refund.limit",
+        "items": [
+          "kb:limit-old",
+          "kb:limit"
+        ]
+      },
+      {
+        "id": "f-trust-blind",
+        "kind": "fact",
+        "fact": "refund.method",
+        "items": [
+          "obs:method-a",
+          "obs:method-b"
+        ]
+      }
+    ]
+  },
+  "trace": {
+    "trace_id": "trace-01m4yzh1n0ges9sxd5hhbymgf1",
+    "profile": {
+      "id": "conflict-fact",
+      "version": 1
+    },
+    "budget": {
+      "input": 4000,
+      "reserved_output": 1024
+    },
+    "result": {
+      "input_tokens": 124,
+      "hash": "b7a074a6aca0d970440ad59178a1450703558f73a7038b82cdab1c8917eaa2b5"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:v12",
+        "tokens": 10,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "state.task",
+        "item_id": "task:8821",
+        "tokens": 5,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:channel-1",
+        "tokens": 7,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:limit",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:price-1",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:price-2",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:status",
+        "tokens": 8,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:window",
+        "tokens": 8,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "wiki:channel-2",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.tool_results",
+        "item_id": "obs:fee-b",
+        "tokens": 3,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.tool_results",
+        "item_id": "obs:method-b",
+        "tokens": 4,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.tool_results",
+        "item_id": "obs:stage",
+        "tokens": 4,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:18",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [
+      {
+        "item_id": "kb:limit-old",
+        "reason": "expired",
+        "stage": "assembler",
+        "slot": "evidence.knowledge"
+      },
+      {
+        "item_id": "kb:fee",
+        "reason": "conflict_lost",
+        "stage": "assembler",
+        "slot": "evidence.knowledge"
+      },
+      {
+        "item_id": "obs:fee-a",
+        "reason": "conflict_lost",
+        "stage": "assembler",
+        "slot": "evidence.tool_results"
+      },
+      {
+        "item_id": "obs:method-a",
+        "reason": "conflict_lost",
+        "stage": "assembler",
+        "slot": "evidence.tool_results"
+      },
+      {
+        "item_id": "obs:status",
+        "reason": "conflict_lost",
+        "stage": "assembler",
+        "slot": "evidence.tool_results"
+      },
+      {
+        "item_id": "wiki:window",
+        "reason": "conflict_lost",
+        "stage": "assembler",
+        "slot": "evidence.knowledge"
+      }
+    ],
+    "conflicts": [
+      {
+        "group_id": "f-freshness",
+        "kind": "fact",
+        "items": [
+          "kb:fee",
+          "obs:fee-a",
+          "obs:fee-b"
+        ],
+        "resolution": "resolved",
+        "decided_by": "freshness",
+        "winner": "obs:fee-b"
+      },
+      {
+        "group_id": "f-ineligible",
+        "kind": "fact",
+        "items": [
+          "kb:channel-1",
+          "wiki:channel-2"
+        ],
+        "resolution": "surfaced",
+        "decided_by": "escalated"
+      },
+      {
+        "group_id": "f-moot",
+        "kind": "fact",
+        "items": [
+          "kb:limit",
+          "kb:limit-old"
+        ],
+        "resolution": "moot",
+        "decided_by": "moot"
+      },
+      {
+        "group_id": "f-precedence",
+        "kind": "fact",
+        "items": [
+          "kb:window",
+          "wiki:window"
+        ],
+        "resolution": "resolved",
+        "decided_by": "policy",
+        "winner": "kb:window"
+      },
+      {
+        "group_id": "f-protected",
+        "kind": "fact",
+        "items": [
+          "obs:stage",
+          "task:8821"
+        ],
+        "resolution": "surfaced",
+        "decided_by": "escalated"
+      },
+      {
+        "group_id": "f-scope",
+        "kind": "fact",
+        "items": [
+          "kb:status",
+          "obs:status"
+        ],
+        "resolution": "resolved",
+        "decided_by": "policy",
+        "winner": "kb:status"
+      },
+      {
+        "group_id": "f-tie",
+        "kind": "fact",
+        "items": [
+          "kb:price-1",
+          "kb:price-2"
+        ],
+        "resolution": "surfaced",
+        "decided_by": "escalated"
+      },
+      {
+        "group_id": "f-trust-blind",
+        "kind": "fact",
+        "items": [
+          "obs:method-a",
+          "obs:method-b"
+        ],
+        "resolution": "resolved",
+        "decided_by": "freshness",
+        "winner": "obs:method-b"
+      }
+    ],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-09-22T12:00:00Z",
+      "route_policy_version": "conflict-fact/v1",
+      "tokenizer": "fixture-whitespace/v1",
+      "renderer": "fixture-xml/v1",
+      "snapshot_digest": "28e3d24764b1437c6fc32e8951353326c5ec17d6a75ff9c6ba2ca0370e64031b"
+    },
+    "defaults_filled": [],
+    "timings": {
+      "admission": 0.060000000000002274,
+      "conflicts": 0.09795800000000554,
+      "supersession": 0.0016669999999976426,
+      "deduplication": 0.0012919999999922993,
+      "diversity": 0.0009589999999946031,
+      "fitting": 0.06974999999999909
+    }
+  },
+  "payload": {
+    "hash": "b7a074a6aca0d970440ad59178a1450703558f73a7038b82cdab1c8917eaa2b5",
+    "bytes": 1348
+  }
+}

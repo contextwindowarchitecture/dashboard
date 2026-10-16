@@ -1,0 +1,564 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4ZG4ZM48MAN296TJPP3NVXM",
+  "recorded_at": "2026-10-15T10:01:30.500Z",
+  "service": {
+    "name": "intake-assistant",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "session": {
+    "id": "intake-12",
+    "turn_index": 0
+  },
+  "redaction_mode": "pii_scrubbed",
+  "timings_ms": {
+    "total": 0.2345420000000047
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-10-15T10:01:30Z",
+    "scope": {
+      "tenant": "riverside-clinic",
+      "user": "p_4471",
+      "session": "intake-12",
+      "task": "triage"
+    },
+    "budget": {
+      "input": 4096,
+      "reserved_output": 800
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "document-analysis",
+      "version": 1,
+      "route": "document-qa",
+      "model_family": null,
+      "route_policy_version": "illustrative/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "governance.instructions",
+          "wrap": "xml:instructions"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:user_profile"
+        },
+        {
+          "slot": "state.task",
+          "wrap": "xml:task"
+        },
+        {
+          "slot": "interaction.memory",
+          "wrap": "xml:memory"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:history"
+        },
+        {
+          "slot": "governance.examples",
+          "wrap": "xml:examples"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:format"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "document-qa",
+      "version": "illustrative/v1",
+      "requires_evidence": true,
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions",
+            "governance.examples",
+            "governance.output_contract"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.user",
+            "state.task"
+          ]
+        },
+        "document-index": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "memory-svc": {
+          "kind": "memory",
+          "slots": [
+            "interaction.memory"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.3,
+          "min_included": 1,
+          "required_scope": [
+            "tenant"
+          ],
+          "order_by": [
+            "-relevance"
+          ],
+          "dedupe": "exact",
+          "max_per_source": 5
+        },
+        "interaction.memory": {
+          "source_prefix": "turn:"
+        }
+      }
+    },
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "cwa-messages/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:intake-v3",
+            "slot": "governance.instructions",
+            "source": "policy-registry",
+            "source_version": "intake-v3",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-01T00:00:00Z",
+            "body": {
+              "redacted": "pii_scrubbed",
+              "text": "You assist intake nurses at Riverside Clinic. Answer only from the clinic's protocols in the evidence. Never diagnose; route anything urgent to the duty clinician.",
+              "content_sha256": "c10ea99e36d43f387cba844a06c0cfda7059aaa5296f04c12251a236bec3b31d",
+              "token_counts": {
+                "fixture-whitespace/v1": 25
+              }
+            }
+          },
+          {
+            "id": "format:intake",
+            "slot": "governance.output_contract",
+            "source": "policy-registry",
+            "source_version": "intake-v3",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-01T00:00:00Z",
+            "body": {
+              "redacted": "pii_scrubbed",
+              "text": "Answer in at most four sentences, then list the protocol sections you used.",
+              "content_sha256": "2b72b4df9aabb01fa83a76a4b785953ac4eb4217568c457d706b75871b89c378",
+              "token_counts": {
+                "fixture-whitespace/v1": 13
+              }
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "document-index",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "triage-protocol:v9#s2",
+            "slot": "evidence.knowledge",
+            "source": "triage-protocol:v9",
+            "source_version": "2026-08",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-08-20T00:00:00Z",
+            "body": {
+              "redacted": "pii_scrubbed",
+              "text": "Chest pain with shortness of breath is triaged as urgent: notify the duty clinician at once and do not book a routine slot.",
+              "content_sha256": "d8217e87906115cb6ae058c3905912b8da3ab013b6b548d8fea3f5b81656e3aa",
+              "token_counts": {
+                "fixture-whitespace/v1": 23
+              }
+            },
+            "relevance": 0.88,
+            "scope": {
+              "tenant": "riverside-clinic"
+            }
+          },
+          {
+            "id": "triage-protocol:v9#s5",
+            "slot": "evidence.knowledge",
+            "source": "triage-protocol:v9",
+            "source_version": "2026-08",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-08-20T00:00:00Z",
+            "body": {
+              "redacted": "pii_scrubbed",
+              "text": "Medication questions after a recent prescription change go to the prescribing clinician within one working day.",
+              "content_sha256": "5148f1da7a2063dd2cb7dfeee556750234443d8d8ca7722804378f988fe517e2",
+              "token_counts": {
+                "fixture-whitespace/v1": 16
+              }
+            },
+            "relevance": 0.62,
+            "scope": {
+              "tenant": "riverside-clinic"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "memory-svc",
+          "kind": "memory"
+        },
+        "items": [
+          {
+            "id": "mem:intake-12",
+            "slot": "interaction.memory",
+            "source": "turn:1",
+            "source_version": "1",
+            "authority": "generated",
+            "trust": "unverified",
+            "freshness": "2026-10-15T10:00:30Z",
+            "body": {
+              "redacted": "pii_scrubbed",
+              "text": "Intake for [name]: chest tightness, shortness of breath, on a new blood pressure medication since last week.",
+              "content_sha256": "9c3576a29659b1b7dca3d5357b8a166dfe1223407e3503146bec80ccaee5eaed",
+              "token_counts": {
+                "fixture-whitespace/v1": 18
+              }
+            },
+            "expires": "2026-10-15T10:20:00Z",
+            "scope": {
+              "tenant": "riverside-clinic",
+              "user": "p_4471"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:1",
+            "slot": "interaction.query",
+            "source": "conversation:intake-12#1",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T10:01:29Z",
+            "body": {
+              "redacted": "pii_scrubbed",
+              "text": "[name] is on the phone: tightness in her chest since this morning and she is short of breath on the stairs.",
+              "content_sha256": "0404d74fdd487c0fb930c9ed78643dcefa69a98f7f9fb67e9215df899c7c25cf",
+              "token_counts": {
+                "fixture-whitespace/v1": 22
+              }
+            }
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m4zg4zm48man296tjpp3nvxm",
+    "profile": {
+      "id": "document-analysis",
+      "version": 1
+    },
+    "budget": {
+      "input": 4096,
+      "reserved_output": 800
+    },
+    "result": {
+      "input_tokens": 160,
+      "hash": "eebaa95293b5c9acbf136e1e55cb52ba015470fe62647ae9dea54db4a6d7d77a"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:intake-v3",
+        "tokens": 25,
+        "source_version": "intake-v3",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "triage-protocol:v9#s2",
+        "tokens": 23,
+        "source_version": "2026-08",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "triage-protocol:v9#s5",
+        "tokens": 16,
+        "source_version": "2026-08",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:intake-v3",
+        "tokens": 25,
+        "source_version": "intake-v3",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.memory",
+        "item_id": "mem:intake-12",
+        "tokens": 18,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.output_contract",
+        "item_id": "format:intake",
+        "tokens": 13,
+        "source_version": "intake-v3",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:1",
+        "tokens": 22,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-10-15T10:01:30Z",
+      "route_policy_version": "illustrative/v1",
+      "tokenizer": "fixture-whitespace/v1",
+      "renderer": "cwa-messages/v1",
+      "snapshot_digest": "9eb9db74d993ec0e752586a3418a286d1a2a4207fb556b2b2fc90ead644e15e0"
+    },
+    "defaults_filled": [
+      {
+        "item_id": "format:intake",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "format:intake",
+        "field": "variants"
+      },
+      {
+        "item_id": "format:intake",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "format:intake",
+        "field": "lineage"
+      },
+      {
+        "item_id": "format:intake",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "format:intake",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "mem:intake-12",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "mem:intake-12",
+        "field": "variants"
+      },
+      {
+        "item_id": "mem:intake-12",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "mem:intake-12",
+        "field": "lineage"
+      },
+      {
+        "item_id": "mem:intake-12",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "mem:intake-12",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "policy:intake-v3",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "policy:intake-v3",
+        "field": "variants"
+      },
+      {
+        "item_id": "policy:intake-v3",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "policy:intake-v3",
+        "field": "lineage"
+      },
+      {
+        "item_id": "policy:intake-v3",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "policy:intake-v3",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "triage-protocol:v9#s2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "triage-protocol:v9#s2",
+        "field": "variants"
+      },
+      {
+        "item_id": "triage-protocol:v9#s2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "triage-protocol:v9#s2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "triage-protocol:v9#s2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "triage-protocol:v9#s2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "triage-protocol:v9#s5",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "triage-protocol:v9#s5",
+        "field": "variants"
+      },
+      {
+        "item_id": "triage-protocol:v9#s5",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "triage-protocol:v9#s5",
+        "field": "lineage"
+      },
+      {
+        "item_id": "triage-protocol:v9#s5",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "triage-protocol:v9#s5",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "injection_risk"
+      }
+    ],
+    "timings": {
+      "admission": 0.06795799999997598,
+      "conflicts": 0.003833000000014408,
+      "supersession": 0.000916999999986956,
+      "deduplication": 0.0037499999999965894,
+      "diversity": 0.012042000000008102,
+      "fitting": 0.061499999999995225
+    }
+  },
+  "payload": {
+    "hash": "eebaa95293b5c9acbf136e1e55cb52ba015470fe62647ae9dea54db4a6d7d77a",
+    "bytes": 1257,
+    "parts": [
+      {
+        "section": "system",
+        "id": "policy:intake-v3",
+        "sha256": "c10ea99e36d43f387cba844a06c0cfda7059aaa5296f04c12251a236bec3b31d",
+        "bytes": 163
+      },
+      {
+        "section": "content",
+        "sha256": "f8443a4ebb02ccfc071a64b756242e3031422bd268d3da0c9ce4dbac063018a0",
+        "bytes": 963
+      }
+    ]
+  }
+}

@@ -1,0 +1,311 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4YZYS3G6YPX5Z0E4K2K33AE",
+  "recorded_at": "2026-10-15T05:18:30.000Z",
+  "service": {
+    "name": "conformance-suite",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.08554200000000378
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-09-22T12:00:00Z",
+    "scope": {
+      "tenant": "acme"
+    },
+    "budget": {
+      "input": 47,
+      "reserved_output": 1200
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "doubles-largest",
+      "version": 1,
+      "route": "support-chat",
+      "model_family": null,
+      "route_policy_version": "doubles-largest/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "xml:governance.instructions"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence.knowledge"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:interaction.query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "support-chat",
+      "version": "doubles-largest/v1",
+      "producers": {
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.query"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 1.7976931348623155e+308
+        }
+      }
+    },
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "fixture-xml/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:18",
+            "slot": "interaction.query",
+            "source": "src:turn:18",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:30Z",
+            "body": "Can I refund my Pro plan?",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "kb:a",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:a",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:30Z",
+            "body": "Refunds within 30 days return to the original card.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "relevance": 1.7976931348623155e+308
+          },
+          {
+            "id": "kb:b",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:b",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:30Z",
+            "body": "Annual plans refund pro rata after 30 days.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "relevance": 1.7976931348623157e+308
+          },
+          {
+            "id": "kb:c",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:c",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:30Z",
+            "body": "Refunds take five business days.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "relevance": 1.7976931348623157e+308
+          },
+          {
+            "id": "kb:d",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:d",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:30Z",
+            "body": "Refunds reach debit cards within ten days.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "relevance": 1.7976931348623153e+308
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:v12",
+            "slot": "governance.instructions",
+            "source": "src:policy:v12",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:30Z",
+            "body": "Follow verified application policy.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m4yzys3g6ypx5z0e4k2k33ae",
+    "profile": {
+      "id": "doubles-largest",
+      "version": 1
+    },
+    "budget": {
+      "input": 47,
+      "reserved_output": 1200
+    },
+    "result": {
+      "input_tokens": 47,
+      "hash": "97a68af25f56c2f4b41e8e531b31e7cf749591cbfd169462de44cc2268e9f3e2"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:v12",
+        "tokens": 4,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:a",
+        "tokens": 9,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:b",
+        "tokens": 8,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "kb:c",
+        "tokens": 5,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:18",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [
+      {
+        "item_id": "kb:d",
+        "reason": "below_threshold",
+        "stage": "assembler",
+        "slot": "evidence.knowledge"
+      }
+    ],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-09-22T12:00:00Z",
+      "route_policy_version": "doubles-largest/v1",
+      "tokenizer": "fixture-whitespace/v1",
+      "renderer": "fixture-xml/v1",
+      "snapshot_digest": "f81fc90ebf1717bd24858effedfbfccf86fccff6f2b120de842c7dcdacd075ee"
+    },
+    "defaults_filled": [],
+    "timings": {
+      "admission": 0.01779200000000003,
+      "conflicts": 0.0005000000000023874,
+      "supersession": 0.0007080000000030395,
+      "deduplication": 0.0005000000000023874,
+      "diversity": 0.0005419999999958236,
+      "fitting": 0.02049999999999841
+    }
+  },
+  "payload": {
+    "hash": "97a68af25f56c2f4b41e8e531b31e7cf749591cbfd169462de44cc2268e9f3e2",
+    "bytes": 473
+  }
+}

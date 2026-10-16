@@ -1,0 +1,96 @@
+{
+  "$schema": "cwa-dashboard/session/v1",
+  "session_id": "refund-7",
+  "route": "support-chat",
+  "service": "support-assistant",
+  "profile": {
+    "id": "cache-first-chat",
+    "version": 1
+  },
+  "turns": [
+    {
+      "turn_index": 0,
+      "event_id": "01M4ZCN9D4M5QNPFCQ5A2K3W6H",
+      "outcome": "assembled",
+      "input_tokens": 438,
+      "by_plane": {
+        "gov": 174,
+        "state": 23,
+        "evid": 111,
+        "inter": 33
+      },
+      "compressed_count": 0,
+      "over_budget_count": 0,
+      "parts": 12
+    },
+    {
+      "turn_index": 1,
+      "event_id": "01M4ZCRYK48S5GFA51EDM9CYPS",
+      "outcome": "assembled",
+      "input_tokens": 510,
+      "by_plane": {
+        "gov": 174,
+        "state": 23,
+        "evid": 111,
+        "inter": 80
+      },
+      "compressed_count": 0,
+      "over_budget_count": 0,
+      "parts": 14,
+      "reused_parts": 8
+    },
+    {
+      "turn_index": 2,
+      "event_id": "01M4ZCWKS4HXMQBYHST49K7EYG",
+      "outcome": "assembled",
+      "input_tokens": 623,
+      "by_plane": {
+        "gov": 174,
+        "state": 23,
+        "evid": 127,
+        "inter": 141
+      },
+      "compressed_count": 0,
+      "over_budget_count": 0,
+      "parts": 17,
+      "reused_parts": 10
+    },
+    {
+      "turn_index": 3,
+      "event_id": "01M4ZD08Z4QNN8GJX11BSW64XE",
+      "outcome": "assembled",
+      "input_tokens": 585,
+      "by_plane": {
+        "gov": 70,
+        "state": 23,
+        "evid": 127,
+        "inter": 206
+      },
+      "compressed_count": 0,
+      "over_budget_count": 2,
+      "parts": 17,
+      "reused_parts": 3
+    },
+    {
+      "turn_index": 4,
+      "event_id": "01M4ZD3Y5439GVAR3H0FA56RD5",
+      "outcome": "assembled",
+      "input_tokens": 554,
+      "by_plane": {
+        "gov": 70,
+        "state": 14,
+        "evid": 48,
+        "inter": 249
+      },
+      "compressed_count": 1,
+      "over_budget_count": 3,
+      "parts": 18,
+      "reused_parts": 4
+    }
+  ],
+  "part_reuse": {
+    "compared_turns": 4,
+    "reused_parts": 25,
+    "parts": 66
+  }
+}

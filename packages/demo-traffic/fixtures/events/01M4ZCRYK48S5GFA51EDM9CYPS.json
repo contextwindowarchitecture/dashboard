@@ -1,0 +1,968 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4ZCRYK48S5GFA51EDM9CYPS",
+  "recorded_at": "2026-10-15T09:02:30.500Z",
+  "service": {
+    "name": "support-assistant",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "session": {
+    "id": "refund-7",
+    "turn_index": 1
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.4181250000000034
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-10-15T09:02:30Z",
+    "scope": {
+      "tenant": "northwind",
+      "user": "u_91",
+      "session": "refund-7",
+      "task": "refund_request"
+    },
+    "budget": {
+      "input": 720,
+      "reserved_output": 1200,
+      "margin_percent": 15
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "cache-first-chat",
+      "version": 1,
+      "route": "support-chat",
+      "model_family": null,
+      "route_policy_version": "illustrative/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "governance.capabilities",
+          "wrap": "tools"
+        },
+        {
+          "slot": "governance.examples",
+          "wrap": "xml:examples"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:format"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:user_profile"
+        },
+        {
+          "slot": "interaction.memory",
+          "wrap": "xml:memory"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:history"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "evidence.tool_results",
+          "wrap": "xml:observation"
+        },
+        {
+          "slot": "state.task",
+          "wrap": "xml:task"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "support-chat",
+      "version": "illustrative/v1",
+      "clock_skew_seconds": 5,
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions",
+            "governance.examples",
+            "governance.output_contract"
+          ]
+        },
+        "capability-policy": {
+          "kind": "capability_policy",
+          "slots": [
+            "governance.capabilities"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.user",
+            "state.task"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "crm-mcp": {
+          "kind": "mcp",
+          "slots": [
+            "evidence.tool_results"
+          ]
+        },
+        "memory-svc": {
+          "kind": "memory",
+          "slots": [
+            "interaction.memory"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "state.user": {
+          "max_age_seconds": 300,
+          "required_scope": [
+            "tenant",
+            "user"
+          ]
+        },
+        "state.task": {
+          "max_age_seconds": 300,
+          "required_scope": [
+            "tenant",
+            "task"
+          ]
+        },
+        "evidence.knowledge": {
+          "min_relevance": 0.5,
+          "max_age_seconds": 7776000,
+          "required_scope": [
+            "tenant"
+          ],
+          "dedupe": "exact",
+          "max_per_source": 3
+        },
+        "evidence.tool_results": {
+          "supersede": "source"
+        },
+        "interaction.memory": {
+          "source_prefix": "turn:",
+          "required_scope": [
+            "tenant",
+            "user"
+          ]
+        }
+      }
+    },
+    "tokenizer": "estimate-utf8/v1",
+    "renderer": "cwa-message-blocks/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "format:chat",
+            "slot": "governance.output_contract",
+            "source": "policy-registry:support-chat",
+            "source_version": "v12",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Max 3 sentences. No bullet lists.",
+            "injection_risk": "none"
+          },
+          {
+            "id": "policy:v12",
+            "slot": "governance.instructions",
+            "source": "policy-registry:support-chat",
+            "source_version": "v12",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "You are Ada, a support agent for Northwind.\nNever quote prices you cannot verify with a tool.",
+            "injection_risk": "none"
+          },
+          {
+            "id": "ex:refund-confirm",
+            "slot": "governance.examples",
+            "source": "policy-registry",
+            "source_version": "examples-v4",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-01T00:00:00Z",
+            "body": "Example. User: please refund my order. Agent: I have checked the order against the refund policy; it qualifies, and the refund is issued to the original payment method. You will see it within 5 to 10 business days."
+          },
+          {
+            "id": "ex:refund-decline",
+            "slot": "governance.examples",
+            "source": "policy-registry",
+            "source_version": "examples-v4",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-01T00:00:00Z",
+            "body": "Example. User: refund my annual plan from last year. Agent: I have checked the order; it is outside the 30-day window, so I cannot refund it, but I can stop the renewal so you are not charged again."
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "capability-policy",
+          "kind": "capability_policy"
+        },
+        "items": [
+          {
+            "id": "tool:issue_refund",
+            "slot": "governance.capabilities",
+            "source": "capability-policy:support-chat",
+            "source_version": "v3",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "{\"name\": \"issue_refund\", \"parameters\": {\"order_id\": \"string\", \"amount\": \"number\"}}",
+            "injection_risk": "none"
+          },
+          {
+            "id": "tool:lookup_order",
+            "slot": "governance.capabilities",
+            "source": "capability-policy:support-chat",
+            "source_version": "v3",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "{\"name\": \"lookup_order\", \"parameters\": {\"order_id\": \"string\"}}",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "state-svc",
+          "kind": "state"
+        },
+        "items": [
+          {
+            "id": "task:refund_request",
+            "slot": "state.task",
+            "source": "state-svc:task",
+            "source_version": "7",
+            "authority": "state",
+            "trust": "verified",
+            "freshness": "2026-10-15T09:02:20Z",
+            "body": "refund_request: verify_eligibility=done, issue=pending",
+            "scope": {
+              "tenant": "northwind",
+              "task": "refund_request"
+            }
+          },
+          {
+            "id": "user:profile",
+            "slot": "state.user",
+            "source": "state-svc:user",
+            "source_version": "31",
+            "authority": "state",
+            "trust": "verified",
+            "freshness": "2026-10-15T09:02:20Z",
+            "body": "plan=pro; region=EU; tone=concise",
+            "scope": {
+              "tenant": "northwind",
+              "user": "u_91"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "billing-faq:v3#p1",
+            "slot": "evidence.knowledge",
+            "source": "kb/billing-faq",
+            "source_version": "v3",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-08-02T10:00:00Z",
+            "body": "Refunds are always returned to the original payment method. Card refunds settle within 5 to 10 business days depending on the issuing bank; bank transfers settle within 3 business days. Store credit is never offered in place of a refund unless the customer asks for it in writing. Partial refunds are prorated by unused days for annual plans only; monthly plans refund in full or not at all.",
+            "relevance": 0.71,
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "northwind"
+            },
+            "variants": [
+              {
+                "id": "billing-faq:v3#p1/summary",
+                "body": "Refunds go back to the original payment method within 5 to 10 business days.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          },
+          {
+            "id": "refunds-eu:v17#p4",
+            "slot": "evidence.knowledge",
+            "source": "kb/refunds-eu",
+            "source_version": "v17",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-09-10T08:00:00Z",
+            "body": "Pro plans refund in full within 30 days of purchase.",
+            "relevance": 0.93,
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "northwind"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "crm-mcp",
+          "kind": "mcp"
+        },
+        "items": [],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "memory-svc",
+          "kind": "memory"
+        },
+        "items": [
+          {
+            "id": "mem:plan-purchase",
+            "slot": "interaction.memory",
+            "source": "turn:4",
+            "source_version": "1",
+            "authority": "generated",
+            "trust": "unverified",
+            "freshness": "2026-09-20T09:12:00Z",
+            "body": "User bought Pro in March, EU billing.",
+            "lineage": "summarised",
+            "injection_risk": "untrusted_content",
+            "expires": "2026-12-20T09:12:00Z",
+            "scope": {
+              "tenant": "northwind",
+              "user": "u_91"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:1",
+            "slot": "interaction.history",
+            "source": "conversation:refund-7#1",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T09:02:00Z",
+            "body": "Hi, I bought the Pro plan last month and it is not what I expected. Is my order refundable?",
+            "lineage": "verbatim"
+          },
+          {
+            "id": "turn:2",
+            "slot": "interaction.history",
+            "source": "conversation:refund-7#2",
+            "source_version": "1",
+            "authority": "untrusted",
+            "trust": "unverified",
+            "freshness": "2026-10-15T09:02:01Z",
+            "body": "I can check that for you. Pro plans are refundable in full within 30 days of purchase. Could you share your order number?",
+            "lineage": "generated"
+          },
+          {
+            "id": "turn:3",
+            "slot": "interaction.query",
+            "source": "conversation:refund-7#3",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T09:02:29Z",
+            "body": "It is order 8821. I paid with my company card, if that matters."
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": [],
+    "capabilities": {
+      "policy_producer": "capability-policy",
+      "allow_list_version": "v3",
+      "allowed_ids": [
+        "tool:issue_refund",
+        "tool:lookup_order"
+      ]
+    }
+  },
+  "trace": {
+    "trace_id": "trace-01m4zcryk48s5gfa51edm9cyps",
+    "profile": {
+      "id": "cache-first-chat",
+      "version": 1
+    },
+    "budget": {
+      "input": 720,
+      "reserved_output": 1200,
+      "margin_percent": 15
+    },
+    "result": {
+      "input_tokens": 510,
+      "hash": "bdea31657eca04397473215588fc985d3da84f36cf4ba1a76b4c44e5cc17270f"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:v12",
+        "tokens": 24,
+        "source_version": "v12",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.capabilities",
+        "item_id": "tool:issue_refund",
+        "tokens": 21,
+        "source_version": "v3",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.capabilities",
+        "item_id": "tool:lookup_order",
+        "tokens": 16,
+        "source_version": "v3",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.examples",
+        "item_id": "ex:refund-confirm",
+        "tokens": 54,
+        "source_version": "examples-v4",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.examples",
+        "item_id": "ex:refund-decline",
+        "tokens": 50,
+        "source_version": "examples-v4",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.output_contract",
+        "item_id": "format:chat",
+        "tokens": 9,
+        "source_version": "v12",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "state.user",
+        "item_id": "user:profile",
+        "tokens": 9,
+        "source_version": "31",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.memory",
+        "item_id": "mem:plan-purchase",
+        "tokens": 10,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:1",
+        "tokens": 23,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.history",
+        "item_id": "turn:2",
+        "tokens": 31,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "billing-faq:v3#p1",
+        "tokens": 98,
+        "source_version": "v3",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "refunds-eu:v17#p4",
+        "tokens": 13,
+        "source_version": "v17",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "state.task",
+        "item_id": "task:refund_request",
+        "tokens": 14,
+        "source_version": "7",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:3",
+        "tokens": 16,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-10-15T09:02:30Z",
+      "route_policy_version": "illustrative/v1",
+      "tokenizer": "estimate-utf8/v1",
+      "renderer": "cwa-message-blocks/v1",
+      "snapshot_digest": "1e1a79447cf6d9459435df68c7f3ad26c6a5904c42b1ac316a14d3c9d28b67c0"
+    },
+    "defaults_filled": [
+      {
+        "item_id": "billing-faq:v3#p1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "billing-faq:v3#p1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "billing-faq:v3#p1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "billing-faq:v3#p1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "ex:refund-confirm",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "ex:refund-confirm",
+        "field": "variants"
+      },
+      {
+        "item_id": "ex:refund-confirm",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "ex:refund-confirm",
+        "field": "lineage"
+      },
+      {
+        "item_id": "ex:refund-confirm",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "ex:refund-confirm",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "ex:refund-decline",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "ex:refund-decline",
+        "field": "variants"
+      },
+      {
+        "item_id": "ex:refund-decline",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "ex:refund-decline",
+        "field": "lineage"
+      },
+      {
+        "item_id": "ex:refund-decline",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "ex:refund-decline",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "format:chat",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "format:chat",
+        "field": "variants"
+      },
+      {
+        "item_id": "format:chat",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "format:chat",
+        "field": "lineage"
+      },
+      {
+        "item_id": "format:chat",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "mem:plan-purchase",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "mem:plan-purchase",
+        "field": "variants"
+      },
+      {
+        "item_id": "mem:plan-purchase",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "mem:plan-purchase",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "policy:v12",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "policy:v12",
+        "field": "variants"
+      },
+      {
+        "item_id": "policy:v12",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "policy:v12",
+        "field": "lineage"
+      },
+      {
+        "item_id": "policy:v12",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "refunds-eu:v17#p4",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "refunds-eu:v17#p4",
+        "field": "variants"
+      },
+      {
+        "item_id": "refunds-eu:v17#p4",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "refunds-eu:v17#p4",
+        "field": "lineage"
+      },
+      {
+        "item_id": "refunds-eu:v17#p4",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "task:refund_request",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "task:refund_request",
+        "field": "variants"
+      },
+      {
+        "item_id": "task:refund_request",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "task:refund_request",
+        "field": "lineage"
+      },
+      {
+        "item_id": "task:refund_request",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "task:refund_request",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "tool:issue_refund",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "tool:issue_refund",
+        "field": "variants"
+      },
+      {
+        "item_id": "tool:issue_refund",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "tool:issue_refund",
+        "field": "lineage"
+      },
+      {
+        "item_id": "tool:issue_refund",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "tool:lookup_order",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "tool:lookup_order",
+        "field": "variants"
+      },
+      {
+        "item_id": "tool:lookup_order",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "tool:lookup_order",
+        "field": "lineage"
+      },
+      {
+        "item_id": "tool:lookup_order",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "lineage"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:3",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "user:profile",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "user:profile",
+        "field": "variants"
+      },
+      {
+        "item_id": "user:profile",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "user:profile",
+        "field": "lineage"
+      },
+      {
+        "item_id": "user:profile",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "user:profile",
+        "field": "injection_risk"
+      }
+    ],
+    "timings": {
+      "admission": 0.11679200000000378,
+      "conflicts": 0.0012499999999988631,
+      "supersession": 0.001416000000006079,
+      "deduplication": 0.005832999999995536,
+      "diversity": 0.0027919999999994616,
+      "fitting": 0.15304100000000176
+    }
+  },
+  "payload": {
+    "hash": "bdea31657eca04397473215588fc985d3da84f36cf4ba1a76b4c44e5cc17270f",
+    "bytes": 2632,
+    "parts": [
+      {
+        "section": "system",
+        "id": "policy:v12",
+        "sha256": "ee19af88da05e1593a3bca062bc2657302b04c367b833e18657a93ffa287e4b5",
+        "bytes": 93
+      },
+      {
+        "section": "tools",
+        "id": "tool:issue_refund",
+        "sha256": "a300146b73ca9f147c97e7e036ebb271cdd8c7ca366f5d50caadf963bb4064c3",
+        "bytes": 82
+      },
+      {
+        "section": "tools",
+        "id": "tool:lookup_order",
+        "sha256": "d2a4b541bad6597779f0b6a6205e2634a09b573dc1c3ee119a845059d6e217be",
+        "bytes": 62
+      },
+      {
+        "section": "content",
+        "id": "ex:refund-confirm",
+        "sha256": "a6d3719e79d28716f534df410ce330121db67b512a161c3cf4f035f8ba40a97a",
+        "bytes": 261
+      },
+      {
+        "section": "content",
+        "id": "ex:refund-decline",
+        "sha256": "f99997a7ddb2ae609ec1e606c78532e29060e66fa2b5235986fff3c29dec9c4f",
+        "bytes": 245
+      },
+      {
+        "section": "content",
+        "id": "format:chat",
+        "sha256": "279a96918ed7c55a73fcef058eaa9f6f56b91c847176958e1f1de953744f5090",
+        "bytes": 70
+      },
+      {
+        "section": "content",
+        "id": "user:profile",
+        "sha256": "495d404e4f2223b6300650544a8234b143bfb42927c5c4cdfc5f6bf6922df15f",
+        "bytes": 83
+      },
+      {
+        "section": "content",
+        "id": "mem:plan-purchase",
+        "sha256": "860fa239676d174a7c4ba3e0cb86aa6cc10a76b136d8485f6f293537fe455598",
+        "bytes": 80
+      },
+      {
+        "section": "content",
+        "id": "turn:1",
+        "sha256": "72011fc736de2d96622546d6d14a601ddbce7b1a5162f07313d95edb6dffe9e3",
+        "bytes": 140
+      },
+      {
+        "section": "content",
+        "id": "turn:2",
+        "sha256": "e34f645be010c71f2373759aa80a7c79b4c3cb25ccff3db489345a54a2da04ed",
+        "bytes": 175
+      },
+      {
+        "section": "content",
+        "id": "billing-faq:v3#p1",
+        "sha256": "0fd82102b9d9b2a06c678b58b4b2f8c63065099fa09079d903829553c602a360",
+        "bytes": 438
+      },
+      {
+        "section": "content",
+        "id": "refunds-eu:v17#p4",
+        "sha256": "42271cbc06e799dd1642d10a3749d86a431e5087fe39d467aea41b9477d684ef",
+        "bytes": 99
+      },
+      {
+        "section": "content",
+        "id": "task:refund_request",
+        "sha256": "8f62af118c4e1701e528c29db61fe523f942d954ec56fdde83d043eff5af3404",
+        "bytes": 95
+      },
+      {
+        "section": "content",
+        "id": "turn:3",
+        "sha256": "11c1d6f309f968037c21b11a0db490e1ec15fc44b80a01889e2769105c054922",
+        "bytes": 93
+      }
+    ]
+  }
+}

@@ -1,0 +1,334 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M5017HVM0ZA194R0PG8TD0HT",
+  "recorded_at": "2026-10-15T15:00:00.500Z",
+  "service": {
+    "name": "invoice-extractor",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.22554200000001856
+  },
+  "outcome": "refused",
+  "snapshot": {
+    "assembly_time": "2026-10-15T15:00:00Z",
+    "scope": {
+      "tenant": "harbor-logistics",
+      "task": "extract_invoice_7731"
+    },
+    "budget": {
+      "input": 2048,
+      "reserved_output": 1024
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "extraction",
+      "version": 1,
+      "route": "extract",
+      "model_family": null,
+      "route_policy_version": "illustrative/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:format"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:user_profile"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "governance.examples",
+          "wrap": "xml:examples"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:format"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "extract",
+      "version": "illustrative/v1",
+      "parser": true,
+      "requires_evidence": true,
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions",
+            "governance.examples",
+            "governance.output_contract"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.user"
+          ]
+        },
+        "document-index": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.3,
+          "min_included": 1,
+          "required_scope": [
+            "tenant"
+          ],
+          "dedupe": "exact"
+        }
+      }
+    },
+    "tokenizer": "estimate-utf8/v1",
+    "renderer": "cwa-messages/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:extract-v2",
+            "slot": "governance.instructions",
+            "source": "policy-registry",
+            "source_version": "extract-v2",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-01T00:00:00Z",
+            "body": "Extract invoice fields exactly as printed. Do not infer missing values."
+          },
+          {
+            "id": "format:invoice-v9",
+            "slot": "governance.output_contract",
+            "source": "policy-registry",
+            "source_version": "invoice-v9",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-14T00:00:00Z",
+            "body": "Return one JSON object matching this schema: {\"type\": \"object\", \"properties\": {\"field_001\": {\"type\": \"string\", \"description\": \"Invoice attribute 1 as printed, or null when absent.\"}, \"field_002\": {\"type\": \"string\", \"description\": \"Invoice attribute 2 as printed, or null when absent.\"}, \"field_003\": {\"type\": \"string\", \"description\": \"Invoice attribute 3 as printed, or null when absent.\"}, \"field_004\": {\"type\": \"string\", \"description\": \"Invoice attribute 4 as printed, or null when absent.\"}, \"field_005\": {\"type\": \"string\", \"description\": \"Invoice attribute 5 as printed, or null when absent.\"}, \"field_006\": {\"type\": \"string\", \"description\": \"Invoice attribute 6 as printed, or null when absent.\"}, \"field_007\": {\"type\": \"string\", \"description\": \"Invoice attribute 7 as printed, or null when absent.\"}, \"field_008\": {\"type\": \"string\", \"description\": \"Invoice attribute 8 as printed, or null when absent.\"}, \"field_009\": {\"type\": \"string\", \"description\": \"Invoice attribute 9 as printed, or null when absent.\"}, \"field_010\": {\"type\": \"string\", \"description\": \"Invoice attribute 10 as printed, or null when absent.\"}, \"field_011\": {\"type\": \"string\", \"description\": \"Invoice attribute 11 as printed, or null when absent.\"}, \"field_012\": {\"type\": \"string\", \"description\": \"Invoice attribute 12 as printed, or null when absent.\"}, \"field_013\": {\"type\": \"string\", \"description\": \"Invoice attribute 13 as printed, or null when absent.\"}, \"field_014\": {\"type\": \"string\", \"description\": \"Invoice attribute 14 as printed, or null when absent.\"}, \"field_015\": {\"type\": \"string\", \"description\": \"Invoice attribute 15 as printed, or null when absent.\"}, \"field_016\": {\"type\": \"string\", \"description\": \"Invoice attribute 16 as printed, or null when absent.\"}, \"field_017\": {\"type\": \"string\", \"description\": \"Invoice attribute 17 as printed, or null when absent.\"}, \"field_018\": {\"type\": \"string\", \"description\": \"Invoice attribute 18 as printed, or null when absent.\"}, \"field_019\": {\"type\": \"string\", \"description\": \"Invoice attribute 19 as printed, or null when absent.\"}, \"field_020\": {\"type\": \"string\", \"description\": \"Invoice attribute 20 as printed, or null when absent.\"}, \"field_021\": {\"type\": \"string\", \"description\": \"Invoice attribute 21 as printed, or null when absent.\"}, \"field_022\": {\"type\": \"string\", \"description\": \"Invoice attribute 22 as printed, or null when absent.\"}, \"field_023\": {\"type\": \"string\", \"description\": \"Invoice attribute 23 as printed, or null when absent.\"}, \"field_024\": {\"type\": \"string\", \"description\": \"Invoice attribute 24 as printed, or null when absent.\"}, \"field_025\": {\"type\": \"string\", \"description\": \"Invoice attribute 25 as printed, or null when absent.\"}, \"field_026\": {\"type\": \"string\", \"description\": \"Invoice attribute 26 as printed, or null when absent.\"}, \"field_027\": {\"type\": \"string\", \"description\": \"Invoice attribute 27 as printed, or null when absent.\"}, \"field_028\": {\"type\": \"string\", \"description\": \"Invoice attribute 28 as printed, or null when absent.\"}, \"field_029\": {\"type\": \"string\", \"description\": \"Invoice attribute 29 as printed, or null when absent.\"}, \"field_030\": {\"type\": \"string\", \"description\": \"Invoice attribute 30 as printed, or null when absent.\"}, \"field_031\": {\"type\": \"string\", \"description\": \"Invoice attribute 31 as printed, or null when absent.\"}, \"field_032\": {\"type\": \"string\", \"description\": \"Invoice attribute 32 as printed, or null when absent.\"}, \"field_033\": {\"type\": \"string\", \"description\": \"Invoice attribute 33 as printed, or null when absent.\"}, \"field_034\": {\"type\": \"string\", \"description\": \"Invoice attribute 34 as printed, or null when absent.\"}, \"field_035\": {\"type\": \"string\", \"description\": \"Invoice attribute 35 as printed, or null when absent.\"}, \"field_036\": {\"type\": \"string\", \"description\": \"Invoice attribute 36 as printed, or null when absent.\"}, \"field_037\": {\"type\": \"string\", \"description\": \"Invoice attribute 37 as printed, or null when absent.\"}, \"field_038\": {\"type\": \"string\", \"description\": \"Invoice attribute 38 as printed, or null when absent.\"}, \"field_039\": {\"type\": \"string\", \"description\": \"Invoice attribute 39 as printed, or null when absent.\"}, \"field_040\": {\"type\": \"string\", \"description\": \"Invoice attribute 40 as printed, or null when absent.\"}, \"field_041\": {\"type\": \"string\", \"description\": \"Invoice attribute 41 as printed, or null when absent.\"}, \"field_042\": {\"type\": \"string\", \"description\": \"Invoice attribute 42 as printed, or null when absent.\"}, \"field_043\": {\"type\": \"string\", \"description\": \"Invoice attribute 43 as printed, or null when absent.\"}, \"field_044\": {\"type\": \"string\", \"description\": \"Invoice attribute 44 as printed, or null when absent.\"}, \"field_045\": {\"type\": \"string\", \"description\": \"Invoice attribute 45 as printed, or null when absent.\"}, \"field_046\": {\"type\": \"string\", \"description\": \"Invoice attribute 46 as printed, or null when absent.\"}, \"field_047\": {\"type\": \"string\", \"description\": \"Invoice attribute 47 as printed, or null when absent.\"}, \"field_048\": {\"type\": \"string\", \"description\": \"Invoice attribute 48 as printed, or null when absent.\"}, \"field_049\": {\"type\": \"string\", \"description\": \"Invoice attribute 49 as printed, or null when absent.\"}, \"field_050\": {\"type\": \"string\", \"description\": \"Invoice attribute 50 as printed, or null when absent.\"}, \"field_051\": {\"type\": \"string\", \"description\": \"Invoice attribute 51 as printed, or null when absent.\"}, \"field_052\": {\"type\": \"string\", \"description\": \"Invoice attribute 52 as printed, or null when absent.\"}, \"field_053\": {\"type\": \"string\", \"description\": \"Invoice attribute 53 as printed, or null when absent.\"}, \"field_054\": {\"type\": \"string\", \"description\": \"Invoice attribute 54 as printed, or null when absent.\"}, \"field_055\": {\"type\": \"string\", \"description\": \"Invoice attribute 55 as printed, or null when absent.\"}, \"field_056\": {\"type\": \"string\", \"description\": \"Invoice attribute 56 as printed, or null when absent.\"}, \"field_057\": {\"type\": \"string\", \"description\": \"Invoice attribute 57 as printed, or null when absent.\"}, \"field_058\": {\"type\": \"string\", \"description\": \"Invoice attribute 58 as printed, or null when absent.\"}, \"field_059\": {\"type\": \"string\", \"description\": \"Invoice attribute 59 as printed, or null when absent.\"}, \"field_060\": {\"type\": \"string\", \"description\": \"Invoice attribute 60 as printed, or null when absent.\"}, \"field_061\": {\"type\": \"string\", \"description\": \"Invoice attribute 61 as printed, or null when absent.\"}, \"field_062\": {\"type\": \"string\", \"description\": \"Invoice attribute 62 as printed, or null when absent.\"}, \"field_063\": {\"type\": \"string\", \"description\": \"Invoice attribute 63 as printed, or null when absent.\"}, \"field_064\": {\"type\": \"string\", \"description\": \"Invoice attribute 64 as printed, or null when absent.\"}, \"field_065\": {\"type\": \"string\", \"description\": \"Invoice attribute 65 as printed, or null when absent.\"}, \"field_066\": {\"type\": \"string\", \"description\": \"Invoice attribute 66 as printed, or null when absent.\"}, \"field_067\": {\"type\": \"string\", \"description\": \"Invoice attribute 67 as printed, or null when absent.\"}, \"field_068\": {\"type\": \"string\", \"description\": \"Invoice attribute 68 as printed, or null when absent.\"}, \"field_069\": {\"type\": \"string\", \"description\": \"Invoice attribute 69 as printed, or null when absent.\"}, \"field_070\": {\"type\": \"string\", \"description\": \"Invoice attribute 70 as printed, or null when absent.\"}, \"field_071\": {\"type\": \"string\", \"description\": \"Invoice attribute 71 as printed, or null when absent.\"}, \"field_072\": {\"type\": \"string\", \"description\": \"Invoice attribute 72 as printed, or null when absent.\"}, \"field_073\": {\"type\": \"string\", \"description\": \"Invoice attribute 73 as printed, or null when absent.\"}, \"field_074\": {\"type\": \"string\", \"description\": \"Invoice attribute 74 as printed, or null when absent.\"}, \"field_075\": {\"type\": \"string\", \"description\": \"Invoice attribute 75 as printed, or null when absent.\"}, \"field_076\": {\"type\": \"string\", \"description\": \"Invoice attribute 76 as printed, or null when absent.\"}, \"field_077\": {\"type\": \"string\", \"description\": \"Invoice attribute 77 as printed, or null when absent.\"}, \"field_078\": {\"type\": \"string\", \"description\": \"Invoice attribute 78 as printed, or null when absent.\"}, \"field_079\": {\"type\": \"string\", \"description\": \"Invoice attribute 79 as printed, or null when absent.\"}, \"field_080\": {\"type\": \"string\", \"description\": \"Invoice attribute 80 as printed, or null when absent.\"}, \"field_081\": {\"type\": \"string\", \"description\": \"Invoice attribute 81 as printed, or null when absent.\"}, \"field_082\": {\"type\": \"string\", \"description\": \"Invoice attribute 82 as printed, or null when absent.\"}, \"field_083\": {\"type\": \"string\", \"description\": \"Invoice attribute 83 as printed, or null when absent.\"}, \"field_084\": {\"type\": \"string\", \"description\": \"Invoice attribute 84 as printed, or null when absent.\"}, \"field_085\": {\"type\": \"string\", \"description\": \"Invoice attribute 85 as printed, or null when absent.\"}, \"field_086\": {\"type\": \"string\", \"description\": \"Invoice attribute 86 as printed, or null when absent.\"}, \"field_087\": {\"type\": \"string\", \"description\": \"Invoice attribute 87 as printed, or null when absent.\"}, \"field_088\": {\"type\": \"string\", \"description\": \"Invoice attribute 88 as printed, or null when absent.\"}, \"field_089\": {\"type\": \"string\", \"description\": \"Invoice attribute 89 as printed, or null when absent.\"}, \"field_090\": {\"type\": \"string\", \"description\": \"Invoice attribute 90 as printed, or null when absent.\"}, \"field_091\": {\"type\": \"string\", \"description\": \"Invoice attribute 91 as printed, or null when absent.\"}, \"field_092\": {\"type\": \"string\", \"description\": \"Invoice attribute 92 as printed, or null when absent.\"}, \"field_093\": {\"type\": \"string\", \"description\": \"Invoice attribute 93 as printed, or null when absent.\"}, \"field_094\": {\"type\": \"string\", \"description\": \"Invoice attribute 94 as printed, or null when absent.\"}, \"field_095\": {\"type\": \"string\", \"description\": \"Invoice attribute 95 as printed, or null when absent.\"}, \"field_096\": {\"type\": \"string\", \"description\": \"Invoice attribute 96 as printed, or null when absent.\"}, \"field_097\": {\"type\": \"string\", \"description\": \"Invoice attribute 97 as printed, or null when absent.\"}, \"field_098\": {\"type\": \"string\", \"description\": \"Invoice attribute 98 as printed, or null when absent.\"}, \"field_099\": {\"type\": \"string\", \"description\": \"Invoice attribute 99 as printed, or null when absent.\"}, \"field_100\": {\"type\": \"string\", \"description\": \"Invoice attribute 100 as printed, or null when absent.\"}, \"field_101\": {\"type\": \"string\", \"description\": \"Invoice attribute 101 as printed, or null when absent.\"}, \"field_102\": {\"type\": \"string\", \"description\": \"Invoice attribute 102 as printed, or null when absent.\"}, \"field_103\": {\"type\": \"string\", \"description\": \"Invoice attribute 103 as printed, or null when absent.\"}, \"field_104\": {\"type\": \"string\", \"description\": \"Invoice attribute 104 as printed, or null when absent.\"}, \"field_105\": {\"type\": \"string\", \"description\": \"Invoice attribute 105 as printed, or null when absent.\"}, \"field_106\": {\"type\": \"string\", \"description\": \"Invoice attribute 106 as printed, or null when absent.\"}, \"field_107\": {\"type\": \"string\", \"description\": \"Invoice attribute 107 as printed, or null when absent.\"}, \"field_108\": {\"type\": \"string\", \"description\": \"Invoice attribute 108 as printed, or null when absent.\"}, \"field_109\": {\"type\": \"string\", \"description\": \"Invoice attribute 109 as printed, or null when absent.\"}, \"field_110\": {\"type\": \"string\", \"description\": \"Invoice attribute 110 as printed, or null when absent.\"}, \"field_111\": {\"type\": \"string\", \"description\": \"Invoice attribute 111 as printed, or null when absent.\"}, \"field_112\": {\"type\": \"string\", \"description\": \"Invoice attribute 112 as printed, or null when absent.\"}, \"field_113\": {\"type\": \"string\", \"description\": \"Invoice attribute 113 as printed, or null when absent.\"}, \"field_114\": {\"type\": \"string\", \"description\": \"Invoice attribute 114 as printed, or null when absent.\"}, \"field_115\": {\"type\": \"string\", \"description\": \"Invoice attribute 115 as printed, or null when absent.\"}, \"field_116\": {\"type\": \"string\", \"description\": \"Invoice attribute 116 as printed, or null when absent.\"}, \"field_117\": {\"type\": \"string\", \"description\": \"Invoice attribute 117 as printed, or null when absent.\"}, \"field_118\": {\"type\": \"string\", \"description\": \"Invoice attribute 118 as printed, or null when absent.\"}, \"field_119\": {\"type\": \"string\", \"description\": \"Invoice attribute 119 as printed, or null when absent.\"}, \"field_120\": {\"type\": \"string\", \"description\": \"Invoice attribute 120 as printed, or null when absent.\"}}}"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "document-index",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "invoice-7731#page1",
+            "slot": "evidence.knowledge",
+            "source": "invoice-7731",
+            "source_version": "scan-1",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-10-02T09:00:00Z",
+            "body": "INVOICE 7731. Harbor Logistics BV, Rotterdam. Date 2026-10-02. Total EUR 18,420.00, VAT 21%.",
+            "relevance": 0.97,
+            "scope": {
+              "tenant": "harbor-logistics"
+            }
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "job:7731",
+            "slot": "interaction.query",
+            "source": "extract-queue:7731",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T14:59:59Z",
+            "body": "Extract the fields of invoice 7731."
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m5017hvm0za194r0pg8td0ht",
+    "profile": {
+      "id": "extraction",
+      "version": 1
+    },
+    "budget": {
+      "input": 2048,
+      "reserved_output": 1024
+    },
+    "result": null,
+    "included": [],
+    "compressed": [],
+    "excluded": [],
+    "conflicts": [],
+    "refused": {
+      "bool": true,
+      "reason": "protected_content_over_budget"
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-10-15T15:00:00Z",
+      "route_policy_version": "illustrative/v1",
+      "tokenizer": "estimate-utf8/v1",
+      "renderer": "cwa-messages/v1",
+      "snapshot_digest": "e8df091ecd8be0ba0aa3259c93a19bd2bd96b9d8fd424f5b522ff8c6f7f1368e"
+    },
+    "defaults_filled": [
+      {
+        "item_id": "format:invoice-v9",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "format:invoice-v9",
+        "field": "variants"
+      },
+      {
+        "item_id": "format:invoice-v9",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "format:invoice-v9",
+        "field": "lineage"
+      },
+      {
+        "item_id": "format:invoice-v9",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "format:invoice-v9",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "invoice-7731#page1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "invoice-7731#page1",
+        "field": "variants"
+      },
+      {
+        "item_id": "invoice-7731#page1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "invoice-7731#page1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "invoice-7731#page1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "invoice-7731#page1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "job:7731",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "job:7731",
+        "field": "variants"
+      },
+      {
+        "item_id": "job:7731",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "job:7731",
+        "field": "lineage"
+      },
+      {
+        "item_id": "job:7731",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "job:7731",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "policy:extract-v2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "policy:extract-v2",
+        "field": "variants"
+      },
+      {
+        "item_id": "policy:extract-v2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "policy:extract-v2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "policy:extract-v2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "policy:extract-v2",
+        "field": "injection_risk"
+      }
+    ],
+    "timings": {
+      "admission": 0.04999999999998295,
+      "conflicts": 0.00041699999999877946,
+      "supersession": 0.0015000000000213731,
+      "deduplication": 0.001958999999999378,
+      "diversity": 0.00041699999999877946,
+      "fitting": 0.09512499999999591
+    }
+  }
+}

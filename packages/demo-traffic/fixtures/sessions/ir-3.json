@@ -1,0 +1,64 @@
+{
+  "$schema": "cwa-dashboard/session/v1",
+  "session_id": "ir-3",
+  "route": "long-context-qa",
+  "service": "investor-relations",
+  "profile": {
+    "id": "long-context-reinforced",
+    "version": 1
+  },
+  "turns": [
+    {
+      "turn_index": 0,
+      "event_id": "01M508QDMMT8Y1VM51Y0MQNXM2",
+      "outcome": "assembled",
+      "input_tokens": 331,
+      "by_plane": {
+        "gov": 100,
+        "state": 0,
+        "evid": 161,
+        "inter": 9
+      },
+      "compressed_count": 0,
+      "over_budget_count": 0,
+      "parts": 6
+    },
+    {
+      "turn_index": 1,
+      "event_id": "01M5090JKMASM5529ABCF79QQZ",
+      "outcome": "assembled",
+      "input_tokens": 471,
+      "by_plane": {
+        "gov": 100,
+        "state": 0,
+        "evid": 209,
+        "inter": 50
+      },
+      "compressed_count": 2,
+      "over_budget_count": 0,
+      "parts": 10,
+      "reused_parts": 3
+    },
+    {
+      "turn_index": 2,
+      "event_id": "01M5099QJMHFG77A4K4QR3MSK2",
+      "outcome": "assembled",
+      "input_tokens": 493,
+      "by_plane": {
+        "gov": 100,
+        "state": 0,
+        "evid": 138,
+        "inter": 93
+      },
+      "compressed_count": 6,
+      "over_budget_count": 0,
+      "parts": 14,
+      "reused_parts": 1
+    }
+  ],
+  "part_reuse": {
+    "compared_turns": 2,
+    "reused_parts": 4,
+    "parts": 24
+  }
+}

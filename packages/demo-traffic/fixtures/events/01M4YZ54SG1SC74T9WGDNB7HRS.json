@@ -1,0 +1,380 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M4YZ54SG1SC74T9WGDNB7HRS",
+  "recorded_at": "2026-10-15T05:04:30.000Z",
+  "service": {
+    "name": "conformance-suite",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.16545899999999847
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-09-22T12:00:00Z",
+    "scope": {
+      "tenant": "acme",
+      "user": "u_91",
+      "session": "s_7",
+      "task": "refund_request"
+    },
+    "budget": {
+      "input": 45,
+      "reserved_output": 1024
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "budget-protected-variants",
+      "version": 1,
+      "route": "support-chat",
+      "model_family": null,
+      "route_policy_version": "budget-protected-variants/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "xml:governance.instructions"
+        },
+        {
+          "slot": "governance.examples",
+          "wrap": "xml:governance.examples"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:governance.output_contract"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:state.user"
+        },
+        {
+          "slot": "state.task",
+          "wrap": "xml:state.task"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence.knowledge"
+        },
+        {
+          "slot": "evidence.tool_results",
+          "wrap": "xml:evidence.tool_results"
+        },
+        {
+          "slot": "interaction.memory",
+          "wrap": "xml:interaction.memory"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:interaction.history"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:interaction.query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "support-chat",
+      "version": "budget-protected-variants/v1",
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.examples",
+            "governance.instructions",
+            "governance.output_contract"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.task",
+            "state.user"
+          ]
+        },
+        "policy-corpus": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "crm-mcp": {
+          "kind": "mcp",
+          "slots": [
+            "evidence.tool_results"
+          ]
+        },
+        "memory-svc": {
+          "kind": "memory",
+          "slots": [
+            "interaction.memory"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.5,
+          "required_scope": [
+            "tenant"
+          ]
+        }
+      },
+      "tier_upgrades": {
+        "state.user": "protected"
+      }
+    },
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "fixture-xml/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:18",
+            "slot": "interaction.query",
+            "source": "src:turn:18",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Can I refund my Pro plan?",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-corpus",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "kb:a",
+            "slot": "evidence.knowledge",
+            "source": "src:kb:a",
+            "source_version": "1",
+            "authority": "reference_only",
+            "trust": "unverified",
+            "freshness": "2026-09-12T15:30:00Z",
+            "body": "Pro plans refund in full within thirty days of purchase when no prior refund was issued.",
+            "token_budget": null,
+            "variants": [
+              {
+                "id": "kb:a~short",
+                "body": "Pro: full refund within 30 days.",
+                "method": "extract",
+                "lineage": "extracted"
+              }
+            ],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "untrusted_content",
+            "scope": {
+              "tenant": "acme"
+            },
+            "relevance": 0.9
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:v12",
+            "slot": "governance.instructions",
+            "source": "src:policy:v12",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Follow verified refund policy, cite the evidence you use, and never promise a refund the tools have not confirmed.",
+            "token_budget": null,
+            "variants": [
+              {
+                "id": "policy:v12~short",
+                "body": "Follow refund policy; cite evidence.",
+                "method": "extract",
+                "lineage": "extracted"
+              }
+            ],
+            "conflict_policy": "governs",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          },
+          {
+            "id": "ex:1",
+            "slot": "governance.examples",
+            "source": "src:ex:1",
+            "source_version": "1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "Example: refunds within thirty days are approved.",
+            "token_budget": null,
+            "variants": [],
+            "conflict_policy": "defers",
+            "lineage": "verbatim",
+            "eligibility": "route-policy",
+            "injection_risk": "none"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "state-svc",
+          "kind": "state"
+        },
+        "items": [
+          {
+            "id": "user:plan",
+            "slot": "state.user",
+            "source": "src:user:plan",
+            "source_version": "1",
+            "authority": "state",
+            "trust": "unverified",
+            "freshness": "2026-09-22T11:59:00Z",
+            "body": "plan=pro since 2026-09-01, seats=4, billing=monthly, region=eu",
+            "token_budget": null,
+            "variants": [
+              {
+                "id": "user:plan~short",
+                "body": "plan=pro",
+                "method": "extract",
+                "lineage": "extracted"
+              }
+            ],
+            "conflict_policy": "governs",
+            "lineage": "extracted",
+            "eligibility": "route-policy",
+            "injection_risk": "none",
+            "scope": {
+              "tenant": "acme",
+              "user": "u_91"
+            }
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m4yz54sg1sc74t9wgdnb7hrs",
+    "profile": {
+      "id": "budget-protected-variants",
+      "version": 1
+    },
+    "budget": {
+      "input": 45,
+      "reserved_output": 1024
+    },
+    "result": {
+      "input_tokens": 40,
+      "hash": "3e3cb1074c1005df80da3a9d6e663693edb0557cd2944a57cb1682dc9e478128"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:v12",
+        "tokens": 19,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "state.user",
+        "item_id": "user:plan",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:18",
+        "tokens": 6,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [
+      {
+        "item_id": "ex:1",
+        "reason": "over_budget",
+        "stage": "assembler",
+        "slot": "governance.examples"
+      },
+      {
+        "item_id": "kb:a",
+        "reason": "over_budget",
+        "stage": "assembler",
+        "slot": "evidence.knowledge"
+      }
+    ],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-09-22T12:00:00Z",
+      "route_policy_version": "budget-protected-variants/v1",
+      "tokenizer": "fixture-whitespace/v1",
+      "renderer": "fixture-xml/v1",
+      "snapshot_digest": "ae7e55df41684f1371c624c07d833f3ee1a34a3b49b74e5e2ed5adaa0cc445fc"
+    },
+    "defaults_filled": [],
+    "timings": {
+      "admission": 0.025166999999996165,
+      "conflicts": 0.001041999999998211,
+      "supersession": 0.0014170000000035543,
+      "deduplication": 0.0011669999999952552,
+      "diversity": 0.001082999999994172,
+      "fitting": 0.06458300000001316
+    }
+  },
+  "payload": {
+    "hash": "3e3cb1074c1005df80da3a9d6e663693edb0557cd2944a57cb1682dc9e478128",
+    "bytes": 369
+  }
+}

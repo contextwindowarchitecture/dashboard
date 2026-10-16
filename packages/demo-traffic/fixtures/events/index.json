@@ -1,0 +1,2133 @@
+{
+  "$schema": "cwa-dashboard/events-index/v1",
+  "generated_at": "2026-10-15T17:21:00.500Z",
+  "window": {
+    "from": "2026-10-15T05:00:00.000Z",
+    "to": "2026-10-15T17:21:00.500Z"
+  },
+  "events": [
+    {
+      "event_id": "01M5099QJMHFG77A4K4QR3MSK2",
+      "recorded_at": "2026-10-15T17:21:00.500Z",
+      "service": "investor-relations",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "long-context-qa",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "long-context-reinforced",
+        "version": 1
+      },
+      "budget_input": 500,
+      "outcome": "assembled",
+      "reason_codes": [
+        "superseded"
+      ],
+      "input_tokens": 493,
+      "session": {
+        "id": "ir-3",
+        "turn_index": 2
+      },
+      "total_ms": 0.9214579999999728
+    },
+    {
+      "event_id": "01M5090JKMASM5529ABCF79QQZ",
+      "recorded_at": "2026-10-15T17:16:00.500Z",
+      "service": "investor-relations",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "long-context-qa",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "long-context-reinforced",
+        "version": 1
+      },
+      "budget_input": 500,
+      "outcome": "assembled",
+      "reason_codes": [
+        "superseded"
+      ],
+      "input_tokens": 471,
+      "session": {
+        "id": "ir-3",
+        "turn_index": 1
+      },
+      "total_ms": 0.354959000000008
+    },
+    {
+      "event_id": "01M508QDMMT8Y1VM51Y0MQNXM2",
+      "recorded_at": "2026-10-15T17:11:00.500Z",
+      "service": "investor-relations",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "long-context-qa",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "long-context-reinforced",
+        "version": 1
+      },
+      "budget_input": 500,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 331,
+      "session": {
+        "id": "ir-3",
+        "turn_index": 0
+      },
+      "total_ms": 0.18950000000000955
+    },
+    {
+      "event_id": "01M504NDFMDGR1Q6EC4BTKCC5C",
+      "recorded_at": "2026-10-15T16:00:00.500Z",
+      "service": "contract-reviewer",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "contract-review",
+      "route_policy_version": "review/v2",
+      "profile": {
+        "id": "contract-review",
+        "version": 1
+      },
+      "budget_input": 130,
+      "outcome": "refused",
+      "refused_reason": "slot_floor_over_budget",
+      "reason_codes": [],
+      "total_ms": 0.22074999999998113
+    },
+    {
+      "event_id": "01M5017HVM0ZA194R0PG8TD0HT",
+      "recorded_at": "2026-10-15T15:00:00.500Z",
+      "service": "invoice-extractor",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "extract",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "extraction",
+        "version": 1
+      },
+      "budget_input": 2048,
+      "outcome": "refused",
+      "refused_reason": "protected_content_over_budget",
+      "reason_codes": [],
+      "total_ms": 0.22554200000001856
+    },
+    {
+      "event_id": "01M4ZYYA3MV0M2RZBF1H40Y7MV",
+      "recorded_at": "2026-10-15T14:20:00.500Z",
+      "service": "policy-desk",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "policy-desk",
+      "route_policy_version": "desk/v1",
+      "profile": {
+        "id": "policy-desk",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 65,
+      "session": {
+        "id": "desk-agent-12",
+        "turn_index": 1
+      },
+      "total_ms": 0.09341699999998809
+    },
+    {
+      "event_id": "01M4ZXSP7MKY2A3A6DG03DFCHK",
+      "recorded_at": "2026-10-15T14:00:00.500Z",
+      "service": "policy-desk",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "policy-desk",
+      "route_policy_version": "desk/v1",
+      "profile": {
+        "id": "policy-desk",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "conflict_unresolved",
+      "reason_codes": [],
+      "session": {
+        "id": "desk-agent-12",
+        "turn_index": 0
+      },
+      "total_ms": 0.12395799999998758
+    },
+    {
+      "event_id": "01M4ZTBTKMYHK0PXNZT3T5KPGM",
+      "recorded_at": "2026-10-15T13:00:00.500Z",
+      "service": "support-assistant",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "policy-first-chat",
+        "version": 1
+      },
+      "budget_input": 8192,
+      "outcome": "assembled",
+      "reason_codes": [
+        "stale_state",
+        "below_threshold",
+        "duplicate_content",
+        "source_diversity_cap"
+      ],
+      "input_tokens": 75,
+      "total_ms": 0.24187499999999318
+    },
+    {
+      "event_id": "01M4ZPXYZMMH9JA1A795GT6HGX",
+      "recorded_at": "2026-10-15T12:00:00.500Z",
+      "service": "support-assistant",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "conflict-fact/v1",
+      "profile": {
+        "id": "billing-facts",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [
+        "conflict_lost"
+      ],
+      "input_tokens": 51,
+      "total_ms": 0.17695800000001327
+    },
+    {
+      "event_id": "01M4ZKRB14SW2GC3BS775AZDHG",
+      "recorded_at": "2026-10-15T11:04:30.500Z",
+      "service": "review-agent",
+      "language": "typescript",
+      "redaction_mode": "digest_only",
+      "route": "agent-loop",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "tool-agent",
+        "version": 1
+      },
+      "budget_input": 6000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "producer_slot_not_allowed",
+        "capability_not_allowed",
+        "superseded"
+      ],
+      "input_tokens": 265,
+      "session": {
+        "id": "agent-run-412",
+        "turn_index": 1
+      },
+      "total_ms": 0.2060419999999965
+    },
+    {
+      "event_id": "01M4ZKH0N4HT508FAY0X5JVM7S",
+      "recorded_at": "2026-10-15T11:00:30.500Z",
+      "service": "review-agent",
+      "language": "typescript",
+      "redaction_mode": "digest_only",
+      "route": "agent-loop",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "tool-agent",
+        "version": 1
+      },
+      "budget_input": 6000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "producer_slot_not_allowed",
+        "capability_not_allowed"
+      ],
+      "input_tokens": 251,
+      "session": {
+        "id": "agent-run-412",
+        "turn_index": 0
+      },
+      "total_ms": 0.23908400000001961
+    },
+    {
+      "event_id": "01M4ZHGXW4QVNQ7FTKA8D9EVT2",
+      "recorded_at": "2026-10-15T10:25:30.500Z",
+      "service": "intake-assistant",
+      "language": "typescript",
+      "redaction_mode": "pii_scrubbed",
+      "route": "document-qa",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "document-analysis",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [
+        "authority_not_allowed",
+        "expired",
+        "out_of_scope"
+      ],
+      "session": {
+        "id": "intake-12",
+        "turn_index": 2
+      },
+      "total_ms": 0.20041599999998994
+    },
+    {
+      "event_id": "01M4ZGKMC4FAH0M12TN8R3QYPE",
+      "recorded_at": "2026-10-15T10:09:30.500Z",
+      "service": "intake-assistant",
+      "language": "typescript",
+      "redaction_mode": "pii_scrubbed",
+      "route": "document-qa",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "document-analysis",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 215,
+      "session": {
+        "id": "intake-12",
+        "turn_index": 1
+      },
+      "total_ms": 0.22587500000000205
+    },
+    {
+      "event_id": "01M4ZG4ZM48MAN296TJPP3NVXM",
+      "recorded_at": "2026-10-15T10:01:30.500Z",
+      "service": "intake-assistant",
+      "language": "typescript",
+      "redaction_mode": "pii_scrubbed",
+      "route": "document-qa",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "document-analysis",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 160,
+      "session": {
+        "id": "intake-12",
+        "turn_index": 0
+      },
+      "total_ms": 0.2345420000000047
+    },
+    {
+      "event_id": "01M4ZD3Y5439GVAR3H0FA56RD5",
+      "recorded_at": "2026-10-15T09:08:30.500Z",
+      "service": "support-assistant",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "budget_input": 720,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 554,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 4
+      },
+      "total_ms": 0.6578330000000108
+    },
+    {
+      "event_id": "01M4ZD08Z4QNN8GJX11BSW64XE",
+      "recorded_at": "2026-10-15T09:06:30.500Z",
+      "service": "support-assistant",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "budget_input": 720,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 585,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 3
+      },
+      "total_ms": 0.43633299999999053
+    },
+    {
+      "event_id": "01M4ZCWKS4HXMQBYHST49K7EYG",
+      "recorded_at": "2026-10-15T09:04:30.500Z",
+      "service": "support-assistant",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "budget_input": 720,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 623,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 2
+      },
+      "total_ms": 0.38895800000000236
+    },
+    {
+      "event_id": "01M4ZCRYK48S5GFA51EDM9CYPS",
+      "recorded_at": "2026-10-15T09:02:30.500Z",
+      "service": "support-assistant",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "budget_input": 720,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 510,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 1
+      },
+      "total_ms": 0.4181250000000034
+    },
+    {
+      "event_id": "01M4ZCN9D4M5QNPFCQ5A2K3W6H",
+      "recorded_at": "2026-10-15T09:00:30.500Z",
+      "service": "support-assistant",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "budget_input": 720,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 438,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 0
+      },
+      "total_ms": 0.5137919999999951
+    },
+    {
+      "event_id": "01M4Z98B2MXAHPP1FQV5R1P39M",
+      "recorded_at": "2026-10-15T08:01:00.500Z",
+      "service": "contract-fixture",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "session": {
+        "id": "fixture-c1",
+        "turn_index": 1
+      },
+      "total_ms": 0.030207999999987578
+    },
+    {
+      "event_id": "01M4Z96GFMM96EVAPDB61FA3YM",
+      "recorded_at": "2026-10-15T08:00:00.500Z",
+      "service": "contract-fixture",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "contract-fixture",
+      "route_policy_version": "fixture/v1",
+      "profile": {
+        "id": "fixture-three-slot",
+        "version": 1
+      },
+      "budget_input": 8192,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 34,
+      "session": {
+        "id": "fixture-c1",
+        "turn_index": 0
+      },
+      "total_ms": 0.155208000000016
+    },
+    {
+      "event_id": "01M4Z1ECHGYSY7KKBTESM2JNZ4",
+      "recorded_at": "2026-10-15T05:44:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.011209000000008018
+    },
+    {
+      "event_id": "01M4Z1DF80KSXRNKR02TMX11VZ",
+      "recorded_at": "2026-10-15T05:44:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.019583000000011452
+    },
+    {
+      "event_id": "01M4Z1CHYGZ36CBJC9BVENQNDM",
+      "recorded_at": "2026-10-15T05:43:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.009874999999993861
+    },
+    {
+      "event_id": "01M4Z1BMN09W0J2BKMJA125KR2",
+      "recorded_at": "2026-10-15T05:43:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.012666000000024269
+    },
+    {
+      "event_id": "01M4Z1AQBG3H4238JWQY62EPD9",
+      "recorded_at": "2026-10-15T05:42:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.011957999999992808
+    },
+    {
+      "event_id": "01M4Z19T20ASS5X8QB9YS79JAD",
+      "recorded_at": "2026-10-15T05:42:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.01166700000001697
+    },
+    {
+      "event_id": "01M4Z18WRGV1ZV6DEMVF7FPDPT",
+      "recorded_at": "2026-10-15T05:41:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.01191599999998516
+    },
+    {
+      "event_id": "01M4Z17ZF0YSHEDSMARM8NK98D",
+      "recorded_at": "2026-10-15T05:41:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.01362499999999045
+    },
+    {
+      "event_id": "01M4Z1725G0CBC4C6N6AHYNERB",
+      "recorded_at": "2026-10-15T05:40:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.014708000000013044
+    },
+    {
+      "event_id": "01M4Z164W0PGCFHGFQM3XPC4YF",
+      "recorded_at": "2026-10-15T05:40:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.013041999999984455
+    },
+    {
+      "event_id": "01M4Z157JG42VQWRZ3E1XF2YYB",
+      "recorded_at": "2026-10-15T05:39:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.029832999999996446
+    },
+    {
+      "event_id": "01M4Z14A9076WEDG0CY9Q9PFNG",
+      "recorded_at": "2026-10-15T05:39:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.02358300000000213
+    },
+    {
+      "event_id": "01M4Z13CZGMSD1YSRDDTFW9304",
+      "recorded_at": "2026-10-15T05:38:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.013208999999989146
+    },
+    {
+      "event_id": "01M4Z12FP04012M3JVECQ4CWZJ",
+      "recorded_at": "2026-10-15T05:38:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.013125000000002274
+    },
+    {
+      "event_id": "01M4Z11JCGFY9PBJ2WMDME3M0R",
+      "recorded_at": "2026-10-15T05:37:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.029832999999996446
+    },
+    {
+      "event_id": "01M4Z10N30PE2QB9MW3RR9FE5K",
+      "recorded_at": "2026-10-15T05:37:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.02145899999999301
+    },
+    {
+      "event_id": "01M4Z0ZQSGAXEFXEVJN7KY3K73",
+      "recorded_at": "2026-10-15T05:36:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.0231250000000216
+    },
+    {
+      "event_id": "01M4Z0YTG0XBMQ294BD4FB74XX",
+      "recorded_at": "2026-10-15T05:36:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.012334000000009837
+    },
+    {
+      "event_id": "01M4Z0XX6G8FE8H18PH484RSE5",
+      "recorded_at": "2026-10-15T05:35:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.016665999999986525
+    },
+    {
+      "event_id": "01M4Z0WZX0RM3WBR0S55GK9QKA",
+      "recorded_at": "2026-10-15T05:35:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.033125000000012506
+    },
+    {
+      "event_id": "01M4Z0W2KGTKPJEDRCMD9JMYMT",
+      "recorded_at": "2026-10-15T05:34:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.019040999999987207
+    },
+    {
+      "event_id": "01M4Z0V5A0E2ZHQMTVKKYX844Z",
+      "recorded_at": "2026-10-15T05:34:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.019249999999999545
+    },
+    {
+      "event_id": "01M4Z0T80G94T8SYCR5HJXAK4W",
+      "recorded_at": "2026-10-15T05:33:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.025707999999980302
+    },
+    {
+      "event_id": "01M4Z0SAQ0RSQD9VZQ7601ZAA6",
+      "recorded_at": "2026-10-15T05:33:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.04345900000001279
+    },
+    {
+      "event_id": "01M4Z0RDDGDTWSSTP0YVFC0Q1P",
+      "recorded_at": "2026-10-15T05:32:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "outcome": "rejected",
+      "reason_codes": [],
+      "problem_count": 1,
+      "total_ms": 0.09470799999999713
+    },
+    {
+      "event_id": "01M4Z0QG40YTBN4W131SCZKA7M",
+      "recorded_at": "2026-10-15T05:32:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "tokenizer-estimate-utf8/v1",
+      "profile": {
+        "id": "tokenizer-estimate-utf8",
+        "version": 1
+      },
+      "budget_input": 150,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 116,
+      "total_ms": 0.11954099999999812
+    },
+    {
+      "event_id": "01M4Z0PJTGX1QAR9JDAHHE46TJ",
+      "recorded_at": "2026-10-15T05:31:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "numbers/v1",
+      "profile": {
+        "id": "numbers-fixture",
+        "version": 1
+      },
+      "budget_input": 28,
+      "outcome": "assembled",
+      "reason_codes": [
+        "below_threshold",
+        "over_budget"
+      ],
+      "input_tokens": 28,
+      "total_ms": 0.11879200000001333
+    },
+    {
+      "event_id": "01M4Z0NNH03N8G97G375T4RR47",
+      "recorded_at": "2026-10-15T05:31:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "supersede-observations/v1",
+      "profile": {
+        "id": "supersede-observations",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "superseded"
+      ],
+      "input_tokens": 83,
+      "total_ms": 0.2487079999999935
+    },
+    {
+      "event_id": "01M4Z0MR7GAJN2TWFX1BZT7REK",
+      "recorded_at": "2026-10-15T05:30:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "supersede-exemptions/v1",
+      "profile": {
+        "id": "supersede-exemptions",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "conflict_lost",
+        "superseded",
+        "duplicate_content"
+      ],
+      "input_tokens": 51,
+      "total_ms": 0.19658400000000142
+    },
+    {
+      "event_id": "01M4Z0KTY0KTQFJWBE5DHG6CEX",
+      "recorded_at": "2026-10-15T05:30:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "supersede-evidence-required/v1",
+      "profile": {
+        "id": "supersede-evidence-required",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [
+        "superseded"
+      ],
+      "total_ms": 0.09770799999999724
+    },
+    {
+      "event_id": "01M4Z0JXMGCXBDFTTQT9TVK30T",
+      "recorded_at": "2026-10-15T05:29:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "required-slot-missing/v1",
+      "profile": {
+        "id": "required-slot-missing",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "required_slot_missing",
+      "reason_codes": [
+        "untrusted_in_governance"
+      ],
+      "total_ms": 0.07437500000000341
+    },
+    {
+      "event_id": "01M4Z0J0B0TTF352G3HGS6SAGC",
+      "recorded_at": "2026-10-15T05:29:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "required-instructions-missing/v1",
+      "profile": {
+        "id": "required-instructions-missing",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "required_slot_missing",
+      "reason_codes": [
+        "untrusted_in_governance"
+      ],
+      "total_ms": 0.055165999999999826
+    },
+    {
+      "event_id": "01M4Z0H31G05G7JTBY30GMNA0J",
+      "recorded_at": "2026-10-15T05:28:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "render-attribute-escaping/v1",
+      "profile": {
+        "id": "render-attribute-escaping",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 41,
+      "total_ms": 0.10649999999999693
+    },
+    {
+      "event_id": "01M4Z0G5R0AGKZA0P14VWSNZ0Q",
+      "recorded_at": "2026-10-15T05:28:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "protected-over-slot-cap/v1",
+      "profile": {
+        "id": "protected-over-slot-cap",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "protected_content_over_budget",
+      "reason_codes": [],
+      "total_ms": 0.08337499999998954
+    },
+    {
+      "event_id": "01M4Z0F8EG8CNWAWEFZDXGD0BF",
+      "recorded_at": "2026-10-15T05:27:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "protected-over-cap/v1",
+      "profile": {
+        "id": "protected-over-cap",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "protected_content_over_budget",
+      "reason_codes": [],
+      "total_ms": 0.07349999999999568
+    },
+    {
+      "event_id": "01M4Z0EB508BQMN0WT7K65A25J",
+      "recorded_at": "2026-10-15T05:27:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "protected-over-budget/v1",
+      "profile": {
+        "id": "protected-over-budget",
+        "version": 1
+      },
+      "budget_input": 25,
+      "outcome": "refused",
+      "refused_reason": "protected_content_over_budget",
+      "reason_codes": [],
+      "total_ms": 0.11049999999998761
+    },
+    {
+      "event_id": "01M4Z0DDVGXRVJ9X6N3QP8PHW8",
+      "recorded_at": "2026-10-15T05:26:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "placement-unplaced-slot/v1",
+      "profile": {
+        "id": "placement-unplaced-slot",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [
+        "untrusted_in_governance",
+        "expired",
+        "slot_unplaced"
+      ],
+      "input_tokens": 43,
+      "total_ms": 0.8292080000000084
+    },
+    {
+      "event_id": "01M4Z0CGJ0JPMVWXVNE66V47J0",
+      "recorded_at": "2026-10-15T05:26:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "placement-required-slot-first/v1",
+      "profile": {
+        "id": "placement-required-slot-first",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "required_slot_missing",
+      "reason_codes": [],
+      "total_ms": 0.05287500000000023
+    },
+    {
+      "event_id": "01M4Z0BK8GMSAA4CTM7MKBZESW",
+      "recorded_at": "2026-10-15T05:25:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "placement-protected-unplaced/v1",
+      "profile": {
+        "id": "placement-protected-unplaced",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "protected_slot_unplaced",
+      "reason_codes": [
+        "slot_unplaced"
+      ],
+      "total_ms": 0.09350000000000591
+    },
+    {
+      "event_id": "01M4Z0ANZ05N0B9CP2EE6P6Z5W",
+      "recorded_at": "2026-10-15T05:25:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "ordering-astral-ids/v1",
+      "profile": {
+        "id": "ordering-astral-ids",
+        "version": 1
+      },
+      "budget_input": 53,
+      "outcome": "assembled",
+      "reason_codes": [
+        "below_threshold",
+        "over_budget"
+      ],
+      "input_tokens": 53,
+      "total_ms": 0.21733299999999645
+    },
+    {
+      "event_id": "01M4Z09RNGQMCSN0NZPC5RAT7R",
+      "recorded_at": "2026-10-15T05:24:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "messages-repeated-slot/v1",
+      "profile": {
+        "id": "messages-repeated-slot",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 65,
+      "total_ms": 0.08483300000000327
+    },
+    {
+      "event_id": "01M4Z08VC0PZ8YDM9SEQKNS8A9",
+      "recorded_at": "2026-10-15T05:24:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "messages-render/v1",
+      "profile": {
+        "id": "messages-render",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [
+        "authority_not_allowed",
+        "capability_not_allowed"
+      ],
+      "input_tokens": 77,
+      "total_ms": 0.20691600000000676
+    },
+    {
+      "event_id": "01M4Z07Y2G2M8Y42J3N90BBQRH",
+      "recorded_at": "2026-10-15T05:23:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "messages-budget/v1",
+      "profile": {
+        "id": "messages-budget",
+        "version": 1
+      },
+      "budget_input": 60,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 56,
+      "total_ms": 0.22970899999999972
+    },
+    {
+      "event_id": "01M4Z070S0PZP2N8FCZGDY2CSY",
+      "recorded_at": "2026-10-15T05:23:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "integer-written-as-double/v1",
+      "profile": {
+        "id": "integer-written-as-double",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "duplicate_content",
+        "source_diversity_cap"
+      ],
+      "input_tokens": 83,
+      "total_ms": 0.16029199999999832
+    },
+    {
+      "event_id": "01M4Z063FGBYR78A8N08ZD9NQ9",
+      "recorded_at": "2026-10-15T05:22:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "history-freshness-order/v1",
+      "profile": {
+        "id": "history-freshness-order",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 64,
+      "total_ms": 0.14850000000001273
+    },
+    {
+      "event_id": "01M4Z0566047KB1X12V54QJQ7N",
+      "recorded_at": "2026-10-15T05:22:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "contract-fixture",
+      "route_policy_version": "fixture/v1",
+      "profile": {
+        "id": "fixture-three-slot",
+        "version": 1
+      },
+      "budget_input": 8192,
+      "outcome": "assembled",
+      "reason_codes": [
+        "expired"
+      ],
+      "input_tokens": 34,
+      "total_ms": 0.09420899999999222
+    },
+    {
+      "event_id": "01M4Z048WGEVHYBBG9CJEF38J1",
+      "recorded_at": "2026-10-15T05:21:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "evidence-retrieve-narrower/v1",
+      "profile": {
+        "id": "evidence-retrieve-narrower",
+        "version": 1
+      },
+      "budget_input": 25,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "total_ms": 0.11062499999999886
+    },
+    {
+      "event_id": "01M4Z03BK0HK5Q5G86C31C1M59",
+      "recorded_at": "2026-10-15T05:21:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "evidence-request-context/v1",
+      "profile": {
+        "id": "evidence-request-context",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [
+        "out_of_scope",
+        "below_threshold"
+      ],
+      "total_ms": 0.0670419999999865
+    },
+    {
+      "event_id": "01M4Z02E9GH1ZHN0RSRXWN1NEY",
+      "recorded_at": "2026-10-15T05:20:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "evidence-precompute-summary/v1",
+      "profile": {
+        "id": "evidence-precompute-summary",
+        "version": 1
+      },
+      "budget_input": 40,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "total_ms": 0.133624999999995
+    },
+    {
+      "event_id": "01M4Z01H00SFASYX2TFC4DE7GZ",
+      "recorded_at": "2026-10-15T05:20:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "evidence-min-included-items/v1",
+      "profile": {
+        "id": "evidence-min-included-items",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [],
+      "total_ms": 0.06320800000000304
+    },
+    {
+      "event_id": "01M4Z00KPGJK3BNPBGPYMXRQAW",
+      "recorded_at": "2026-10-15T05:19:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "evidence-cap-omitted/v1",
+      "profile": {
+        "id": "evidence-cap-omitted",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "total_ms": 0.08074999999999477
+    },
+    {
+      "event_id": "01M4YZZPD08K248PTFFZR2Y36H",
+      "recorded_at": "2026-10-15T05:19:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "doubles-nearest/v1",
+      "profile": {
+        "id": "doubles-nearest",
+        "version": 1
+      },
+      "budget_input": 39,
+      "outcome": "assembled",
+      "reason_codes": [
+        "below_threshold"
+      ],
+      "input_tokens": 39,
+      "total_ms": 0.08979100000000528
+    },
+    {
+      "event_id": "01M4YZYS3G6YPX5Z0E4K2K33AE",
+      "recorded_at": "2026-10-15T05:18:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "doubles-largest/v1",
+      "profile": {
+        "id": "doubles-largest",
+        "version": 1
+      },
+      "budget_input": 47,
+      "outcome": "assembled",
+      "reason_codes": [
+        "below_threshold"
+      ],
+      "input_tokens": 47,
+      "total_ms": 0.08554200000000378
+    },
+    {
+      "event_id": "01M4YZXVT0N9BECJFQPP1EDDVP",
+      "recorded_at": "2026-10-15T05:18:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "diversity-exemptions/v1",
+      "profile": {
+        "id": "diversity-exemptions",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "conflict_lost",
+        "superseded",
+        "duplicate_content",
+        "source_diversity_cap"
+      ],
+      "input_tokens": 55,
+      "total_ms": 0.19233400000000245
+    },
+    {
+      "event_id": "01M4YZWYGG6B0MYZ7SH7W121CT",
+      "recorded_at": "2026-10-15T05:17:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "diversity-evidence-required/v1",
+      "profile": {
+        "id": "diversity-evidence-required",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [
+        "source_diversity_cap"
+      ],
+      "total_ms": 0.09291600000000244
+    },
+    {
+      "event_id": "01M4YZW170V4R2HB536DH4YA1E",
+      "recorded_at": "2026-10-15T05:17:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "diversity-cap/v1",
+      "profile": {
+        "id": "diversity-cap",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "duplicate_content",
+        "source_diversity_cap"
+      ],
+      "input_tokens": 83,
+      "total_ms": 0.18133299999999508
+    },
+    {
+      "event_id": "01M4YZV3XGNVX2XMKA1S6NW9CY",
+      "recorded_at": "2026-10-15T05:16:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "digest-beyond-2-53/v1",
+      "profile": {
+        "id": "digest-beyond-2-53",
+        "version": 1
+      },
+      "budget_input": 48,
+      "outcome": "assembled",
+      "reason_codes": [
+        "below_threshold"
+      ],
+      "input_tokens": 48,
+      "total_ms": 0.09133300000000588
+    },
+    {
+      "event_id": "01M4YZT6M0TMR0MJ171Q2W6C1M",
+      "recorded_at": "2026-10-15T05:16:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "dedupe-producer-reported/v1",
+      "profile": {
+        "id": "dedupe-producer-reported",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "duplicate_content"
+      ],
+      "input_tokens": 41,
+      "total_ms": 0.1160419999999931
+    },
+    {
+      "event_id": "01M4YZS9AG8RWARWZVTED6WQ17",
+      "recorded_at": "2026-10-15T05:15:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "dedupe-exemptions/v1",
+      "profile": {
+        "id": "dedupe-exemptions",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "below_threshold",
+        "conflict_lost",
+        "duplicate_content"
+      ],
+      "input_tokens": 53,
+      "total_ms": 0.19908300000000168
+    },
+    {
+      "event_id": "01M4YZRC10D9N71MHZSCFJM2MB",
+      "recorded_at": "2026-10-15T05:15:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "dedupe-exact/v1",
+      "profile": {
+        "id": "dedupe-exact",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "duplicate_content"
+      ],
+      "input_tokens": 93,
+      "total_ms": 0.3486249999999984
+    },
+    {
+      "event_id": "01M4YZQEQGCNCGBPXQ3A95H12A",
+      "recorded_at": "2026-10-15T05:14:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "dedupe-evidence-required/v1",
+      "profile": {
+        "id": "dedupe-evidence-required",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "refused",
+      "refused_reason": "evidence_required",
+      "reason_codes": [
+        "duplicate_content"
+      ],
+      "total_ms": 0.5292919999999981
+    },
+    {
+      "event_id": "01M4YZPHE0Q49APBGFAPPZ2Z93",
+      "recorded_at": "2026-10-15T05:14:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "conflict-surfaced-shed/v1",
+      "profile": {
+        "id": "conflict-surfaced-shed",
+        "version": 1
+      },
+      "budget_input": 40,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 32,
+      "total_ms": 0.1313339999999954
+    },
+    {
+      "event_id": "01M4YZNM4GRT2WHBVGBBTJV7WD",
+      "recorded_at": "2026-10-15T05:13:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "conflict-required-slot-first/v1",
+      "profile": {
+        "id": "conflict-required-slot-first",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "refused",
+      "refused_reason": "required_slot_missing",
+      "reason_codes": [],
+      "total_ms": 0.07591600000000653
+    },
+    {
+      "event_id": "01M4YZMPV0BTVCRTK515MFGEAM",
+      "recorded_at": "2026-10-15T05:13:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "conflict-request-context/v1",
+      "profile": {
+        "id": "conflict-request-context",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "refused",
+      "refused_reason": "conflict_unresolved",
+      "reason_codes": [],
+      "total_ms": 0.07445899999999028
+    },
+    {
+      "event_id": "01M4YZKSHGKMG1A2MZXFSF08X1",
+      "recorded_at": "2026-10-15T05:12:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "conflict-refused/v1",
+      "profile": {
+        "id": "conflict-refused",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "refused",
+      "refused_reason": "conflict_unresolved",
+      "reason_codes": [
+        "conflict_lost"
+      ],
+      "total_ms": 0.09775000000000489
+    },
+    {
+      "event_id": "01M4YZJW805SH6F04BJZCKGCC2",
+      "recorded_at": "2026-10-15T05:12:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "conflict-instruction-request-context/v1",
+      "profile": {
+        "id": "conflict-instruction-request-context",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "refused",
+      "refused_reason": "conflict_unresolved",
+      "reason_codes": [],
+      "total_ms": 0.06733399999998824
+    },
+    {
+      "event_id": "01M4YZHYYGC6H1HAH74899MJ2C",
+      "recorded_at": "2026-10-15T05:11:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "conflict-instruction/v1",
+      "profile": {
+        "id": "conflict-instruction",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "untrusted_in_governance",
+        "conflict_deferred"
+      ],
+      "input_tokens": 227,
+      "total_ms": 0.43362499999999216
+    },
+    {
+      "event_id": "01M4YZH1N0GES9SXD5HHBYMGF1",
+      "recorded_at": "2026-10-15T05:11:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "conflict-fact/v1",
+      "profile": {
+        "id": "conflict-fact",
+        "version": 1
+      },
+      "budget_input": 4000,
+      "outcome": "assembled",
+      "reason_codes": [
+        "expired",
+        "conflict_lost"
+      ],
+      "input_tokens": 124,
+      "total_ms": 0.40791600000000017
+    },
+    {
+      "event_id": "01M4YZG4BGXEXZK6MKKXBX1E70",
+      "recorded_at": "2026-10-15T05:10:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "capability-kind/v1",
+      "profile": {
+        "id": "capability-kind-fixture",
+        "version": 1
+      },
+      "budget_input": 8192,
+      "outcome": "assembled",
+      "reason_codes": [
+        "capability_not_allowed"
+      ],
+      "input_tokens": 16,
+      "total_ms": 0.0692499999999967
+    },
+    {
+      "event_id": "01M4YZF720Q1719XADN4MSNF3D",
+      "recorded_at": "2026-10-15T05:10:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-variant-choice/v1",
+      "profile": {
+        "id": "budget-variant-choice",
+        "version": 1
+      },
+      "budget_input": 64,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 61,
+      "total_ms": 0.1322499999999991
+    },
+    {
+      "event_id": "01M4YZE9RGWCYGMD3RMR30SR7A",
+      "recorded_at": "2026-10-15T05:09:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-token-caps/v1",
+      "profile": {
+        "id": "budget-token-caps",
+        "version": 1
+      },
+      "budget_input": 52,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 50,
+      "total_ms": 0.1317499999999967
+    },
+    {
+      "event_id": "01M4YZDCF0Z5MWJJCKJSVCRP75",
+      "recorded_at": "2026-10-15T05:09:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-tier-lowering-ignored/v1",
+      "profile": {
+        "id": "budget-tier-lowering-ignored",
+        "version": 1
+      },
+      "budget_input": 25,
+      "outcome": "refused",
+      "refused_reason": "protected_content_over_budget",
+      "reason_codes": [],
+      "total_ms": 0.07754099999999653
+    },
+    {
+      "event_id": "01M4YZCF5GKJ54Y80FAZMF0M1S",
+      "recorded_at": "2026-10-15T05:08:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-slot-floor-under-cap/v1",
+      "profile": {
+        "id": "budget-slot-floor-under-cap",
+        "version": 1
+      },
+      "budget_input": 40,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 36,
+      "total_ms": 0.18329099999999698
+    },
+    {
+      "event_id": "01M4YZBHW0P1SYAXVMEKD64YM1",
+      "recorded_at": "2026-10-15T05:08:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-slot-floor-refused/v1",
+      "profile": {
+        "id": "budget-slot-floor-refused",
+        "version": 1
+      },
+      "budget_input": 50,
+      "outcome": "refused",
+      "refused_reason": "slot_floor_over_budget",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "total_ms": 0.2089160000000021
+    },
+    {
+      "event_id": "01M4YZAMJGC0GHNVFR2CQ6VR35",
+      "recorded_at": "2026-10-15T05:07:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-slot-floor/v1",
+      "profile": {
+        "id": "budget-slot-floor",
+        "version": 1
+      },
+      "budget_input": 65,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 61,
+      "total_ms": 0.20383400000000051
+    },
+    {
+      "event_id": "01M4YZ9Q90MSMNY0VX0THJB32N",
+      "recorded_at": "2026-10-15T05:07:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-slot-caps/v1",
+      "profile": {
+        "id": "budget-slot-caps",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 62,
+      "total_ms": 0.26158399999999915
+    },
+    {
+      "event_id": "01M4YZ8SZG9YKH15K74MK020CN",
+      "recorded_at": "2026-10-15T05:06:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-slot-cap-before-pressure/v1",
+      "profile": {
+        "id": "budget-slot-cap-before-pressure",
+        "version": 1
+      },
+      "budget_input": 60,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 57,
+      "total_ms": 0.1840830000000011
+    },
+    {
+      "event_id": "01M4YZ7WP0GCR82ZZ0V3CKGCP4",
+      "recorded_at": "2026-10-15T05:06:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-route-tiers/v1",
+      "profile": {
+        "id": "budget-route-tiers",
+        "version": 1
+      },
+      "budget_input": 53,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 52,
+      "total_ms": 0.22912499999999625
+    },
+    {
+      "event_id": "01M4YZ6ZCGM32T4P8M9HX235N1",
+      "recorded_at": "2026-10-15T05:05:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-route-order/v1",
+      "profile": {
+        "id": "budget-route-order",
+        "version": 1
+      },
+      "budget_input": 71,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 63,
+      "total_ms": 0.1927920000000114
+    },
+    {
+      "event_id": "01M4YZ623016MM0ADVMBBK0XHJ",
+      "recorded_at": "2026-10-15T05:05:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-repeated-compress/v1",
+      "profile": {
+        "id": "budget-repeated-compress",
+        "version": 1
+      },
+      "budget_input": 55,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 44,
+      "total_ms": 0.09158399999999745
+    },
+    {
+      "event_id": "01M4YZ54SG1SC74T9WGDNB7HRS",
+      "recorded_at": "2026-10-15T05:04:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-protected-variants/v1",
+      "profile": {
+        "id": "budget-protected-variants",
+        "version": 1
+      },
+      "budget_input": 45,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 40,
+      "total_ms": 0.16545899999999847
+    },
+    {
+      "event_id": "01M4YZ47G0W9XVMN7C968XY5A2",
+      "recorded_at": "2026-10-15T05:04:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-omit-after-variants/v1",
+      "profile": {
+        "id": "budget-omit-after-variants",
+        "version": 1
+      },
+      "budget_input": 60,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 52,
+      "total_ms": 0.3803750000000008
+    },
+    {
+      "event_id": "01M4YZ3A6G0ZAQV38VSS734DH9",
+      "recorded_at": "2026-10-15T05:03:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-margin-rounding/v1",
+      "profile": {
+        "id": "budget-margin-rounding",
+        "version": 1
+      },
+      "budget_input": 39,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 33,
+      "total_ms": 0.13470900000000086
+    },
+    {
+      "event_id": "01M4YZ2CX0429NM3GG6S8ZYV05",
+      "recorded_at": "2026-10-15T05:03:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-margin-protected/v1",
+      "profile": {
+        "id": "budget-margin-protected",
+        "version": 1
+      },
+      "budget_input": 30,
+      "outcome": "refused",
+      "refused_reason": "protected_content_over_budget",
+      "reason_codes": [],
+      "total_ms": 0.11562500000000853
+    },
+    {
+      "event_id": "01M4YZ1FKGNGH2SV859W94MHA3",
+      "recorded_at": "2026-10-15T05:02:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-margin/v1",
+      "profile": {
+        "id": "budget-margin",
+        "version": 1
+      },
+      "budget_input": 60,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 52,
+      "total_ms": 0.13741600000000176
+    },
+    {
+      "event_id": "01M4YZ0JA0V9WGXP5NY4Z5C3CA",
+      "recorded_at": "2026-10-15T05:02:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "budget-droppable-order/v1",
+      "profile": {
+        "id": "budget-droppable-order",
+        "version": 1
+      },
+      "budget_input": 44,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 42,
+      "total_ms": 0.17508299999998655
+    },
+    {
+      "event_id": "01M4YYZN0GKV7ZPC9NYXPXTX31",
+      "recorded_at": "2026-10-15T05:01:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "blocks-render/v1",
+      "profile": {
+        "id": "blocks-render",
+        "version": 1
+      },
+      "budget_input": 4096,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "input_tokens": 97,
+      "total_ms": 0.3981250000000074
+    },
+    {
+      "event_id": "01M4YYYQQ0QERZ7R4AD74QJ481",
+      "recorded_at": "2026-10-15T05:01:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "blocks-budget/v1",
+      "profile": {
+        "id": "blocks-budget",
+        "version": 1
+      },
+      "budget_input": 135,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "input_tokens": 118,
+      "total_ms": 0.6045830000000052
+    },
+    {
+      "event_id": "01M4YYXTDGF2CR961DJS96NHR6",
+      "recorded_at": "2026-10-15T05:00:30.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "route-slots/v1",
+      "profile": {
+        "id": "route-slots-fixture",
+        "version": 1
+      },
+      "budget_input": 8192,
+      "outcome": "assembled",
+      "reason_codes": [
+        "producer_slot_not_allowed",
+        "capability_not_allowed"
+      ],
+      "input_tokens": 36,
+      "total_ms": 0.2162919999999957
+    },
+    {
+      "event_id": "01M4YYWX40M0GZY8KQDZEF4C74",
+      "recorded_at": "2026-10-15T05:00:00.000Z",
+      "service": "conformance-suite",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "admission/v1",
+      "profile": {
+        "id": "admission-fixture",
+        "version": 1
+      },
+      "budget_input": 8192,
+      "outcome": "assembled",
+      "reason_codes": [
+        "producer_not_authenticated",
+        "missing_field:body",
+        "missing_field:expires",
+        "missing_field:id",
+        "missing_field:relevance",
+        "missing_field:slot",
+        "unknown_slot",
+        "unknown_authority",
+        "invalid_structure",
+        "duplicate_item_id",
+        "producer_slot_not_allowed",
+        "authority_not_allowed",
+        "capability_not_allowed",
+        "untrusted_in_governance",
+        "untrusted_content_unmarked",
+        "protected_tier_changed",
+        "tier_upgrade_not_allowed",
+        "duplicate_variant_id",
+        "revoked",
+        "expired",
+        "future_freshness",
+        "stale_state",
+        "source_invalid",
+        "out_of_scope",
+        "below_threshold",
+        "not_eligible"
+      ],
+      "input_tokens": 153,
+      "total_ms": 5.493207999999996
+    }
+  ],
+  "facets": {
+    "outcome": {
+      "assembled": 59,
+      "refused": 26,
+      "rejected": 26
+    },
+    "language": {
+      "typescript": 111
+    },
+    "route": {
+      "long-context-qa": 3,
+      "contract-review": 1,
+      "extract": 1,
+      "policy-desk": 2,
+      "support-chat": 71,
+      "agent-loop": 2,
+      "document-qa": 3,
+      "contract-fixture": 2
+    },
+    "reason": {
+      "superseded": 7,
+      "slot_floor_over_budget": 2,
+      "protected_content_over_budget": 6,
+      "conflict_unresolved": 4,
+      "stale_state": 2,
+      "below_threshold": 9,
+      "duplicate_content": 9,
+      "source_diversity_cap": 5,
+      "conflict_lost": 6,
+      "producer_slot_not_allowed": 4,
+      "capability_not_allowed": 6,
+      "authority_not_allowed": 3,
+      "expired": 5,
+      "out_of_scope": 3,
+      "evidence_required": 9,
+      "over_budget": 24,
+      "untrusted_in_governance": 5,
+      "required_slot_missing": 4,
+      "slot_unplaced": 2,
+      "protected_slot_unplaced": 1,
+      "conflict_deferred": 1,
+      "producer_not_authenticated": 1,
+      "missing_field:body": 1,
+      "missing_field:expires": 1,
+      "missing_field:id": 1,
+      "missing_field:relevance": 1,
+      "missing_field:slot": 1,
+      "unknown_slot": 1,
+      "unknown_authority": 1,
+      "invalid_structure": 1,
+      "duplicate_item_id": 1,
+      "untrusted_content_unmarked": 1,
+      "protected_tier_changed": 1,
+      "tier_upgrade_not_allowed": 1,
+      "duplicate_variant_id": 1,
+      "revoked": 1,
+      "future_freshness": 1,
+      "source_invalid": 1,
+      "not_eligible": 1
+    },
+    "service": {
+      "investor-relations": 3,
+      "contract-reviewer": 1,
+      "invoice-extractor": 1,
+      "policy-desk": 2,
+      "support-assistant": 7,
+      "review-agent": 2,
+      "intake-assistant": 3,
+      "contract-fixture": 2,
+      "conformance-suite": 90
+    }
+  }
+}

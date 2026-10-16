@@ -1,0 +1,514 @@
+{
+  "$schema": "cwa-dashboard/assembly-event/v1",
+  "event_id": "01M508QDMMT8Y1VM51Y0MQNXM2",
+  "recorded_at": "2026-10-15T17:11:00.500Z",
+  "service": {
+    "name": "investor-relations",
+    "environment": "demo"
+  },
+  "assembler": {
+    "language": "typescript",
+    "name": "@contextwindowarchitecture/assembler",
+    "version": "0.0.1"
+  },
+  "contract": {
+    "repository": "contextwindowarchitecture/contextwindowarchitecture",
+    "commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
+    "lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271"
+  },
+  "session": {
+    "id": "ir-3",
+    "turn_index": 0
+  },
+  "redaction_mode": "full",
+  "timings_ms": {
+    "total": 0.18950000000000955
+  },
+  "outcome": "assembled",
+  "snapshot": {
+    "assembly_time": "2026-10-15T17:11:00Z",
+    "scope": {
+      "tenant": "fjord-capital",
+      "user": "analyst_3",
+      "session": "ir-3",
+      "task": "report_qa"
+    },
+    "budget": {
+      "input": 500,
+      "reserved_output": 1500
+    },
+    "profile": {
+      "spec": "cwa/draft",
+      "id": "long-context-reinforced",
+      "version": 1,
+      "route": "long-context-qa",
+      "model_family": null,
+      "route_policy_version": "illustrative/v1",
+      "placement": [
+        {
+          "slot": "governance.instructions",
+          "wrap": "system"
+        },
+        {
+          "slot": "evidence.knowledge",
+          "wrap": "xml:evidence"
+        },
+        {
+          "slot": "evidence.tool_results",
+          "wrap": "xml:observation"
+        },
+        {
+          "slot": "state.user",
+          "wrap": "xml:user_profile"
+        },
+        {
+          "slot": "state.task",
+          "wrap": "xml:task"
+        },
+        {
+          "slot": "interaction.memory",
+          "wrap": "xml:memory"
+        },
+        {
+          "slot": "interaction.history",
+          "wrap": "xml:history"
+        },
+        {
+          "slot": "governance.output_contract",
+          "wrap": "xml:format"
+        },
+        {
+          "slot": "governance.instructions",
+          "wrap": "xml:instructions"
+        },
+        {
+          "slot": "interaction.query",
+          "wrap": "xml:query"
+        }
+      ],
+      "evaluation": {
+        "status": "unevaluated",
+        "suite": null,
+        "date": null,
+        "result": null,
+        "artifact": null
+      }
+    },
+    "route_policy": {
+      "route": "long-context-qa",
+      "version": "illustrative/v1",
+      "requires_evidence": true,
+      "producers": {
+        "policy-registry": {
+          "kind": "policy",
+          "slots": [
+            "governance.instructions",
+            "governance.output_contract"
+          ]
+        },
+        "state-svc": {
+          "kind": "state",
+          "slots": [
+            "state.user",
+            "state.task"
+          ]
+        },
+        "document-index": {
+          "kind": "retrieval",
+          "slots": [
+            "evidence.knowledge"
+          ]
+        },
+        "docs-mcp": {
+          "kind": "mcp",
+          "slots": [
+            "evidence.tool_results"
+          ]
+        },
+        "memory-svc": {
+          "kind": "memory",
+          "slots": [
+            "interaction.memory"
+          ]
+        },
+        "conversation": {
+          "kind": "interaction",
+          "slots": [
+            "interaction.history",
+            "interaction.query"
+          ]
+        }
+      },
+      "slots": {
+        "evidence.knowledge": {
+          "min_relevance": 0.2,
+          "min_included": 1,
+          "required_scope": [
+            "tenant"
+          ],
+          "dedupe": "exact",
+          "max_per_source": 8
+        },
+        "evidence.tool_results": {
+          "supersede": "source"
+        },
+        "interaction.memory": {
+          "source_prefix": "turn:"
+        }
+      }
+    },
+    "tokenizer": "estimate-utf8/v1",
+    "renderer": "cwa-message-blocks/v1",
+    "batches": [
+      {
+        "producer": {
+          "id": "policy-registry",
+          "kind": "policy"
+        },
+        "items": [
+          {
+            "id": "policy:ir-v1",
+            "slot": "governance.instructions",
+            "source": "policy-registry",
+            "source_version": "ir-v1",
+            "authority": "governing",
+            "trust": "verified",
+            "freshness": "2026-10-01T00:00:00Z",
+            "body": "You answer analysts' questions about Fjord Capital's published reports. Use only the report excerpts in the evidence, give figures with their units, and say when the report does not cover a question."
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "document-index",
+          "kind": "retrieval"
+        },
+        "items": [
+          {
+            "id": "annual-report-2025#s1",
+            "slot": "evidence.knowledge",
+            "source": "annual-report-2025",
+            "source_version": "final",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-03-14T00:00:00Z",
+            "body": "Revenue grew 11 percent to NOK 4.2 billion, driven by the Nordic payments business, which added 38,000 merchants. Card volumes rose 17 percent while transaction margins narrowed by four basis points under competitive pricing in Sweden and Denmark. Recurring software revenue reached 31 percent of the total, up from 26 percent.",
+            "relevance": 0.91,
+            "scope": {
+              "tenant": "fjord-capital"
+            },
+            "variants": [
+              {
+                "id": "annual-report-2025#s1/summary",
+                "body": "Revenue +11% to NOK 4.2bn; Nordic payments added 38,000 merchants; margins down 4bp.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          },
+          {
+            "id": "annual-report-2025#s2",
+            "slot": "evidence.knowledge",
+            "source": "annual-report-2025",
+            "source_version": "final",
+            "authority": "reference_only",
+            "trust": "verified",
+            "freshness": "2026-03-14T00:00:00Z",
+            "body": "Operating costs rose 9 percent, mainly from 240 new engineering hires and the migration of the core ledger to a cloud provider, which ran three months late. The board expects the migration's double-running costs of NOK 85 million to end in the second quarter of 2026.",
+            "relevance": 0.86,
+            "scope": {
+              "tenant": "fjord-capital"
+            },
+            "variants": [
+              {
+                "id": "annual-report-2025#s2/summary",
+                "body": "Costs +9% from hiring and a late ledger migration; NOK 85m double-running ends Q2 2026.",
+                "method": "summary",
+                "lineage": "summarised"
+              }
+            ]
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "docs-mcp",
+          "kind": "mcp"
+        },
+        "items": [
+          {
+            "id": "obs:report-pages-1",
+            "slot": "evidence.tool_results",
+            "source": "docs-mcp:annual-report-2025",
+            "source_version": "reading-1",
+            "authority": "observation",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:05:00Z",
+            "body": "{\"document\": \"annual-report-2025\", \"pages\": 212}"
+          }
+        ],
+        "excluded": []
+      },
+      {
+        "producer": {
+          "id": "conversation",
+          "kind": "interaction"
+        },
+        "items": [
+          {
+            "id": "turn:1",
+            "slot": "interaction.query",
+            "source": "conversation:ir-3#1",
+            "source_version": "1",
+            "authority": "user",
+            "trust": "unverified",
+            "freshness": "2026-10-15T17:10:55Z",
+            "body": "What drove revenue growth last year?"
+          }
+        ],
+        "excluded": []
+      }
+    ],
+    "conflicts": []
+  },
+  "trace": {
+    "trace_id": "trace-01m508qdmmt8y1vm51y0mqnxm2",
+    "profile": {
+      "id": "long-context-reinforced",
+      "version": 1
+    },
+    "budget": {
+      "input": 500,
+      "reserved_output": 1500
+    },
+    "result": {
+      "input_tokens": 331,
+      "hash": "3153ee6d563745d583266c00a4839681def92a3463eb2a369e852e7c9bfa5c3c"
+    },
+    "included": [
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:ir-v1",
+        "tokens": 50,
+        "source_version": "ir-v1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s1",
+        "tokens": 82,
+        "source_version": "final",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "item_id": "annual-report-2025#s2",
+        "tokens": 67,
+        "source_version": "final",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "evidence.tool_results",
+        "item_id": "obs:report-pages-1",
+        "tokens": 12,
+        "source_version": "reading-1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "governance.instructions",
+        "item_id": "policy:ir-v1",
+        "tokens": 50,
+        "source_version": "ir-v1",
+        "eligibility": "route-policy"
+      },
+      {
+        "slot": "interaction.query",
+        "item_id": "turn:1",
+        "tokens": 9,
+        "source_version": "1",
+        "eligibility": "route-policy"
+      }
+    ],
+    "compressed": [],
+    "excluded": [],
+    "conflicts": [],
+    "refused": {
+      "bool": false,
+      "reason": null
+    },
+    "context": {
+      "spec": "cwa/draft",
+      "assembly_time": "2026-10-15T17:11:00Z",
+      "route_policy_version": "illustrative/v1",
+      "tokenizer": "estimate-utf8/v1",
+      "renderer": "cwa-message-blocks/v1",
+      "snapshot_digest": "f17776f68e413806c8a1790b3e477db97c0165ea0ff970b45030af1642d9b3cf"
+    },
+    "defaults_filled": [
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "annual-report-2025#s1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "lineage"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "annual-report-2025#s2",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "variants"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "obs:report-pages-1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "variants"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "policy:ir-v1",
+        "field": "injection_risk"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "token_budget"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "variants"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "conflict_policy"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "lineage"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "eligibility"
+      },
+      {
+        "item_id": "turn:1",
+        "field": "injection_risk"
+      }
+    ],
+    "timings": {
+      "admission": 0.04141599999999812,
+      "conflicts": 0.0005419999999958236,
+      "supersession": 0.0031670000000190157,
+      "deduplication": 0.007000000000005002,
+      "diversity": 0.002250000000003638,
+      "fitting": 0.04454199999997854
+    }
+  },
+  "payload": {
+    "hash": "3153ee6d563745d583266c00a4839681def92a3463eb2a369e852e7c9bfa5c3c",
+    "bytes": 1617,
+    "parts": [
+      {
+        "section": "system",
+        "id": "policy:ir-v1",
+        "sha256": "edd4868a7c7ec5737fd21091491f92cbb65886cb55d781e04627c34cc1ebbf63",
+        "bytes": 199
+      },
+      {
+        "section": "content",
+        "id": "annual-report-2025#s1",
+        "sha256": "a9a08773b7cb0cb872deb68408bfd5ca0f37c17d5165aead449d0bf94ccc88fd",
+        "bytes": 378
+      },
+      {
+        "section": "content",
+        "id": "annual-report-2025#s2",
+        "sha256": "f8150f48f73dd6752157347506578427b61832765662d01c703ad8dca35a7f41",
+        "bytes": 318
+      },
+      {
+        "section": "content",
+        "id": "obs:report-pages-1",
+        "sha256": "23fddc5648287da2d1aa734af959107e9ab5b0012efed53b05c8f2b62c041de4",
+        "bytes": 102
+      },
+      {
+        "section": "content",
+        "id": "policy:ir-v1",
+        "sha256": "ed596858c62806fd9bfec47693374d826d8328c1619941052cc8d4081dbd7ecd",
+        "bytes": 249
+      },
+      {
+        "section": "content",
+        "id": "turn:1",
+        "sha256": "0711e456d1e71a6b958faab07cd848b2b2d34d6b4ccad83c73536826f03aa366",
+        "bytes": 66
+      }
+    ]
+  }
+}
