@@ -45,9 +45,10 @@ test("the app loads under the production policy, in the light theme by default",
   const policy = response?.headers()["content-security-policy"] ?? ""
   expect(policy).toContain("script-src 'self';")
   expect(policy).not.toContain("unsafe-eval")
-  await expect(page).toHaveTitle("CWA dashboard")
+  await expect(page).toHaveURL(/\/traces$/)
+  await expect(page).toHaveTitle("Trace stream — CWA dashboard")
   await expect(page.getByRole("main")).toHaveCount(1)
-  await expect(page.getByRole("heading", { level: 1, name: "CWA dashboard" })).toBeVisible()
+  await expect(page.getByRole("heading", { level: 1, name: "Trace stream" })).toBeVisible()
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light")
   // The website's paper, from tokens.css, wins over the generated stylesheet's white.
   expect(await bodyBackground(page)).toBe("oklch(0.985 0.004 90)")
@@ -64,7 +65,25 @@ test("the stored dark theme applies before the app renders", async ({ page }) =>
 
 test("the page never scrolls sideways at 400px", async ({ page }) => {
   await page.setViewportSize({ width: 400, height: 800 })
-  await page.goto("/")
-  await expect(page.getByRole("main")).toBeVisible()
+  await page.goto("/traces")
+  await expect(page.getByRole("heading", { level: 1, name: "Trace stream" })).toBeVisible()
   await expectNoSidewaysScroll(page)
+})
+
+// The restyled shell, measured in the browser (STYLE.md 5, 6): what a unit test cannot see.
+test("the shell wears the website's shapes and type", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto("/traces")
+  const style = (selector: string, property: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((element, name) => getComputedStyle(element).getPropertyValue(name), property)
+  expect(await style('[data-slot="masthead"]', "height")).toBe("68px")
+  expect(await style('[data-slot="ghost-button"]', "border-top-left-radius")).toBe("999px")
+  expect(await style('[data-slot="ghost-button"]', "font-family")).toContain("IBM Plex Mono")
+  expect(await style('[data-slot="page-title"]', "font-family")).toContain("Space Grotesk")
+  const current = '[data-slot="sidebar-menu-button"][data-active="true"]'
+  expect(await style(current, "border-left-width")).toBe("3px")
+  expect(await style(current, "border-left-color")).toBe(await style("[data-kicker]", "color"))
 })

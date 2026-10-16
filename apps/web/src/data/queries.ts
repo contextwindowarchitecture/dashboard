@@ -6,8 +6,8 @@
 // retried; a network or server failure is retried once.
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query"
-import { createContext, type ReactNode, useContext } from "react"
 
+import { useData } from "./data-context"
 import { type EventSource, SourceError } from "./source"
 import { type DocumentByKind, type Kind, parseDocument, type ParseResult } from "./validate"
 
@@ -18,24 +18,6 @@ export interface Fetched<K extends Kind> {
 }
 
 export type DocumentQuery<K extends Kind> = UseQueryResult<Fetched<K>, Error>
-
-interface Data {
-  readonly source: EventSource
-  /** The data root, which every query key carries. */
-  readonly root: string
-}
-
-const DataContext = createContext<Data | null>(null)
-
-export function DataProvider({ source, root, children }: Data & { children: ReactNode }) {
-  return <DataContext.Provider value={{ source, root }}>{children}</DataContext.Provider>
-}
-
-function useData(): Data {
-  const data = useContext(DataContext)
-  if (data === null) throw new Error("useData outside a DataProvider")
-  return data
-}
 
 const INDEX_POLL_MS = 30_000
 

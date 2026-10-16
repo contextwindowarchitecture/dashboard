@@ -4,7 +4,8 @@ import type { ReactNode } from "react"
 import { describe, expect, it } from "vitest"
 
 import { fixtureFetch, type FixtureFetchOptions } from "../test/fixture-fetch"
-import { DataProvider, useEvent, useFleet, useIndex, useSession } from "./queries"
+import { DataProvider } from "./data-provider"
+import { useEvent, useFleet, useIndex, useSession } from "./queries"
 import { regionOf } from "./region"
 import { createFileSource } from "./source"
 

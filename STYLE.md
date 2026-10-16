@@ -533,6 +533,7 @@ These are how the dashboard differs from the website on purpose. They are record
 - **Icons.** Lucide line icons on controls and sidebar items; the site has none.
 - **Status outcomes beyond the demo's.** `assembled`, `rejected`, drift and the redaction mode are chips the demo does not have; they follow the same ladder and add no colour.
 - **Full-width pages.** Dashboard pages fill the inset beside the sidebar; narrative pages keep the site's `1180px` container.
+- **The sidebar's sheet threshold.** The generated sidebar becomes a sheet below `768px` (its `use-mobile` hook), not the `900px` of section 5, because generated files stay as generated. Between `768px` and `1200px` it starts collapsed to its icon rail, which section 5 already asks for up to `1200px`, and the masthead's menu button opens it.
 
 ## 11. Checklist for a new page or section
 

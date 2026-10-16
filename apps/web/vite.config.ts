@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process"
 import { randomBytes } from "node:crypto"
 import path from "node:path"
 
@@ -6,8 +7,23 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
 import { contentSecurityPolicyPlugin } from "./dev/csp.ts"
+import { dataPlugin } from "./dev/data-plugin.ts"
 
 const root = import.meta.dirname
+// The data tree the dev and preview servers serve: the committed demo tree unless told otherwise.
+const dataDir =
+  process.env["VITE_DATA_DIR"] ?? path.resolve(root, "../../packages/demo-traffic/fixtures")
+
+// The commit the app is built from, for the footer.
+function buildCommit(): string {
+  try {
+    return execFileSync("git", ["-C", root, "rev-parse", "--short", "HEAD"], {
+      encoding: "utf8",
+    }).trim()
+  } catch {
+    return "dev"
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => {
@@ -16,8 +32,9 @@ export default defineConfig(({ command }) => {
   // the preview server sends the production policy unchanged.
   const nonce = command === "serve" ? randomBytes(16).toString("base64") : undefined
   return {
-    plugins: [react(), tailwindcss(), contentSecurityPolicyPlugin(nonce)],
+    plugins: [react(), tailwindcss(), contentSecurityPolicyPlugin(nonce), dataPlugin(dataDir)],
     html: nonce === undefined ? {} : { cspNonce: nonce },
+    define: { __BUILD_COMMIT__: JSON.stringify(buildCommit()) },
     resolve: {
       alias: {
         "@": path.resolve(root, "./src"),
