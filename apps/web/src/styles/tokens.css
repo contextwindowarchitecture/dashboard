@@ -195,6 +195,11 @@ a:hover {
   margin: 12px 0 0;
 }
 
+/* A hash link's target lands below the sticky masthead, not under it (STYLE.md 6). */
+[id] {
+  scroll-margin-top: calc(var(--mast-h) + 16px);
+}
+
 /* --- Skip link, masthead and wordmark (STYLE.md 6) ---------------------------------------------- */
 
 [data-slot="skip-link"] {

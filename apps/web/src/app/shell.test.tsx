@@ -56,6 +56,22 @@ describe("the shell", () => {
     await waitFor(() => expect(title).toHaveFocus())
   })
 
+  it("scrolls to the element a link's hash names, once it has rendered", async () => {
+    const scrolled: Element[] = []
+    const original = Element.prototype.scrollIntoView
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this)
+    }
+    try {
+      const { router } = renderApp("/traces")
+      await screen.findByRole("heading", { level: 1, name: "Trace stream" })
+      await act(() => router.navigate("/nowhere#page-title"))
+      await waitFor(() => expect(scrolled.map((e) => e.id)).toContain("page-title"))
+    } finally {
+      Element.prototype.scrollIntoView = original
+    }
+  })
+
   it("keeps focus where it is when only the query changes", async () => {
     const { router } = renderApp("/traces")
     await screen.findByRole("heading", { level: 1, name: "Trace stream" })
