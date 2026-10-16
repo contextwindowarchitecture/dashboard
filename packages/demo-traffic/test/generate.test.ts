@@ -158,6 +158,22 @@ describe("the demo tree", () => {
     }
   })
 
+  it("keeps the current window in index.json and closes the rest into their days", () => {
+    const small = generateTree({ events: 40, window: { hours: 24, max: 50 } })
+    const index = JSON.parse(small.get("events/index.json")!) as EventsIndexV1
+    valid(validateEventsIndexV1, index, "index")
+    expect(index.events).toHaveLength(50)
+    let closed = 0
+    for (const window of index.windows!) {
+      const day = JSON.parse(small.get(`events/${window.path}`)!) as EventsIndexV1
+      valid(validateEventsIndexV1, day, window.path)
+      expect(day.events).toHaveLength(window.events)
+      closed += window.events
+    }
+    const all = [...small.keys()].filter((path) => /^events\/[0-9A-Z]{26}\.json$/.test(path)).length
+    expect(index.events.length + closed).toBe(all)
+  })
+
   it("is the same tree on every run, measurements aside", () => {
     const again = generateTree()
     expect([...again.keys()]).toEqual([...tree.keys()])

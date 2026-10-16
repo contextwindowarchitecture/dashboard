@@ -38,7 +38,13 @@ import {
   TOKENIZERS,
 } from "@cwa-dashboard/assembler"
 import { IMPLEMENTATIONS } from "@cwa-dashboard/contract/implementations"
-import { buildIndex, buildSessions, serviceRows } from "@cwa-dashboard/telemetry/derive"
+import {
+  buildSessions,
+  indexFromRows,
+  indexRow,
+  serviceRows,
+  windowRows,
+} from "@cwa-dashboard/telemetry/derive"
 import type { AssemblyEventV1, FleetReportV1 } from "@cwa-dashboard/telemetry/types"
 
 import { SCENARIOS } from "./scenarios/index.ts"
@@ -56,6 +62,8 @@ export const FIXTURES = join(ROOT, "packages/demo-traffic/fixtures")
 const DEMO = "demo"
 
 export interface Options {
+  /** The current window (dashboard-plan.md 3): 24 hours and 20,000 events unless given. */
+  readonly window?: { readonly hours: number; readonly max: number }
   /** More events beyond the committed set: the scenarios' turns replayed with jitter. */
   readonly events?: number
   readonly seed?: number
@@ -194,7 +202,17 @@ export function generateTree(options: Options = {}): Map<string, string> {
     .sort()
     .at(-1)!
   const files = new Map<string, string>()
-  files.set("events/index.json", text(buildIndex(events, generatedAt)))
+  // The current window in index.json, the rest closed into their days, as the ingest service keeps it.
+  const { current, closed } = windowRows(
+    events.map(indexRow),
+    options.window ?? { hours: 24, max: 20_000 },
+  )
+  const windows = [...closed].map(([day, rows]) => {
+    files.set(`events/index/${day}.json`, text(indexFromRows(rows, generatedAt)))
+    return { day, path: `index/${day}.json`, events: rows.length }
+  })
+  const index = indexFromRows(current, generatedAt)
+  files.set("events/index.json", text(windows.length > 0 ? { ...index, windows } : index))
   for (const event of events) files.set(`events/${event.event_id}.json`, text(event))
   for (const session of buildSessions(events))
     files.set(`sessions/${session.session_id}.json`, text(session))
