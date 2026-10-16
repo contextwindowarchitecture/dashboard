@@ -971,6 +971,34 @@ export const SCOPE = [
   }
 ] as const
 
+/** conformance/README.md, Tokenizers and renderers: every published one, and whether every implementation must provide it. */
+export const COMPONENTS = {
+  "tokenizers": [
+    {
+      "id": "fixture-whitespace/v1",
+      "required": true
+    },
+    {
+      "id": "estimate-utf8/v1",
+      "required": true
+    }
+  ],
+  "renderers": [
+    {
+      "id": "fixture-xml/v1",
+      "required": true
+    },
+    {
+      "id": "cwa-messages/v1",
+      "required": true
+    },
+    {
+      "id": "cwa-message-blocks/v1",
+      "required": false
+    }
+  ]
+} as const
+
 /** implementations/index.json: each implementation's id and label, without its report. */
 export const IMPLEMENTATION_INDEX = [
   {

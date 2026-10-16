@@ -124,6 +124,47 @@ function generateValidators() {
 
 // --- data ----------------------------------------------------------------------------------------
 
+// conformance/README.md, Tokenizers and renderers: the ids listed before Optional are required, the
+// ones under it optional. The README does not say which are tokenizers and which renderers, but every
+// published case uses them (that section says so), so each id's kind is where the cases name it.
+function components() {
+  const readme = readFileSync(join(ROOT, "vendor/cwa/conformance/README.md"), "utf8")
+  const start = readme.indexOf("\n## Tokenizers and renderers\n")
+  const optional = readme.indexOf("\n### Optional\n", start)
+  const end = readme.indexOf("\n## ", optional + 1)
+  if (start < 0 || optional < 0 || end < 0) {
+    throw new Error(
+      "conformance/README.md: no Tokenizers and renderers section with an Optional list",
+    )
+  }
+  const ids = (text) => [...text.matchAll(/^- `([a-z0-9-]+\/v[0-9]+)`/gm)].map((m) => m[1])
+  const listed = [
+    ...ids(readme.slice(start, optional)).map((id) => ({ id, required: true })),
+    ...ids(readme.slice(optional, end)).map((id) => ({ id, required: false })),
+  ]
+  const cases = join(ROOT, "vendor/cwa/conformance/cases")
+  const used = { tokenizers: new Set(), renderers: new Set() }
+  for (const id of readdirSync(cases).sort()) {
+    const snapshot = JSON.parse(readFileSync(join(cases, id, "snapshot.json"), "utf8"))
+    used.tokenizers.add(snapshot.tokenizer)
+    used.renderers.add(snapshot.renderer)
+  }
+  const kind = (entry) => {
+    const asTokenizer = used.tokenizers.has(entry.id)
+    const asRenderer = used.renderers.has(entry.id)
+    if (asTokenizer === asRenderer) {
+      throw new Error(
+        `conformance/README.md: no case tells whether ${entry.id} is a tokenizer or a renderer`,
+      )
+    }
+    return asTokenizer ? "tokenizers" : "renderers"
+  }
+  return {
+    tokenizers: listed.filter((entry) => kind(entry) === "tokenizers"),
+    renderers: listed.filter((entry) => kind(entry) === "renderers"),
+  }
+}
+
 function generateData() {
   const lock = JSON.parse(readFileSync(join(ROOT, "vendor/cwa.lock.json"), "utf8"))
   const source = { repository: lock.repository, commit: lock.spec_commit, dirty: lock.dirty }
@@ -146,6 +187,9 @@ export const SLOT_DEFAULTS = ${json(read("contract/slot-defaults.json"))} as con
 
 /** contract/assembler-scope.json: whether each requirement is the assembler's, the boundary's or the application's. */
 export const SCOPE = ${json(read("contract/assembler-scope.json"))} as const
+
+/** conformance/README.md, Tokenizers and renderers: every published one, and whether every implementation must provide it. */
+export const COMPONENTS = ${json(components())} as const
 
 /** implementations/index.json: each implementation's id and label, without its report. */
 export const IMPLEMENTATION_INDEX = ${json(read("implementations/index.json"))} as const

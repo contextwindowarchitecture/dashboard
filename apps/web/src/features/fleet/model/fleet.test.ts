@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs"
-import { join, resolve } from "node:path"
+import { join } from "node:path"
 
 import type { FleetReportV1 } from "@cwa-dashboard/telemetry/types"
 import { describe, expect, it } from "vitest"
@@ -8,20 +8,13 @@ import { FIXTURES_DIR } from "../../../test/fixture-fetch"
 import { caseRows, conformanceRows, REQUIRED, serviceRows } from "./fleet"
 
 const fleet = JSON.parse(readFileSync(join(FIXTURES_DIR, "fleet.json"), "utf8")) as FleetReportV1
-const readme = readFileSync(
-  resolve(
-    import.meta.dirname,
-    "../../../../../../packages/contract/vendor/cwa/conformance/README.md",
-  ),
-  "utf8",
-)
 
 describe("REQUIRED", () => {
-  it("names the tokenizers and renderers conformance/README.md says every implementation provides", () => {
-    const section = readme.slice(readme.indexOf("## Tokenizers and renderers"))
-    const required = section.slice(0, section.indexOf("\n### Optional"))
-    const ids = [...required.matchAll(/^- `([a-z0-9-]+\/v\d+)`/gm)].map((m) => m[1])
-    expect([...REQUIRED.tokenizers, ...REQUIRED.renderers].sort()).toEqual([...ids].sort())
+  it("is the contract's required tokenizers and renderers", () => {
+    expect(REQUIRED).toEqual({
+      tokenizers: ["fixture-whitespace/v1", "estimate-utf8/v1"],
+      renderers: ["fixture-xml/v1", "cwa-messages/v1"],
+    })
   })
 })
 

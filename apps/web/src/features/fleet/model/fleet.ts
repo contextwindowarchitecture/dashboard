@@ -3,18 +3,16 @@
 // says it lacks; each case with its rules; and each service's contract commit beside the one the
 // dashboard's lock pins, with the latency its wrapper measured, or none where it measured none.
 
+import { COMPONENTS } from "@cwa-dashboard/contract/data"
 import type { FleetReportV1 } from "@cwa-dashboard/telemetry/types"
 
 type Implementation = FleetReportV1["implementations"][number]
 
-/**
- * What every implementation provides (conformance/README.md, Tokenizers and renderers, before
- * Optional). The README says it in prose, so a test reads the list back from it.
- */
+/** What every implementation provides (conformance/README.md, Tokenizers and renderers). */
 export const REQUIRED = {
-  tokenizers: ["fixture-whitespace/v1", "estimate-utf8/v1"],
-  renderers: ["fixture-xml/v1", "cwa-messages/v1"],
-} as const
+  tokenizers: COMPONENTS.tokenizers.filter((c) => c.required).map((c) => c.id),
+  renderers: COMPONENTS.renderers.filter((c) => c.required).map((c) => c.id),
+}
 
 const tally = <O extends string>(list: readonly { outcome: string }[], outcomes: readonly O[]) =>
   Object.fromEntries([

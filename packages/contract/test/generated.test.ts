@@ -5,6 +5,7 @@ import { join, resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 
 import {
+  COMPONENTS,
   CONTRACT_SOURCE,
   IMPLEMENTATION_INDEX,
   MODEL,
@@ -156,6 +157,36 @@ describe("the generated contract data", () => {
 
   it("holds the implementations' index, small enough for any page to name a language", () => {
     expect(IMPLEMENTATION_INDEX).toEqual(read("implementations/index.json"))
+  })
+
+  it("holds the published tokenizers and renderers, required or optional, as conformance/README.md lists them", () => {
+    expect(COMPONENTS).toEqual({
+      tokenizers: [
+        { id: "fixture-whitespace/v1", required: true },
+        { id: "estimate-utf8/v1", required: true },
+      ],
+      renderers: [
+        { id: "fixture-xml/v1", required: true },
+        { id: "cwa-messages/v1", required: true },
+        { id: "cwa-message-blocks/v1", required: false },
+      ],
+    })
+    // Every case uses only published components, each of the kind the cases use it as.
+    const cases = readdirSync(join(vendor, "conformance/cases"))
+    for (const id of cases) {
+      const snapshot = read(`conformance/cases/${id}/snapshot.json`) as {
+        tokenizer: string
+        renderer: string
+      }
+      expect(
+        COMPONENTS.tokenizers.map((c) => c.id),
+        id,
+      ).toContain(snapshot.tokenizer)
+      expect(
+        COMPONENTS.renderers.map((c) => c.id),
+        id,
+      ).toContain(snapshot.renderer)
+    }
   })
 
   it("holds the registry and the four implementations' reports", () => {
