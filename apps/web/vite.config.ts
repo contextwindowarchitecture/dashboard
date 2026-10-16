@@ -14,6 +14,14 @@ const root = import.meta.dirname
 const dataDir =
   process.env["VITE_DATA_DIR"] ?? path.resolve(root, "../../packages/demo-traffic/fixtures")
 
+// The replay service (apps/ingest) to proxy /api to, when there is one: `pnpm dev` and the browser
+// tests set it, so the app reaches the service on its own origin, as nginx proxies it in a deployment.
+const apiTarget = process.env["VITE_API_TARGET"]
+const proxy =
+  apiTarget === undefined
+    ? undefined
+    : { "/api": { target: apiTarget, rewrite: (p: string) => p.replace(/^\/api/, "") } }
+
 // The commit the app is built from, for the footer.
 function buildCommit(): string {
   try {
@@ -32,7 +40,13 @@ export default defineConfig(({ command }) => {
   // the preview server sends the production policy unchanged.
   const nonce = command === "serve" ? randomBytes(16).toString("base64") : undefined
   return {
-    plugins: [react(), tailwindcss(), contentSecurityPolicyPlugin(nonce), dataPlugin(dataDir)],
+    plugins: [
+      react(),
+      tailwindcss(),
+      contentSecurityPolicyPlugin(nonce),
+      dataPlugin(dataDir, apiTarget === undefined ? {} : { apiBase: "/api" }),
+    ],
+    ...(proxy === undefined ? {} : { server: { proxy }, preview: { proxy } }),
     html: nonce === undefined ? {} : { cspNonce: nonce },
     define: { __BUILD_COMMIT__: JSON.stringify(buildCommit()) },
     resolve: {

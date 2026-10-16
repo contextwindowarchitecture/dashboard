@@ -1,5 +1,6 @@
 // Serves the app's data in development and preview (dashboard-plan.md 9), as nginx does in a
-// deployment: /config.json with the demo's configuration, and /data/ from the committed demo tree
+// deployment: /config.json with the demo's configuration (naming the replay service's base when the
+// server proxies one, as vite.config.ts does with VITE_API_TARGET), and /data/ from the committed demo tree
 // (packages/demo-traffic/fixtures) or $VITE_DATA_DIR. JSON files only, 404 on a miss, no listing,
 // nothing outside the tree.
 
@@ -17,9 +18,24 @@ export type DataRequest =
   | { kind: "not-found" }
   | { kind: "pass" }
 
-export function resolveDataRequest(url: string, dir: string): DataRequest {
+export interface DataOptions {
+  /** The replay service's base, when the server proxies one. */
+  readonly apiBase?: string
+}
+
+export function resolveDataRequest(
+  url: string,
+  dir: string,
+  options: DataOptions = {},
+): DataRequest {
   const pathname = url.split("?")[0] ?? ""
-  if (pathname === "/config.json") return { kind: "config", body: DEMO_CONFIG }
+  if (pathname === "/config.json") {
+    return {
+      kind: "config",
+      body:
+        options.apiBase === undefined ? DEMO_CONFIG : { ...DEMO_CONFIG, apiBase: options.apiBase },
+    }
+  }
   if (!pathname.startsWith(PREFIX) && pathname !== "/data") return { kind: "pass" }
   let relative: string
   try {
@@ -36,10 +52,10 @@ export function resolveDataRequest(url: string, dir: string): DataRequest {
   return { kind: "file", path }
 }
 
-export function dataPlugin(dir: string): Plugin {
+export function dataPlugin(dir: string, options: DataOptions = {}): Plugin {
   const mount = (server: ViteDevServer | PreviewServer) => {
     server.middlewares.use((request, response, next) => {
-      const resolved = resolveDataRequest(request.url ?? "/", dir)
+      const resolved = resolveDataRequest(request.url ?? "/", dir, options)
       if (resolved.kind === "pass") return next()
       if (resolved.kind === "not-found") {
         response.statusCode = 404

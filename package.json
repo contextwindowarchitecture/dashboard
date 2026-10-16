@@ -9,6 +9,7 @@
     "node": ">=24"
   },
   "scripts": {
+    "dev": "VITE_API_TARGET=http://127.0.0.1:8090 pnpm --parallel --filter @cwa-dashboard/ingest --filter @cwa-dashboard/web dev",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",

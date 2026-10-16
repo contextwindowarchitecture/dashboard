@@ -366,6 +366,10 @@ test("the guardrails and a guardrail's page read in both themes and at a phone's
 test("the sandbox says when the replay service is not configured, and reads in both themes", async ({
   page,
 }) => {
+  // A deployment whose config.json names no apiBase.
+  await page.route("**/config.json", (route) =>
+    route.fulfill({ json: { dataRoot: "/data", source: "file" } }),
+  )
   await page.goto("/traces?outcome=assembled")
   await page
     .getByRole("table", { name: "Trace stream" })
@@ -383,4 +387,72 @@ test("the sandbox says when the replay service is not configured, and reads in b
   await expect(page.getByRole("region", { name: "Replay service" })).toBeVisible()
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
+})
+
+// DP-5: a demo event replays through the real assembler on the replay service to the hash it
+// recorded; a budget too small for its protected content refuses; a service that does not answer
+// is said not to.
+const REFUND_TURN = (
+  JSON.parse(
+    readFileSync(
+      resolve(
+        import.meta.dirname,
+        "../../../packages/demo-traffic/fixtures/sessions/refund-7.json",
+      ),
+      "utf8",
+    ),
+  ) as { turns: { event_id: string }[] }
+).turns[0]!.event_id
+const recordedHash = (
+  JSON.parse(
+    readFileSync(
+      resolve(
+        import.meta.dirname,
+        `../../../packages/demo-traffic/fixtures/events/${REFUND_TURN}.json`,
+      ),
+      "utf8",
+    ),
+  ) as { payload: { hash: string } }
+).payload.hash
+
+test("the sandbox replays an event to the hash it recorded, through the service", async ({
+  page,
+}) => {
+  await page.goto(`/sandbox?event=${REFUND_TURN}`)
+  await page.getByRole("button", { name: "Replay" }).click()
+  const parity = page.getByRole("region", { name: "Parity" })
+  await expect(parity).toContainText("Parity · equal")
+  await expect(parity).toContainText(recordedHash)
+  await expect(page.getByRole("region", { name: "Trace diff lines" })).toContainText("No change")
+  await expectAccessible(page)
+})
+
+test("the sandbox refuses a budget too small for the protected content, and says so", async ({
+  page,
+}) => {
+  await page.goto(`/sandbox?event=${REFUND_TURN}`)
+  await page.getByRole("spinbutton", { name: "budget.input" }).fill("10")
+  await expect(page).toHaveURL(/[?&]input=10/)
+  await page.getByRole("button", { name: "Replay" }).click()
+  const result = page.getByRole("region", { name: "Replay result" })
+  await expect(result).toContainText("refused")
+  await expect(result).toContainText("protected_content_over_budget")
+  await expect(page.getByRole("region", { name: "Parity" })).toContainText("no parity claimed")
+  await expectAccessible(page)
+  await page.setViewportSize({ width: 400, height: 800 })
+  await expectNoSidewaysScroll(page)
+})
+
+test("the sandbox says so when the replay service does not answer", async ({ page }) => {
+  await page.route("**/api/replay", (route) => route.abort())
+  await page.goto(`/sandbox?event=${REFUND_TURN}`)
+  await page.getByRole("button", { name: "Replay" }).click()
+  await expect(page.getByRole("region", { name: "Replay result" })).toContainText("did not answer")
+  // The request this test aborts is logged as a failed load; that one error is expected, no other.
+  const seen = problems.get(page)!
+  const expected = seen.filter((message) =>
+    /Failed to load resource: net::ERR_FAILED/.test(message),
+  )
+  expect(expected).toHaveLength(1)
+  seen.splice(seen.indexOf(expected[0]!), 1)
 })

@@ -7,6 +7,13 @@ import { DEMO_CONFIG, resolveDataRequest } from "./data-plugin.ts"
 const dir = resolve(import.meta.dirname, "../../../packages/demo-traffic/fixtures")
 
 describe("resolveDataRequest", () => {
+  it("names the replay service's base in the configuration when one is proxied", () => {
+    expect(resolveDataRequest("/config.json", dir, { apiBase: "/api" })).toEqual({
+      kind: "config",
+      body: { ...DEMO_CONFIG, apiBase: "/api" },
+    })
+  })
+
   it("serves the configuration and the tree's JSON files", () => {
     expect(resolveDataRequest("/config.json", dir)).toEqual({ kind: "config", body: DEMO_CONFIG })
     expect(resolveDataRequest("/data/events/index.json", dir)).toEqual({

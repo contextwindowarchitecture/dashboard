@@ -297,11 +297,25 @@ function EventReplay({
     <DataRegion region={region} label={`event ${eventId}`}>
       {(event) => (
         <div data-slot="content">
-          <p data-slot="panel-note">
-            <Link to={`/traces/${event.event_id}`}>{event.event_id}</Link> · recorded by the{" "}
-            {event.assembler.language} assembler {event.assembler.version} · {event.redaction_mode}{" "}
-            · replayed by the TypeScript assembler
-          </p>
+          {/* A list, so no link sits in running text (axe, link-in-text-block). */}
+          <ul aria-label="Event" data-slot="facts">
+            <li>
+              <span data-label="">event</span>{" "}
+              <Link to={`/traces/${event.event_id}`}>{event.event_id}</Link>
+            </li>
+            <li>
+              <span data-label="">recorded by</span>{" "}
+              <code>
+                {event.assembler.language} {event.assembler.version}
+              </code>
+            </li>
+            <li>
+              <span data-label="">redaction</span> <code>{event.redaction_mode}</code>
+            </li>
+            <li>
+              <span data-label="">replayed by</span> <code>typescript</code>
+            </li>
+          </ul>
           <Replayer key={event.event_id} event={event} client={client} />
         </div>
       )}
@@ -322,10 +336,12 @@ export function SandboxView() {
       {client === null ? (
         <NotConfigured />
       ) : eventId === null ? (
-        <p data-slot="panel-note">
-          Open an event from the <Link to="/traces">trace stream</Link> and choose “Replay in the
-          sandbox”.
-        </p>
+        <div data-slot="content">
+          <p data-slot="panel-note">Choose “Replay in the sandbox” on an event’s page.</p>
+          <p>
+            <Link to="/traces">Open the trace stream →</Link>
+          </p>
+        </div>
       ) : (
         <EventReplay eventId={eventId} client={client} />
       )}
