@@ -171,6 +171,8 @@ a:hover {
   line-height: 1.02;
   max-width: 24ch;
   text-wrap: balance;
+  /* A record's title is its id, which has nowhere to break at a phone's width. */
+  overflow-wrap: anywhere;
   margin: 0;
 }
 [data-slot="page-title"]:focus {
@@ -424,6 +426,10 @@ a:hover {
   line-height: 1;
   white-space: nowrap;
   color: var(--muted);
+  /* Wider than its row, a chip puts its detail under its name rather than push the page sideways. */
+  max-width: 100%;
+  flex-wrap: wrap;
+  row-gap: 4px;
 }
 [data-slot="badge"][data-tone="ok"],
 [data-slot="badge"][data-tone="info"] {

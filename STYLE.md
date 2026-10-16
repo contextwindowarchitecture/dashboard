@@ -176,7 +176,7 @@ The theme is an attribute, `data-theme="light"` or `"dark"`, on `<html>`. The ap
 | Role | Family | Size | Weight | Tracking | Line-height | Measure | Notes |
 |---|---|---|---|---|---|---|---|
 | Narrative page title (About, Telemetry, Glossary) | sans | `clamp(38px, 5.4vw, 72px)` | 700 | `-0.045em` | `0.96` | `16ch` | `text-wrap: balance` |
-| Dashboard page title (h1) | sans | `clamp(28px, 3.6vw, 44px)` | 700 | `-0.035em` | `1.02` | `24ch` | `text-wrap: balance`; the site's h2 scale |
+| Dashboard page title (h1) | sans | `clamp(28px, 3.6vw, 44px)` | 700 | `-0.035em` | `1.02` | `24ch` | `text-wrap: balance`; `overflow-wrap: anywhere`, since a record page's title is its id; the site's h2 scale |
 | Section title (h2) | sans | `var(--fs-h3)` 22px | 600 | `-0.02em` | `1.2` | none | `margin: 0 0 12px` |
 | Card, panel and column title | sans | `var(--fs-title)` 16px | 600 | `-0.015em` | `1.35` | | |
 | Lede, page description | sans | `var(--fs-lede)` 18px | 400 | none | `1.6` | `64ch` | `color: var(--muted)`, `text-wrap: pretty` |
@@ -340,8 +340,10 @@ A page has one accent kicker in its header; every panel title, column heading ("
 One shape for badges, tags and statuses: a pill in mono. Colour is the outcome (section 3); the word is always there. The generated `Badge` is restyled to this shape; `StatusBadge`, `ReasonChip`, `RuleChip`, `SlotBadge`, `LanguageMark` and `PlaneMark` are the dashboard's components over it.
 
 ```css
-[data-slot="badge"] { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid var(--line); border-radius: var(--pill); font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; white-space: nowrap; color: var(--muted); }
+[data-slot="badge"] { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid var(--line); border-radius: var(--pill); font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; white-space: nowrap; color: var(--muted); max-width: 100%; flex-wrap: wrap; row-gap: 4px; }
 ```
+
+A chip wider than its row, a long slot with its wrap and count at a phone's width, puts its detail (`chip-detail`) on a second line inside the pill; the name and the detail each stay on one line.
 
 | Variant | Text | Border | Fill | Used for |
 |---|---|---|---|---|

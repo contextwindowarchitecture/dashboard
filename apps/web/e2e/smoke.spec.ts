@@ -150,6 +150,10 @@ test("the inspector opens an assembled, a refused and a rejected event from the 
       await expect(page.getByRole("tabpanel", { name: tab })).toBeVisible()
       await expectAccessible(page)
     }
+    // The title is the event's id, which has nowhere to break.
+    await page.setViewportSize({ width: 400, height: 800 })
+    await expectNoSidewaysScroll(page)
+    await page.setViewportSize({ width: 1280, height: 720 })
   }
 })
 
