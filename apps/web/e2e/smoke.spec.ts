@@ -4,8 +4,9 @@
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 
-import { AxeBuilder } from "@axe-core/playwright"
-import { expect, test, type Page } from "@playwright/test"
+import type { Page } from "@playwright/test"
+
+import { expect, expectAccessible, expectNoSidewaysScroll, test } from "./support"
 
 // The demo tree's event count, from its index, so the tests follow the tree when it grows.
 const TOTAL = (
@@ -17,39 +18,8 @@ const TOTAL = (
   ) as { events: unknown[] }
 ).events.length
 
-// A CSP violation is a console error in Chromium; one anywhere fails the test, as does any
-// uncaught error on the page.
-const problems = new WeakMap<Page, string[]>()
-
-test.beforeEach(({ page }) => {
-  const seen: string[] = []
-  page.on("console", (message) => {
-    if (message.type() === "error") seen.push(message.text())
-  })
-  page.on("pageerror", (error) => seen.push(error.message))
-  problems.set(page, seen)
-})
-
-test.afterEach(({ page }) => {
-  expect(problems.get(page) ?? [], "errors on the page").toEqual([])
-})
-
-async function expectAccessible(page: Page) {
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
-    .analyze()
-  expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([])
-}
-
 const bodyBackground = (page: Page) =>
   page.evaluate(() => getComputedStyle(document.body).backgroundColor)
-
-async function expectNoSidewaysScroll(page: Page) {
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  )
-  expect(overflow).toBeLessThanOrEqual(0)
-}
 
 test("the app loads under the production policy, in the light theme by default", async ({
   page,
@@ -452,13 +422,15 @@ test("the sandbox refuses a budget too small for the protected content, and says
   await expectNoSidewaysScroll(page)
 })
 
-test("the sandbox says so when the replay service does not answer", async ({ page }) => {
+test("the sandbox says so when the replay service does not answer", async ({
+  page,
+  pageErrors: seen,
+}) => {
   await page.route("**/api/replay", (route) => route.abort())
   await page.goto(`/sandbox?event=${REFUND_TURN}`)
   await page.getByRole("button", { name: "Replay" }).click()
   await expect(page.getByRole("region", { name: "Replay result" })).toContainText("did not answer")
   // The request this test aborts is logged as a failed load; that one error is expected, no other.
-  const seen = problems.get(page)!
   const expected = seen.filter((message) =>
     /Failed to load resource: net::ERR_FAILED/.test(message),
   )
