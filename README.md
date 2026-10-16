@@ -13,9 +13,10 @@ Phase 1 is under way. Over the committed demo traffic (`packages/demo-traffic/fi
 - the registry's route policies and profiles, and the events that ran them pinned, drifted or unregistered;
 - the fleet: every implementation's conformance run, the services, their contract and latency;
 - the seven guardrails, each with its codes counted and linked to the stream;
-- the sandbox, which replays an event or a snapshot of your own through the real TypeScript assembler on the replay service (`apps/ingest`), with its controls, its parity with what the event recorded, and the trace diff.
+- the sandbox, which replays an event or a snapshot of your own through the real TypeScript assembler on the replay service (`apps/ingest`), with its controls, its parity with what the event recorded, and the trace diff;
+- the glossary, the telemetry page and the about page.
 
-Writing events through the ingest service (`POST /events`) and the deployment are not built yet. Run it with `pnpm install` and `pnpm dev`, which starts the web app and the replay service side by side.
+The ingest service also takes events (`POST /events`, with a bearer token) into the tree the app reads. Run it all with `pnpm install` and `pnpm dev`, or as containers with `podman compose up --build`; `deploy/README.md` covers both and the cluster. The three illustrations are deferred (`docs/adr/0006-illustrations-deferred.md`).
 
 ## Working here
 
