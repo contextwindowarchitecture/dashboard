@@ -56,6 +56,16 @@ describe("the shell", () => {
     await waitFor(() => expect(title).toHaveFocus())
   })
 
+  it("keeps focus where it is when only the query changes", async () => {
+    const { router } = renderApp("/traces")
+    await screen.findByRole("heading", { level: 1, name: "Trace stream" })
+    const toggle = screen.getByRole("button", { name: "dark" })
+    toggle.focus()
+    await act(() => router.navigate("/traces?outcome=refused", { replace: true }))
+    await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve(undefined))))
+    expect(toggle).toHaveFocus()
+  })
+
   it("toggles the theme, names the theme it would switch to, and keeps the choice", async () => {
     renderApp("/traces")
     const toggle = await screen.findByRole("button", { name: "dark" })
