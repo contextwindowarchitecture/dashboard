@@ -8,21 +8,8 @@ import { OutcomeStrip } from "../../../components/dashboard/outcome-strip"
 import { useIndex, useSession } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import { formatCount, formatInstant, NOT_AVAILABLE } from "../../../lib/format"
-import { sessionModel, type Firsts } from "../model/session"
+import { firstInflection, sessionModel } from "../model/session"
 import { sessionRows, type SessionRow } from "../model/sessions-list"
-
-/** The words each first is known by: the trace's field, the contract's code, the outcome. */
-const FIRST_WORDS: Record<keyof Firsts, string> = {
-  compressed: "compressed",
-  overBudget: "over_budget",
-  refusal: "refused",
-}
-
-export function firstInflection(firsts: Firsts) {
-  const entries = (Object.entries(firsts) as [keyof Firsts, number][]).sort((a, b) => a[1] - b[1])
-  const [kind, turn] = entries[0] ?? []
-  return kind === undefined ? undefined : { kind, turn: turn!, words: FIRST_WORDS[kind] }
-}
 
 function PartReuse({ id }: { readonly id: string }) {
   const region = regionOf(useSession(id), { what: `Session ${id}` })

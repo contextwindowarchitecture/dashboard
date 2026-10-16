@@ -37,6 +37,20 @@ export interface Firsts {
   readonly refusal?: number
 }
 
+/** The words each first is known by: the trace's field, the contract's code, the outcome. */
+const FIRST_WORDS: Record<keyof Firsts, string> = {
+  compressed: "compressed",
+  overBudget: "over_budget",
+  refusal: "refused",
+}
+
+/** The earliest first, with its words; undefined when nothing happened. */
+export function firstInflection(firsts: Firsts) {
+  const entries = (Object.entries(firsts) as [keyof Firsts, number][]).sort((a, b) => a[1] - b[1])
+  const [kind, turn] = entries[0] ?? []
+  return kind === undefined ? undefined : { kind, turn: turn!, words: FIRST_WORDS[kind] }
+}
+
 export interface SessionModel {
   readonly turns: readonly Turn[]
   readonly firsts: Firsts
