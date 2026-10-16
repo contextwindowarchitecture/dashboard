@@ -18,3 +18,6 @@ export declare const BUILT_ASSEMBLER: {
     readonly lock_sha256: string
   }
 }
+
+/** Every file the assembler's vendored contract lock pins, by path, with its SHA-256. */
+export declare const BUILT_CONTRACT_FILES: Readonly<Record<string, string>>

@@ -24,3 +24,7 @@ export const BUILT_ASSEMBLER = Object.freeze({
     lock_sha256: createHash("sha256").update(lockBytes).digest("hex"),
   }),
 })
+
+// The files that lock pins, each with its SHA-256, so a fleet report can compare the contract this
+// assembler runs with the dashboard's file by file, not only by commit.
+export const BUILT_CONTRACT_FILES = Object.freeze({ ...lock.files })

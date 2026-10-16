@@ -4,7 +4,7 @@ import { join, resolve } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
-import { BUILT_ASSEMBLER } from "../index.js"
+import { BUILT_ASSEMBLER, BUILT_CONTRACT_FILES } from "../index.js"
 
 const built = resolve(import.meta.dirname, "../.build/assembler-typescript")
 const pin = JSON.parse(readFileSync(resolve(import.meta.dirname, "../pin.json"), "utf8"))
@@ -28,5 +28,13 @@ describe("BUILT_ASSEMBLER", () => {
       },
     })
     expect(BUILT_ASSEMBLER.name).toBe("@contextwindowarchitecture/assembler")
+  })
+})
+
+describe("BUILT_CONTRACT_FILES", () => {
+  it("is every file the assembler's lock pins, with its SHA-256, and cannot be changed", () => {
+    const lock = JSON.parse(readFileSync(join(built, "vendor/cwa.lock.json"), "utf8"))
+    expect(BUILT_CONTRACT_FILES).toEqual(lock.files)
+    expect(Object.isFrozen(BUILT_CONTRACT_FILES)).toBe(true)
   })
 })
