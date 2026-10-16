@@ -789,3 +789,76 @@ a:hover {
   display: grid;
   gap: 6px;
 }
+
+/* --- Item rows (STYLE.md 6, Panels and cards; 3, Outcomes) --------------------------------------- */
+
+[data-slot="item-row"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--plane);
+  background: var(--surface);
+  padding: 10px 14px;
+}
+[data-slot="item-row"][data-compressed] {
+  border-left-color: color-mix(in oklab, var(--plane) 50%, transparent);
+}
+[data-slot="item-id"] {
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+[data-slot="item-meta"] {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  color: var(--muted);
+}
+[data-slot="meta"] {
+  overflow-wrap: anywhere;
+}
+[data-slot="meta-label"] {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+[data-slot="item-row"] [data-slot="cell-note"] {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+}
+[data-slot="item-body"] summary {
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+[data-slot="item-body"] summary:hover {
+  color: var(--fg);
+}
+[data-slot="item-body"] pre {
+  margin: 8px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  line-height: 1.6;
+}
+[data-slot="item-body"] [data-slot="key-values"] {
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+[data-slot="item-body"] [data-slot="note"] {
+  margin-top: 8px;
+  display: block;
+}

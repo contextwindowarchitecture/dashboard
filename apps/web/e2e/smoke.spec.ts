@@ -133,3 +133,26 @@ test("the inspector opens an assembled, a refused and a rejected event from the 
     await expectAccessible(page)
   }
 })
+
+// R-DASH-1 and R-DASH-2 in the browser: a full, a scrubbed and a digested event, bodies open.
+test("the inspector shows bodies in each redaction mode, and passes axe with them open", async ({
+  page,
+}) => {
+  for (const [session, words] of [
+    ["refund-7", "body ·"],
+    ["intake-12", "body scrubbed at source"],
+    ["agent-run-412", "body redacted · digest_only"],
+  ] as const) {
+    await page.goto(`/traces?session=${session}&outcome=assembled`)
+    await page
+      .getByRole("table", { name: "Trace stream" })
+      .getByRole("row")
+      .nth(1)
+      .getByRole("link")
+      .click()
+    const items = page.getByRole("list", { name: "Included items" })
+    await expect(items.getByText(words).first()).toBeVisible()
+    for (const summary of await items.locator("summary").all()) await summary.click()
+    await expectAccessible(page)
+  }
+})
