@@ -31,7 +31,12 @@ import {
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { RENDERERS, TOKENIZERS } from "@cwa-dashboard/assembler"
+import {
+  BUILT_ASSEMBLER,
+  BUILT_CONTRACT_FILES,
+  RENDERERS,
+  TOKENIZERS,
+} from "@cwa-dashboard/assembler"
 import { IMPLEMENTATIONS } from "@cwa-dashboard/contract/implementations"
 import { buildIndex, buildSessions, serviceRows } from "@cwa-dashboard/telemetry/derive"
 import type { AssemblyEventV1, FleetReportV1 } from "@cwa-dashboard/telemetry/types"
@@ -40,6 +45,12 @@ import { SCENARIOS } from "./scenarios/index.ts"
 import { record, ulid } from "./wrapper.ts"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
+/** The dashboard's vendored contract files, by path, with their SHA-256 (packages/contract's lock). */
+const CONTRACT_FILES = (
+  JSON.parse(readFileSync(join(ROOT, "packages/contract/vendor/cwa.lock.json"), "utf8")) as {
+    files: Record<string, string>
+  }
+).files
 const VENDOR = join(ROOT, "packages/contract/vendor/cwa")
 export const FIXTURES = join(ROOT, "packages/demo-traffic/fixtures")
 const DEMO = "demo"
@@ -151,7 +162,12 @@ function fleetReport(events: readonly AssemblyEventV1[], generatedAt: string): F
         ? { tokenizers: Object.keys(TOKENIZERS).sort(), renderers: [...RENDERERS].sort() }
         : {}),
     })),
-    services: serviceRows(events),
+    // The one lock this generator knows is the built assembler's, so every demo service, which
+    // runs it, is compared with the dashboard's contract file by file.
+    services: serviceRows(events, {
+      files: CONTRACT_FILES,
+      knownLocks: { [BUILT_ASSEMBLER.contract.lock_sha256]: BUILT_CONTRACT_FILES },
+    }),
   }
 }
 

@@ -3515,15 +3515,19 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "contract-fixture",
         "support-chat"
       ],
       "latency_ms": {
         "samples": 90,
-        "p50": 0.11566700000000196,
-        "p95": 0.650999999999982,
-        "p99": 6.135834000000017
+        "p50": 0.0982919999999865,
+        "p95": 0.44720899999998664,
+        "p99": 5.590833999999987
       }
     },
     {
@@ -3532,14 +3536,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "contract-fixture"
       ],
       "latency_ms": {
         "samples": 2,
-        "p50": 0.03554199999999241,
-        "p95": 0.16058400000000006,
-        "p99": 0.16058400000000006
+        "p50": 0.01866699999999355,
+        "p95": 0.0935840000000212,
+        "p99": 0.0935840000000212
       }
     },
     {
@@ -3548,14 +3556,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "contract-review"
       ],
       "latency_ms": {
         "samples": 1,
-        "p50": 0.23050000000000637,
-        "p95": 0.23050000000000637,
-        "p99": 0.23050000000000637
+        "p50": 0.2179999999999893,
+        "p95": 0.2179999999999893,
+        "p99": 0.2179999999999893
       }
     },
     {
@@ -3564,14 +3576,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "document-qa"
       ],
       "latency_ms": {
         "samples": 3,
-        "p50": 0.2552090000000078,
-        "p95": 0.2580000000000098,
-        "p99": 0.2580000000000098
+        "p50": 0.23229200000000105,
+        "p95": 0.23799999999999955,
+        "p99": 0.23799999999999955
       }
     },
     {
@@ -3580,14 +3596,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "long-context-qa"
       ],
       "latency_ms": {
         "samples": 3,
-        "p50": 0.3606670000000065,
-        "p95": 1.0487500000000125,
-        "p99": 1.0487500000000125
+        "p50": 0.33745799999999804,
+        "p95": 0.8292499999999734,
+        "p99": 0.8292499999999734
       }
     },
     {
@@ -3596,14 +3616,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "extract"
       ],
       "latency_ms": {
         "samples": 1,
-        "p50": 0.24191700000000083,
-        "p95": 0.24191700000000083,
-        "p99": 0.24191700000000083
+        "p50": 0.21612500000000523,
+        "p95": 0.21612500000000523,
+        "p99": 0.21612500000000523
       }
     },
     {
@@ -3612,14 +3636,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "policy-desk"
       ],
       "latency_ms": {
         "samples": 2,
-        "p50": 0.10291599999999335,
-        "p95": 0.11066700000000651,
-        "p99": 0.11066700000000651
+        "p50": 0.08754099999998743,
+        "p95": 0.10533300000000168,
+        "p99": 0.10533300000000168
       }
     },
     {
@@ -3628,14 +3656,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "agent-loop"
       ],
       "latency_ms": {
         "samples": 2,
-        "p50": 0.22170800000000668,
-        "p95": 0.25087500000000773,
-        "p99": 0.25087500000000773
+        "p50": 0.22749999999999204,
+        "p95": 0.2429159999999797,
+        "p99": 0.2429159999999797
       }
     },
     {
@@ -3644,14 +3676,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "support-chat"
       ],
       "latency_ms": {
         "samples": 7,
-        "p50": 0.4222910000000013,
-        "p95": 0.7542080000000055,
-        "p99": 0.7542080000000055
+        "p50": 0.40825000000000955,
+        "p95": 0.5995000000000061,
+        "p99": 0.5995000000000061
       }
     },
     {
@@ -3660,14 +3696,18 @@
       "assembler_version": "0.0.1",
       "contract_commit": "c252494af79720d23c95d54c0cf9c638d3e43557",
       "contract_lock_sha256": "9aa3f72356a67368ed3db82fa28d1366e7b153c56cd7fec5b509477a6c8a0271",
+      "contract_files": {
+        "pinned": 303,
+        "differing": []
+      },
       "routes": [
         "support-chat"
       ],
       "latency_ms": {
         "samples": 1,
-        "p50": 0.14754100000001813,
-        "p95": 0.14754100000001813,
-        "p99": 0.14754100000001813
+        "p50": 0.11570799999998371,
+        "p95": 0.11570799999998371,
+        "p99": 0.11570799999998371
       }
     }
   ]

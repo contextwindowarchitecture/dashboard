@@ -18,7 +18,7 @@
   },
   "redaction_mode": "full",
   "timings_ms": {
-    "total": 0.23050000000000637
+    "total": 0.2179999999999893
   },
   "outcome": "refused",
   "snapshot": {
@@ -376,12 +376,12 @@
       }
     ],
     "timings": {
-      "admission": 0.040208000000006905,
-      "conflicts": 0.0006250000000136424,
-      "supersession": 0.000874999999979309,
-      "deduplication": 0.0015410000000031232,
-      "diversity": 0.0005830000000059954,
-      "fitting": 0.1315840000000037
+      "admission": 0.038458000000019865,
+      "conflicts": 0.0005830000000059954,
+      "supersession": 0.0007080000000030395,
+      "deduplication": 0.0018750000000125056,
+      "diversity": 0.0006250000000136424,
+      "fitting": 0.12641700000000355
     }
   }
 }

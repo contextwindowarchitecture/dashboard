@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
+import { BUILT_ASSEMBLER, BUILT_CONTRACT_FILES } from "@cwa-dashboard/assembler"
 import { SLOT_DEFAULTS } from "@cwa-dashboard/contract/data"
 import {
   validateAssemblyEventV1,
@@ -138,6 +139,23 @@ describe("the demo tree", () => {
       reused_parts: 0,
       parts: 0,
     })
+  })
+
+  it("compares each service's contract files with the dashboard's, the built assembler's lock being known", () => {
+    const fleet = json<{ services: { contract_lock_sha256: string; contract_files?: unknown }[] }>(
+      "fleet.json",
+    )
+    const ours = JSON.parse(readFileSync(resolve(vendor, "../cwa.lock.json"), "utf8")) as {
+      files: Record<string, string>
+    }
+    for (const service of fleet.services) {
+      expect(service.contract_lock_sha256).toBe(BUILT_ASSEMBLER.contract.lock_sha256)
+      const pinned = Object.keys(BUILT_CONTRACT_FILES).sort()
+      expect(service.contract_files).toEqual({
+        pinned: pinned.length,
+        differing: pinned.filter((path) => ours.files[path] !== BUILT_CONTRACT_FILES[path]),
+      })
+    }
   })
 
   it("is the same tree on every run, measurements aside", () => {
