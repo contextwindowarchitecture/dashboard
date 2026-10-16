@@ -59,7 +59,10 @@ test("a filter chosen by keyboard returns the focus to its trigger", async ({ pa
   await trigger.focus()
   await page.keyboard.press("Enter")
   await expect(page.getByRole("listbox")).toBeVisible()
+  // The list moves the focus to the chosen option once it has opened.
+  await expect(page.getByRole("option", { name: "All outcomes" })).toBeFocused()
   await page.keyboard.press("ArrowDown")
+  await expect(page.getByRole("option", { name: "All outcomes" })).not.toBeFocused()
   await page.keyboard.press("Enter")
   await expect(page.getByRole("listbox")).toBeHidden()
   await expect(trigger).toBeFocused()
