@@ -1,8 +1,13 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+
 import { CONTRACT_SOURCE } from "@cwa-dashboard/contract/data"
+import type { AssemblyEventV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it } from "vitest"
 
+import { FIXTURES_DIR } from "../test/fixture-fetch"
 import { renderApp } from "../test/render-app"
 
 afterEach(() => {
@@ -67,6 +72,36 @@ describe("the shell", () => {
       await screen.findByRole("heading", { level: 1, name: "Trace stream" })
       await act(() => router.navigate("/nowhere#page-title"))
       await waitFor(() => expect(scrolled.map((e) => e.id)).toContain("page-title"))
+    } finally {
+      Element.prototype.scrollIntoView = original
+    }
+  })
+
+  it("waits for a hash link's target that renders only when the page's data arrives", async () => {
+    const index = JSON.parse(
+      readFileSync(join(FIXTURES_DIR, "events/index.json"), "utf8"),
+    ) as EventsIndexV1
+    const eventId = index.events.find((row) => row.outcome === "assembled")!.event_id
+    const event = JSON.parse(
+      readFileSync(join(FIXTURES_DIR, "events", `${eventId}.json`), "utf8"),
+    ) as AssemblyEventV1
+    const item = event.trace!.included[0]!.item_id
+    const scrolled: Element[] = []
+    const original = Element.prototype.scrollIntoView
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this)
+    }
+    try {
+      // The event arrives a quarter of a second after the page asks for it.
+      renderApp(`/traces/${eventId}#item-${encodeURIComponent(item)}`, {
+        hold: (url) =>
+          url.endsWith(`${eventId}.json`)
+            ? new Promise((done) => setTimeout(done, 250))
+            : undefined,
+      })
+      await waitFor(() => expect(scrolled.map((e) => e.id)).toContain(`item-${item}`), {
+        timeout: 3000,
+      })
     } finally {
       Element.prototype.scrollIntoView = original
     }
