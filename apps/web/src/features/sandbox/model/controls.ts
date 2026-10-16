@@ -1,7 +1,8 @@
 // The sandbox's controls (dashboard-plan.md 7.8): what the reader changes in a snapshot before it is
 // replayed: the budget, the profile (only one the registry binds to the same route and policy
 // version, R-20), items left out, and the assembly time moved. A pure edit of the snapshot the
-// reader asks for; what the assembler then decides is the replay's, never computed here.
+// reader asks for (a tokenizer or renderer too); what the assembler then decides is the replay's,
+// never computed here.
 
 import type { Snapshot as ContractSnapshot } from "@cwa-dashboard/contract/types"
 import { REGISTRY } from "@cwa-dashboard/contract/registry"
@@ -18,6 +19,9 @@ export interface Controls {
   readonly off?: readonly string[]
   /** Seconds to move assembly_time by, to expire items or bring them into date. */
   readonly offset?: number
+  /** A published tokenizer or renderer in place of the snapshot's (conformance/README.md). */
+  readonly tokenizer?: string
+  readonly renderer?: string
 }
 
 export interface ProfileChoice {
@@ -77,6 +81,8 @@ export function applyControls(
       Date.parse(out.assembly_time) + controls.offset * 1000,
     ).toISOString()
   }
+  if (controls.tokenizer !== undefined) out.tokenizer = controls.tokenizer
+  if (controls.renderer !== undefined) out.renderer = controls.renderer
   if (controls.profile !== undefined && controls.profile !== "") {
     const choice = profileChoices(snapshot).find((c) => c.value === controls.profile)
     if (choice === undefined) problems.push(`The registry holds no profile ${controls.profile}.`)

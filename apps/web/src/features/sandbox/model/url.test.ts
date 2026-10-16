@@ -17,6 +17,11 @@ describe("the sandbox's controls in the URL", () => {
       offset: -60,
     })
     expect(parse("input=-5&reserved=x&margin=101&profile=nope&off=&offset=1.5")).toEqual({})
+    expect(parse("tokenizer=estimate-utf8/v1&renderer=fixture-xml/v1")).toEqual({
+      tokenizer: "estimate-utf8/v1",
+      renderer: "fixture-xml/v1",
+    })
+    expect(parse("tokenizer=not%20an%20id&renderer=")).toEqual({})
   })
 
   it("writes the controls back beside the event, and drops the ones at rest", () => {
@@ -34,5 +39,6 @@ describe("the sandbox's controls in the URL", () => {
     expect(edited({ offset: 0 })).toBe(false)
     expect(edited({ input: 300 })).toBe(true)
     expect(edited({ off: ["a"] })).toBe(true)
+    expect(edited({ renderer: "fixture-xml/v1" })).toBe(true)
   })
 })

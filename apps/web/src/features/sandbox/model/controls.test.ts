@@ -44,6 +44,15 @@ describe("applyControls", () => {
     expect(Date.parse(out.assembly_time) - Date.parse(snapshot.assembly_time)).toBe(86_400_000)
   })
 
+  it("names another tokenizer or renderer when the controls give one", () => {
+    const { snapshot: out } = applyControls(snapshot, {
+      tokenizer: "estimate-utf8/v1",
+      renderer: "fixture-xml/v1",
+    })
+    expect(out.tokenizer).toBe("estimate-utf8/v1")
+    expect(out.renderer).toBe("fixture-xml/v1")
+  })
+
   it("swaps in a registry profile for the same route and policy version (R-20)", () => {
     const { snapshot: out, problems } = applyControls(snapshot, { profile: "policy-first-chat@1" })
     expect(problems).toEqual([])

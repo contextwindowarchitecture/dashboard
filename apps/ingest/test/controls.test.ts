@@ -35,6 +35,14 @@ describe("the sandbox's controls, replayed", () => {
     expect(refusal(snapshot)).toBe("protected_content_over_budget")
   })
 
+  it("reject a renderer that cannot realize the profile's placement (R-7, R-20)", () => {
+    const { snapshot } = applyControls(snapshotOf("messages-render"), {
+      renderer: "fixture-xml/v1",
+    })
+    const result = replay(snapshot)
+    expect(result.status).toBe(400)
+  })
+
   it("refuse with slot_floor_over_budget when the budget is below a slot's floor (R-16)", () => {
     const { snapshot } = applyControls(snapshotOf("budget-slot-floor"), { input: 40 })
     expect(refusal(snapshot)).toBe("slot_floor_over_budget")

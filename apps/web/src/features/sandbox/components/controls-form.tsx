@@ -1,5 +1,6 @@
 // The sandbox's controls (dashboard-plan.md 7.8; STYLE.md 6, Form controls): the budget's input,
 // reserve and margin as exact numbers (a refusal can turn on one token), the assembly time's offset,
+// the tokenizer and renderer the service lists (required or optional, those it lacks disabled),
 // the profile (those R-20 forbids offered disabled, with the reason beside them), and every item
 // with a box that leaves it out. Each change goes to the URL; Reset clears them all.
 
@@ -15,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select"
+import type { Component, Components } from "../api/replay"
 import { profileChoices, type Controls, type Snapshot } from "../model/controls"
 
 const RECORDED = "recorded"
@@ -61,13 +63,64 @@ function NumberField({
   )
 }
 
+function ComponentField({
+  label,
+  recorded,
+  value,
+  list,
+  onChange,
+}: {
+  readonly label: "tokenizer" | "renderer"
+  readonly recorded: string
+  readonly value: string | undefined
+  readonly list: readonly Component[] | undefined
+  readonly onChange: (value: string | undefined) => void
+}) {
+  const id = useId()
+  // The snapshot's own, even when the service does not list it (an application's own tokenizer).
+  const options = [
+    ...(list ?? []),
+    ...((list ?? []).some((c) => c.id === recorded)
+      ? []
+      : [{ id: recorded, required: false, provided: true, own: true }]),
+  ]
+  return (
+    <div data-slot="field">
+      <span id={id} data-label="">
+        {label}
+      </span>
+      <Select
+        value={value ?? recorded}
+        onValueChange={(next) => onChange(next === recorded ? undefined : next)}
+        disabled={list === undefined}
+      >
+        <SelectTrigger aria-labelledby={id} aria-label={label}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((c) => (
+            <SelectItem key={c.id} value={c.id} disabled={!c.provided}>
+              {"own" in c
+                ? `${c.id} · as recorded`
+                : `${c.id} · ${c.required ? "required" : "optional"}${c.provided ? "" : " · not provided"}`}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
 export function ControlsForm({
   snapshot,
   controls,
+  components,
   onChange,
 }: {
   readonly snapshot: Snapshot
   readonly controls: Controls
+  /** The service's tokenizers and renderers; undefined until it has said. */
+  readonly components: Components | undefined
   readonly onChange: (controls: Controls) => void
 }) {
   const set = <K extends keyof Controls>(key: K, value: Controls[K] | undefined) => {
@@ -109,6 +162,22 @@ export function ControlsForm({
           value={controls.offset}
           recorded={0}
           onChange={(v) => set("offset", v)}
+        />
+      </div>
+      <div data-slot="field-row">
+        <ComponentField
+          label="tokenizer"
+          recorded={snapshot.tokenizer}
+          value={controls.tokenizer}
+          list={components?.tokenizers}
+          onChange={(v) => set("tokenizer", v)}
+        />
+        <ComponentField
+          label="renderer"
+          recorded={snapshot.renderer}
+          value={controls.renderer}
+          list={components?.renderers}
+          onChange={(v) => set("renderer", v)}
         />
       </div>
       <div data-slot="field">

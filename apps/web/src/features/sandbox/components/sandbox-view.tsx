@@ -4,6 +4,7 @@
 // says it. Without a configured service the page says so and how to run one.
 
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
+import { useQuery } from "@tanstack/react-query"
 import { useRef, useState } from "react"
 import { Link, useSearchParams } from "react-router"
 
@@ -226,6 +227,11 @@ function Replayer({
   const [run, setRun] = useState<Run>({ status: "idle" })
   const [search, setSearch] = useSearchParams()
   const inFlight = useRef<AbortController | null>(null)
+  const components = useQuery({
+    queryKey: ["replay-components"],
+    queryFn: ({ signal }) => client.components(signal),
+    staleTime: Infinity,
+  })
   if (source.kind === "none") {
     return (
       <section aria-label="Fidelity" data-slot="note">
@@ -258,6 +264,7 @@ function Replayer({
       <ControlsForm
         snapshot={source.snapshot}
         controls={controls}
+        components={components.data}
         onChange={(next) => setSearch(searchWithControls(search, next), { replace: true })}
       />
       {applied.problems.length > 0 ? (

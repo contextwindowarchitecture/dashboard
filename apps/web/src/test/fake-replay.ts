@@ -24,8 +24,16 @@ export function fakeReplay(answer: (snapshot: unknown) => ReplayAnswer) {
     },
     async components() {
       return {
-        tokenizers: [{ id: "fixture-whitespace/v1", required: true, provided: true }],
-        renderers: [{ id: "cwa-messages/v1", required: true, provided: true }],
+        tokenizers: [
+          { id: "fixture-whitespace/v1", required: true, provided: true },
+          { id: "estimate-utf8/v1", required: true, provided: true },
+        ],
+        renderers: [
+          { id: "fixture-xml/v1", required: true, provided: true },
+          { id: "cwa-messages/v1", required: true, provided: true },
+          // As a service that leaves out an optional renderer would list it.
+          { id: "cwa-message-blocks/v1", required: false, provided: false },
+        ],
       }
     },
   }

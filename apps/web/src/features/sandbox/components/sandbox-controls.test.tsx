@@ -101,6 +101,17 @@ describe("the sandbox's controls", () => {
     expect(screen.getByRole("button", { name: "Replay" })).toBeDisabled()
   })
 
+  it("offer the service's tokenizers and renderers, saying which are required and which it lacks", async () => {
+    const user = userEvent.setup()
+    const { controls, search } = await open()
+    await user.click(await within(controls).findByRole("combobox", { name: "renderer" }))
+    expect(
+      screen.getByRole("option", { name: "cwa-message-blocks/v1 · optional · not provided" }),
+    ).toHaveAttribute("aria-disabled", "true")
+    await user.click(screen.getByRole("option", { name: "fixture-xml/v1 · required" }))
+    expect(search().get("renderer")).toBe("fixture-xml/v1")
+  })
+
   it("puts everything back with Reset", async () => {
     const user = userEvent.setup()
     const { search } = await open(`${base}&input=120&off=x`)
