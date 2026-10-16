@@ -1,12 +1,14 @@
 // The routes (dashboard-plan.md 6). Each route's handle names its document title and its crumb;
 // record pages name them from their params.
 
-import type { Params, RouteObject } from "react-router"
+import { Navigate, type Params, type RouteObject } from "react-router"
 
 import { Shell } from "../components/layout/shell"
+import { PolicyView } from "../features/registry/components/policy-view"
 import { InspectorPage } from "./pages/inspector"
 import { NotFoundPage } from "./pages/not-found"
 import { OverviewPage } from "./pages/overview"
+import { PoliciesPage } from "./pages/registry"
 import { SessionPage } from "./pages/session"
 import { SessionsPage } from "./pages/sessions"
 import { TracesPage } from "./pages/traces"
@@ -58,6 +60,28 @@ export const ROUTES: RouteObject[] = [
               (params) => params["sessionId"] ?? "",
               (params) => params["sessionId"] ?? "",
             ),
+          },
+        ],
+      },
+      {
+        path: "registry",
+        handle: handle("Registry", () => "Registry"),
+        children: [
+          { index: true, element: <Navigate to="policies" replace /> },
+          {
+            path: "policies",
+            handle: handle("Route policies", () => "Route policies"),
+            children: [
+              { index: true, element: <PoliciesPage />, handle: handle("Route policies") },
+              {
+                path: ":route/:version",
+                element: <PolicyView />,
+                handle: handle(
+                  (params) => `${params["route"] ?? ""} ${params["version"] ?? ""}`,
+                  (params) => `${params["route"] ?? ""} ${params["version"] ?? ""}`,
+                ),
+              },
+            ],
           },
         ],
       },

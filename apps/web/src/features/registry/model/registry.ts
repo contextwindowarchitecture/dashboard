@@ -10,6 +10,22 @@ import type { EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
 
 type Row = EventsIndexV1["events"][number]
 
+/** schema/route_policy.schema.json's slot_rules, in its order; a test holds the two together. */
+export const SLOT_RULE_FIELDS = [
+  "min_relevance",
+  "max_age_seconds",
+  "required_scope",
+  "source_prefix",
+  "priority",
+  "order_by",
+  "min_included",
+  "max_tokens",
+  "min_tokens",
+  "supersede",
+  "dedupe",
+  "max_per_source",
+] as const
+
 export interface Registry {
   readonly profiles: readonly Profile[]
   readonly route_policies: readonly RoutePolicy[]

@@ -290,3 +290,25 @@ test("a session plays to its last turn, in both motion preferences", async ({ pa
     await expectAccessible(page)
   }
 })
+
+test("the route policies and a policy's page read in both themes and at a phone's width", async ({
+  page,
+}) => {
+  await page.goto("/registry/policies")
+  await expect(page.getByRole("region", { name: "Drift" })).toBeVisible()
+  await page
+    .getByRole("table", { name: "Route policies" })
+    .getByRole("link", { name: "support-chat illustrative/v1" })
+    .click()
+  await expect(page).toHaveURL(/\/registry\/policies\/support-chat\/illustrative%2Fv1$/)
+  await expect(page.getByRole("table", { name: "Slot rules" })).toBeVisible()
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  for (const path of ["/registry/policies", "/registry/policies/support-chat/conflict-fact%2Fv1"]) {
+    await page.goto(path)
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
+    await expectNoSidewaysScroll(page)
+    await expectAccessible(page)
+  }
+})

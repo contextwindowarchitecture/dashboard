@@ -865,6 +865,11 @@ a:hover {
   display: block;
 }
 
+/* Drift is one of the three things the accent marks (STYLE.md 2). */
+[data-drift] {
+  color: var(--accent);
+}
+
 /* --- Outcome strip (STYLE.md 3, Outcomes; plan 8): ink for an assembly, the accent for a refusal,
    a hollow accent mark for a rejection; the words beside it carry the same ---------------------- */
 

@@ -2,7 +2,13 @@
 // under which an item is the current page. Only pages that exist are listed; each is added here when
 // it lands.
 
-import { LayoutDashboard, ListTree, MessagesSquare, type LucideIcon } from "lucide-react"
+import {
+  LayoutDashboard,
+  ListTree,
+  MessagesSquare,
+  ScrollText,
+  type LucideIcon,
+} from "lucide-react"
 import { matchPath } from "react-router"
 
 export interface NavItem {
@@ -39,6 +45,19 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: "/sessions",
         icon: MessagesSquare,
         patterns: ["/sessions", "/sessions/:sessionId"],
+      },
+    ],
+  },
+  {
+    id: "registry",
+    label: "Registry",
+    items: [
+      {
+        id: "policies",
+        label: "Route policies",
+        to: "/registry/policies",
+        icon: ScrollText,
+        patterns: ["/registry/policies", "/registry/policies/:route/:version"],
       },
     ],
   },
