@@ -224,7 +224,7 @@ Dashboard pages are full width inside the sidebar: the tables need it. Narrative
 | Page gutter | `32px`, tightened to `20px` below 900px |
 | Page header | `padding: 32px 32px 24px`: kicker, h1, lede, the mono meta row, actions on the right |
 | Filter bar | `padding: 0 32px 16px`, controls in a row that wraps, `gap: 10px` |
-| Status region | `padding: 0 32px 16px`, the source badge and the window as mono muted |
+| Status region | `padding: 0 32px 16px`, the source badge and the window as mono muted; each part `min-width: 0; overflow-wrap: anywhere`, since one can hold a repository path |
 | Metric grid | `margin: 0 32px 24px`, a hairline grid of `repeat(auto-fit, minmax(220px, 1fr))` |
 | Content | `padding: 0 32px 32px`, a column of panels with `gap: 24px`; a two-column page is `minmax(0, 1fr) minmax(360px, 420px)` with `gap: 24px` |
 | Panel header | `padding: 12px 18px`, 1px `--line` bottom border, sticky at the masthead's bottom inside a scrolling panel |
@@ -320,7 +320,7 @@ Labels are sentence case: "Replay in sandbox", "Download trace", "Clear filters"
 
 ### Form controls
 
-Selects, inputs, number fields and the date range are square hairline boxes, not pills: they are fields, not buttons. `font-family: var(--mono); font-size: var(--fs-mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); height: var(--control-sm); padding: 0 10px;`. The generated `Select` and `Input` are restyled to this (radius 0, no ring shadow); the select's chevron is a 6px `--muted` chevron 12px in from the edge, turning `--fg` with the border on hover. A checkbox is a 14px `--line` square that fills `--fg` with a `--bg` check. The sandbox's budget fields are number inputs, not sliders: whether an assembly fits or refuses can turn on one token, so the reader types the exact value. A slider, where one is wanted, is a 2px `--line` track with a 14px `--fg` square thumb and its value in mono beside it. Their label sits above them as a muted uppercase mono label. Focus is a `2px` `--accent` outline with `outline-offset: 2px`, on every control.
+Selects, inputs, number fields and the date range are square hairline boxes, not pills: they are fields, not buttons. `font-family: var(--mono); font-size: var(--fs-mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); height: var(--control-sm); padding: 0 10px;`. The generated `Select` and `Input` are restyled to this (radius 0, no ring shadow); the select's chevron is a 6px `--muted` chevron 12px in from the edge, turning `--fg` with the border on hover. A checkbox is a 14px `--line` square that fills `--fg` with a `--bg` check. The sandbox's budget fields are number inputs, not sliders: whether an assembly fits or refuses can turn on one token, so the reader types the exact value. A slider, where one is wanted, is a 2px `--line` track with a 14px `--fg` square thumb and its value in mono beside it. Their label sits above them as a muted uppercase mono label. A field is a one-column grid, `grid-template-columns: minmax(0, 1fr)`, so what it holds is never wider than it; a select's trigger is at most the field's width and a longer value ends in an ellipsis. Focus is a `2px` `--accent` outline with `outline-offset: 2px`, on every control.
 
 ### Links
 

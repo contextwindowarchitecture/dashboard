@@ -546,6 +546,8 @@ a:hover {
 }
 [data-slot="field"] {
   display: grid;
+  /* The column is the field's width, so a long value or note wraps or truncates inside it. */
+  grid-template-columns: minmax(0, 1fr);
   min-width: 180px;
 }
 [data-slot="select-trigger"] {
@@ -558,6 +560,18 @@ a:hover {
   height: var(--control-sm);
   padding: 0 10px;
   --tw-shadow: 0 0 transparent;
+}
+/* A value wider than its field (a long profile id) ends in an ellipsis; the whole value is still
+   the control's text. */
+[data-slot="select-trigger"] {
+  max-width: 100%;
+}
+[data-slot="select-value"] {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 [data-slot="select-trigger"]:hover {
   border-color: var(--fg);
@@ -661,6 +675,11 @@ a:hover {
   font-family: var(--mono);
   font-size: var(--fs-label);
   color: var(--muted);
+}
+/* A part holding a path (a lock's repository) breaks anywhere rather than push the page sideways. */
+[data-slot="status-region"] > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 [data-slot="stream-actions"] {
   display: flex;
