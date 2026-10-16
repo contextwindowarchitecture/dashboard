@@ -4,10 +4,11 @@ import { join } from "node:path"
 import type { AssemblyEventV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 
-import { gsap, REDUCED_MOTION } from "../../../lib/motion"
+import { gsap } from "../../../lib/motion"
 import { FIXTURES_DIR } from "../../../test/fixture-fetch"
+import { prefer, running, withMotionClock } from "../../../test/motion"
 import { renderApp } from "../../../test/render-app"
 import { excludedByStage } from "../model/inspector"
 
@@ -20,31 +21,7 @@ const twoStages = index.events.find(
   (row) => row.outcome === "assembled" && excludedByStage(load(row.event_id)).length >= 2,
 )!.event_id
 
-const NO_PREFERENCE = "(prefers-reduced-motion: no-preference)"
-// The media the walk sees: the reader's motion preference, and nothing else matching.
-function prefer(reduce: boolean) {
-  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-    matches: query === (reduce ? REDUCED_MOTION : NO_PREFERENCE),
-    media: query,
-    onchange: null,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  }))
-}
-
-const original = window.matchMedia
-beforeEach(() => {
-  // GSAP's clock, four times as fast: a turn of 150ms, slow enough that a waitFor polling every
-  // 50ms sees each stage, fast enough that a played walk takes test time, not reading time.
-  gsap.globalTimeline.timeScale(4)
-})
-afterEach(() => {
-  gsap.globalTimeline.timeScale(1)
-  window.matchMedia = original
-})
+withMotionClock()
 
 async function openWalk(strict = false) {
   const app = renderApp(`/traces/${twoStages}?tab=excluded`, {}, { strict })
@@ -62,7 +39,6 @@ async function openWalk(strict = false) {
   const rows = () => [...panel.querySelectorAll('[data-current] [data-slot="excluded-row"]')]
   return { ...app, panel, walk, all, current, button, rows }
 }
-const running = () => gsap.globalTimeline.getChildren(true, true, true).length
 
 describe("the played stage walk", () => {
   it("plays one stage per turn from the first, and stops at the last", async () => {
@@ -136,10 +112,10 @@ describe("the played stage walk", () => {
     const user = userEvent.setup()
     const { all, current, button, router } = await openWalk(true)
     await user.click(button("Play"))
-    await waitFor(() => expect(running()).toBeGreaterThan(0))
+    await waitFor(() => expect(running().length).toBeGreaterThan(0))
     await waitFor(() => expect(current()).toEqual([all[1]]))
     await act(() => router.navigate("/traces"))
     await screen.findByRole("heading", { level: 1, name: "Trace stream" })
-    expect(running()).toBe(0)
+    expect(running()).toHaveLength(0)
   })
 })
