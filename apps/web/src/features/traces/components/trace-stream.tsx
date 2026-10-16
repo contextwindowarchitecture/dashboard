@@ -3,6 +3,8 @@
 // region says how many rows show, from where, and when a refresh is running.
 
 import type { EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
+import { useWindowVirtualizer } from "@tanstack/react-virtual"
+import { useCallback, useState, type ComponentProps } from "react"
 import { Link, useSearchParams } from "react-router"
 
 import { useData } from "../../../data/data-context"
@@ -128,71 +130,133 @@ function Reasons({ row }: { readonly row: IndexRow }) {
   )
 }
 
+/** One event's row; the virtualised body passes its index for assistive technology. */
+function StreamRow({ row, ...rest }: { readonly row: IndexRow } & ComponentProps<typeof TableRow>) {
+  return (
+    <TableRow {...rest}>
+      <TableCell data-mono="">{formatInstant(row.recorded_at)}</TableCell>
+      <TableCell data-mono="">
+        <Link to={`/traces/${row.event_id}`}>{row.event_id}</Link>
+      </TableCell>
+      <TableCell>
+        <StatusBadge
+          outcome={row.outcome}
+          {...(row.input_tokens === undefined ? {} : { inputTokens: row.input_tokens })}
+          {...(row.refused_reason === undefined ? {} : { refusedReason: row.refused_reason })}
+          {...(row.problem_count === undefined ? {} : { problemCount: row.problem_count })}
+        />
+      </TableCell>
+      <TableCell data-mono="">
+        {row.route ? (
+          <>
+            {row.route} <span data-slot="cell-note">· {row.route_policy_version}</span>
+          </>
+        ) : (
+          NOT_AVAILABLE
+        )}
+      </TableCell>
+      <TableCell data-mono="">
+        {row.profile ? `${row.profile.id} v${row.profile.version}` : NOT_AVAILABLE}
+      </TableCell>
+      <TableCell>
+        <LanguageMark language={row.language} />
+      </TableCell>
+      <TableCell data-numeric="">
+        <Tokens row={row} />
+      </TableCell>
+      <TableCell>
+        <Reasons row={row} />
+      </TableCell>
+      <TableCell data-mono="">
+        {row.session ? (
+          <>
+            {row.session.id} <span data-slot="cell-note">· turn {row.session.turn_index}</span>
+          </>
+        ) : (
+          <span data-slot="cell-note">none</span>
+        )}
+      </TableCell>
+      <TableCell data-numeric="">{formatMs(row.total_ms)}</TableCell>
+    </TableRow>
+  )
+}
+
+const HEAD = (
+  <TableHeader>
+    <TableRow>
+      <TableHead>Recorded</TableHead>
+      <TableHead>Event</TableHead>
+      <TableHead>Outcome</TableHead>
+      <TableHead>Route</TableHead>
+      <TableHead>Profile</TableHead>
+      <TableHead>Language</TableHead>
+      <TableHead data-numeric="">Input tokens</TableHead>
+      <TableHead>Reasons</TableHead>
+      <TableHead>Session</TableHead>
+      <TableHead data-numeric="">Wrapper time</TableHead>
+    </TableRow>
+  </TableHeader>
+)
+
+/** Above this many rows the stream draws only those near the view (dashboard-plan.md 9). */
+const VIRTUAL_ABOVE = 500
+/** Every row of a virtualised stream is this tall (STYLE.md 6: a virtualised table's rows are one height). */
+const ROW_HEIGHT = 44
+
+/**
+ * The rows near the view, the window being the scroller, with a spacer above and below for the rest,
+ * and each row's index and the table's count for assistive technology.
+ */
+function VirtualTable({ rows }: { readonly rows: readonly IndexRow[] }) {
+  // Where the body starts in the document, measured when it is attached, so the virtualiser can tell
+  // the window's scroll from the rows' own offset.
+  const [margin, setMargin] = useState(0)
+  const body = useCallback((element: HTMLTableSectionElement | null) => {
+    if (element !== null) setMargin(element.getBoundingClientRect().top + window.scrollY)
+  }, [])
+  const virtualizer = useWindowVirtualizer({
+    count: rows.length,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 10,
+    scrollMargin: margin,
+  })
+  const items = virtualizer.getVirtualItems()
+  const before = items.length > 0 ? items[0]!.start - margin : 0
+  const after = items.length > 0 ? virtualizer.getTotalSize() - (items.at(-1)!.end - margin) : 0
+  return (
+    <Table aria-label="Trace stream" aria-rowcount={rows.length + 1} data-virtual="">
+      {HEAD}
+      <TableBody ref={body}>
+        {before > 0 ? (
+          <tr aria-hidden="true" data-slot="virtual-spacer" style={{ height: before }}>
+            <td colSpan={10} />
+          </tr>
+        ) : null}
+        {items.map((item) => (
+          <StreamRow
+            key={rows[item.index]!.event_id}
+            row={rows[item.index]!}
+            aria-rowindex={item.index + 2}
+          />
+        ))}
+        {after > 0 ? (
+          <tr aria-hidden="true" data-slot="virtual-spacer" style={{ height: after }}>
+            <td colSpan={10} />
+          </tr>
+        ) : null}
+      </TableBody>
+    </Table>
+  )
+}
+
 function StreamTable({ rows }: { readonly rows: readonly IndexRow[] }) {
+  if (rows.length > VIRTUAL_ABOVE) return <VirtualTable rows={rows} />
   return (
     <Table aria-label="Trace stream">
-      <TableHeader>
-        <TableRow>
-          <TableHead>Recorded</TableHead>
-          <TableHead>Event</TableHead>
-          <TableHead>Outcome</TableHead>
-          <TableHead>Route</TableHead>
-          <TableHead>Profile</TableHead>
-          <TableHead>Language</TableHead>
-          <TableHead data-numeric="">Input tokens</TableHead>
-          <TableHead>Reasons</TableHead>
-          <TableHead>Session</TableHead>
-          <TableHead data-numeric="">Wrapper time</TableHead>
-        </TableRow>
-      </TableHeader>
+      {HEAD}
       <TableBody>
         {rows.map((row) => (
-          <TableRow key={row.event_id}>
-            <TableCell data-mono="">{formatInstant(row.recorded_at)}</TableCell>
-            <TableCell data-mono="">
-              <Link to={`/traces/${row.event_id}`}>{row.event_id}</Link>
-            </TableCell>
-            <TableCell>
-              <StatusBadge
-                outcome={row.outcome}
-                {...(row.input_tokens === undefined ? {} : { inputTokens: row.input_tokens })}
-                {...(row.refused_reason === undefined ? {} : { refusedReason: row.refused_reason })}
-                {...(row.problem_count === undefined ? {} : { problemCount: row.problem_count })}
-              />
-            </TableCell>
-            <TableCell data-mono="">
-              {row.route ? (
-                <>
-                  {row.route} <span data-slot="cell-note">· {row.route_policy_version}</span>
-                </>
-              ) : (
-                NOT_AVAILABLE
-              )}
-            </TableCell>
-            <TableCell data-mono="">
-              {row.profile ? `${row.profile.id} v${row.profile.version}` : NOT_AVAILABLE}
-            </TableCell>
-            <TableCell>
-              <LanguageMark language={row.language} />
-            </TableCell>
-            <TableCell data-numeric="">
-              <Tokens row={row} />
-            </TableCell>
-            <TableCell>
-              <Reasons row={row} />
-            </TableCell>
-            <TableCell data-mono="">
-              {row.session ? (
-                <>
-                  {row.session.id}{" "}
-                  <span data-slot="cell-note">· turn {row.session.turn_index}</span>
-                </>
-              ) : (
-                <span data-slot="cell-note">none</span>
-              )}
-            </TableCell>
-            <TableCell data-numeric="">{formatMs(row.total_ms)}</TableCell>
-          </TableRow>
+          <StreamRow key={row.event_id} row={row} />
         ))}
       </TableBody>
     </Table>

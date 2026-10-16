@@ -1046,6 +1046,19 @@ a:hover {
   max-width: 78ch;
 }
 
+/* A virtualised table (the stream above 500 rows): every row one height, cells on one line, so the
+   rows the virtualiser does not draw are spacers of known height (STYLE.md 6). */
+[data-virtual] tbody tr:not([data-slot="virtual-spacer"]) {
+  height: 44px;
+}
+[data-virtual] tbody td {
+  white-space: nowrap;
+}
+[data-slot="virtual-spacer"] td {
+  padding: 0;
+  border: 0;
+}
+
 /* A profile's placement: each slot with its wrap, in order. */
 [data-slot="placement-list"] {
   margin: 0;
