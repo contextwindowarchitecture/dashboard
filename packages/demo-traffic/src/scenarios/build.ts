@@ -155,3 +155,27 @@ export const turn = (id: string, body: string, said: "user" | "model", common: C
       })
 export const query = (id: string, body: string, common: Common) =>
   item(id, "interaction.query", "user", "unverified", body, common)
+
+// --- routes of a deployment's own ----------------------------------------------------------------
+
+/**
+ * A draft profile of a deployment's own, not in the published registry: unevaluated, for no model
+ * family yet (R-19), binding the route policy version it names (R-20).
+ */
+export function draftProfile(
+  id: string,
+  route: string,
+  routePolicyVersion: string,
+  placement: { slot: string; wrap: string }[],
+): Profile {
+  return {
+    spec: "cwa/draft",
+    id,
+    version: 1,
+    route,
+    model_family: null,
+    route_policy_version: routePolicyVersion,
+    placement,
+    evaluation: { status: "unevaluated", suite: null, date: null, result: null, artifact: null },
+  } as unknown as Profile
+}

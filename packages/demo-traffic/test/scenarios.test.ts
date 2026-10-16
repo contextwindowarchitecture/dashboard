@@ -1,3 +1,7 @@
+import { readdirSync, readFileSync } from "node:fs"
+import { join, resolve } from "node:path"
+
+import { REGISTRY } from "@cwa-dashboard/contract/registry"
 import { validateSnapshot } from "@cwa-dashboard/contract/validators"
 import { describe, expect, it } from "vitest"
 
@@ -64,4 +68,41 @@ describe("the authored scenarios", () => {
       })
     })
   }
+})
+
+// The demo covers what exists today (the maintainer, 2026-10-15): between them the scenarios use
+// every renderer and tokenizer the published cases use, every published profile, every redaction
+// mode and every outcome, so no part of the dashboard is shown on one configuration only.
+describe("the scenarios cover what exists today", () => {
+  const cases = resolve(import.meta.dirname, "../../contract/vendor/cwa/conformance/cases")
+  const published = readdirSync(cases).map(
+    (id) =>
+      JSON.parse(readFileSync(join(cases, id, "snapshot.json"), "utf8")) as {
+        renderer: string
+        tokenizer: string
+      },
+  )
+  const snapshots = SCENARIOS.flatMap((scenario) => scenario.turns.map((turn) => turn.snapshot))
+  const used = (values: Iterable<string>) => [...new Set(values)].sort()
+
+  it("every published renderer and tokenizer", () => {
+    expect(used(snapshots.map((s) => s.renderer))).toEqual(used(published.map((s) => s.renderer)))
+    expect(used(snapshots.map((s) => s.tokenizer))).toEqual(used(published.map((s) => s.tokenizer)))
+  })
+
+  it("every profile in the published registry", () => {
+    const profiles = new Set(snapshots.map((s) => s.profile.id))
+    for (const profile of REGISTRY.profiles) expect([...profiles], profile.id).toContain(profile.id)
+  })
+
+  it("every redaction mode and every outcome", () => {
+    expect(used(SCENARIOS.map((scenario) => scenario.redaction.mode))).toEqual([
+      "digest_only",
+      "full",
+      "pii_scrubbed",
+    ])
+    expect(
+      used(SCENARIOS.flatMap((scenario) => scenario.turns.map((t) => t.expect.outcome))),
+    ).toEqual(["assembled", "refused", "rejected"])
+  })
 })
