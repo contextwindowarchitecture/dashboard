@@ -872,6 +872,26 @@ a:hover {
 [data-slot="stage-groups"] h3[data-label] {
   margin: 0 0 8px;
 }
+/* The stage walk (STYLE.md 7): the controls, the stage reached, and the current stage's kicker. */
+[data-slot="walk-controls"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+[data-slot="walk-controls"] [aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+}
+[data-slot="walk-status"] {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  color: var(--muted);
+}
+[data-slot="stage-groups"] h3[aria-current="step"] {
+  color: var(--fg);
+}
 [data-slot="excluded-row"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
