@@ -1,0 +1,11 @@
+# What the image builds never need: installs and builds made on this machine, test output, the local plan and the
+# prototype (AGENTS.md: never committed), and the repository's own history.
+**/node_modules
+**/dist
+**/.build
+**/test-results
+**/playwright-report
+docs/plans
+prototype.md
+prototype.tsx
+.git

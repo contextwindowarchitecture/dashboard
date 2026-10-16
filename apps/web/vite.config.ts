@@ -22,8 +22,11 @@ const proxy =
     ? undefined
     : { "/api": { target: apiTarget, rewrite: (p: string) => p.replace(/^\/api/, "") } }
 
-// The commit the app is built from, for the footer.
+// The commit the app is built from, for the footer: BUILD_COMMIT where there is no checkout to ask
+// (the image's build stage), otherwise git.
 function buildCommit(): string {
+  const given = process.env["BUILD_COMMIT"]
+  if (given !== undefined && given !== "") return given
   try {
     return execFileSync("git", ["-C", root, "rev-parse", "--short", "HEAD"], {
       encoding: "utf8",
