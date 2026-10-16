@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto"
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs"
 import { request as httpRequest } from "node:http"
-import { readFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import type { AddressInfo } from "node:net"
 import { join, resolve } from "node:path"
 
@@ -9,6 +10,7 @@ import { afterEach, describe, expect, it } from "vitest"
 import { replay } from "../src/replay.ts"
 import { ReplayTimeoutError, type Runner } from "../src/runner.ts"
 import { createIngestServer } from "../src/server.ts"
+import { createStore } from "../src/store.ts"
 
 const cases = resolve(
   import.meta.dirname,
@@ -159,5 +161,78 @@ describe("the ingest service", () => {
     const get = await call("/replay")
     expect(get.status).toBe(405)
     expect(get.headers.get("allow")).toBe("POST")
+  })
+})
+
+describe("POST /events", () => {
+  const fixtures = resolve(import.meta.dirname, "../../../packages/demo-traffic/fixtures")
+  const index = JSON.parse(readFileSync(join(fixtures, "events/index.json"), "utf8")) as {
+    events: { event_id: string; recorded_at: string }[]
+  }
+  const template = JSON.parse(
+    readFileSync(join(fixtures, "events", `${index.events[0]!.event_id}.json`), "utf8"),
+  ) as Record<string, unknown>
+  const fresh = { ...template, event_id: "01MZ0000000000000000000099", session: undefined }
+  const token = "s3cret-token"
+  const authorised = (body: string, value = `Bearer ${token}`) => ({
+    ...post(body),
+    headers: { "content-type": "application/json", authorization: value },
+  })
+  const dirs: string[] = []
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true })
+  })
+  async function withStore() {
+    const dir = mkdtempSync(join(tmpdir(), "cwa-ingest-server-"))
+    dirs.push(dir)
+    const store = await createStore(dir, { debounceMs: 0 })
+    const call = await start({ store, token })
+    return { call, dir, store }
+  }
+
+  it("writes an event a caller with the token posts", async () => {
+    const { call, dir, store } = await withStore()
+    const response = await call("/events", authorised(JSON.stringify(fresh)))
+    expect(response.status).toBe(201)
+    expect(await response.json()).toEqual({ ok: true, event_id: fresh.event_id })
+    await store.close()
+    expect(existsSync(join(dir, "events", `${fresh.event_id}.json`))).toBe(true)
+  })
+
+  it("refuses a caller without the token, or with another", async () => {
+    const { call } = await withStore()
+    const none = await call("/events", post(JSON.stringify(fresh)))
+    expect(none.status).toBe(401)
+    expect(none.headers.get("www-authenticate")).toBe("Bearer")
+    expect((await call("/events", authorised(JSON.stringify(fresh), "Bearer nope"))).status).toBe(
+      401,
+    )
+  })
+
+  it("says what is wrong with an event that is not one, and refuses one the tree holds", async () => {
+    const { call } = await withStore()
+    const invalid = await call(
+      "/events",
+      authorised(JSON.stringify({ ...fresh, outcome: undefined })),
+    )
+    expect(invalid.status).toBe(400)
+    expect(await invalid.json()).toMatchObject({ ok: false, kind: "invalid" })
+    expect((await call("/events", authorised(JSON.stringify(fresh)))).status).toBe(201)
+    const again = await call("/events", authorised(JSON.stringify(fresh)))
+    expect(again.status).toBe(409)
+  })
+
+  it("takes no writes without a tree and a token, and says which is missing", async () => {
+    const noTree = await start()
+    const a = await noTree("/events", authorised(JSON.stringify(fresh)))
+    expect(a.status).toBe(503)
+    expect(JSON.stringify(await a.json())).toContain("EVENTS_DIR")
+    await close?.()
+    const dir = mkdtempSync(join(tmpdir(), "cwa-ingest-server-"))
+    dirs.push(dir)
+    const noToken = await start({ store: await createStore(dir) })
+    const b = await noToken("/events", authorised(JSON.stringify(fresh)))
+    expect(b.status).toBe(503)
+    expect(JSON.stringify(await b.json())).toContain("INGEST_TOKEN")
   })
 })

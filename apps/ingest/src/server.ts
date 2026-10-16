@@ -1,15 +1,17 @@
 // The Phase 1 Node service's HTTP face (dashboard-plan.md 7.8, 11; D9, D12), on Node's own http:
 // GET /healthz; GET /replay/components, the published tokenizers and renderers with whether each is
-// required and whether this assembler provides it; and POST /replay, a JSON snapshot in, the
-// replay's result out. Bodies are size-limited and the queue bounded; the service is stateless and
-// writes nothing.
+// required and whether this assembler provides it; POST /replay, a JSON snapshot in, the replay's
+// result out, which writes nothing; and POST /events, an assembly event in, written into the tree
+// for a caller with the bearer token. Bodies are size-limited and the replay queue bounded.
 
+import { timingSafeEqual } from "node:crypto"
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http"
 
 import { RENDERERS, TOKENIZERS } from "@cwa-dashboard/assembler"
 import { COMPONENTS } from "@cwa-dashboard/contract/data"
 
 import { ReplayTimeoutError, type Runner } from "./runner.ts"
+import type { Store } from "./store.ts"
 
 export interface IngestOptions {
   readonly runner: Runner
@@ -17,6 +19,10 @@ export interface IngestOptions {
   readonly maxBodyBytes: number
   /** How many replays may wait or run at once before the service answers 503. */
   readonly maxQueue: number
+  /** The event tree POST /events writes into; without it the route takes no writes. */
+  readonly store?: Store
+  /** The bearer token POST /events requires; without it the route takes no writes. */
+  readonly token?: string
 }
 
 function send(
@@ -66,34 +72,73 @@ const components = () => ({
   renderers: COMPONENTS.renderers.map((c) => ({ ...c, provided: RENDERERS.includes(c.id) })),
 })
 
+/** Whether the request carries the token, compared in constant time. */
+function authorised(request: IncomingMessage, token: string) {
+  const header = request.headers["authorization"] ?? ""
+  const given = Buffer.from(header.startsWith("Bearer ") ? header.slice(7) : "")
+  const expected = Buffer.from(token)
+  return given.length === expected.length && timingSafeEqual(given, expected)
+}
+
+/** A JSON body, or the response already sent saying why there is none. */
+async function readJsonBody(
+  request: IncomingMessage,
+  response: ServerResponse,
+  limit: number,
+  what: string,
+): Promise<{ ok: true; value: unknown } | { ok: false }> {
+  const type = request.headers["content-type"] ?? ""
+  if (!/^application\/json\b/.test(type)) {
+    fail(response, 415, "unsupported-media-type", [`Send the ${what} as application/json.`])
+    return { ok: false }
+  }
+  let text: string
+  try {
+    text = await readBody(request, limit)
+  } catch (error) {
+    if (error instanceof TooLargeError) {
+      response.setHeader("connection", "close")
+      fail(response, 413, "too-large", [`The body is over ${limit} bytes.`])
+      return { ok: false }
+    }
+    throw error
+  }
+  try {
+    return { ok: true, value: JSON.parse(text) }
+  } catch (error) {
+    fail(response, 400, "invalid-json", [error instanceof Error ? error.message : "Not JSON."])
+    return { ok: false }
+  }
+}
+
 export function createIngestServer(options: IngestOptions): Server {
   let inFlight = 0
 
+  async function eventsRoute(request: IncomingMessage, response: ServerResponse) {
+    const { store, token } = options
+    if (store === undefined) {
+      return fail(response, 503, "not-configured", [
+        "No event tree: set EVENTS_DIR to write events.",
+      ])
+    }
+    if (token === undefined || token === "") {
+      return fail(response, 503, "not-configured", ["No token: set INGEST_TOKEN to take writes."])
+    }
+    if (!authorised(request, token)) {
+      response.setHeader("www-authenticate", "Bearer")
+      return fail(response, 401, "unauthorised", ["Send the ingest token as a bearer token."])
+    }
+    const body = await readJsonBody(request, response, options.maxBodyBytes, "event")
+    if (!body.ok) return
+    const result = await store.write(body.value)
+    if (result.ok) return send(response, 201, { ok: true, event_id: result.eventId })
+    return fail(response, result.kind === "duplicate" ? 409 : 400, result.kind, result.problems)
+  }
+
   async function replayRoute(request: IncomingMessage, response: ServerResponse) {
-    const type = request.headers["content-type"] ?? ""
-    if (!/^application\/json\b/.test(type)) {
-      return fail(response, 415, "unsupported-media-type", [
-        "Send the snapshot as application/json.",
-      ])
-    }
-    let text: string
-    try {
-      text = await readBody(request, options.maxBodyBytes)
-    } catch (error) {
-      if (error instanceof TooLargeError) {
-        response.setHeader("connection", "close")
-        return fail(response, 413, "too-large", [`The body is over ${options.maxBodyBytes} bytes.`])
-      }
-      throw error
-    }
-    let snapshot: unknown
-    try {
-      snapshot = JSON.parse(text)
-    } catch (error) {
-      return fail(response, 400, "invalid-json", [
-        error instanceof Error ? error.message : "Not JSON.",
-      ])
-    }
+    const body = await readJsonBody(request, response, options.maxBodyBytes, "snapshot")
+    if (!body.ok) return
+    const snapshot = body.value
     if (inFlight >= options.maxQueue) {
       return fail(response, 503, "busy", ["Too many replays are waiting; try again shortly."])
     }
@@ -120,6 +165,10 @@ export function createIngestServer(options: IngestOptions): Server {
       if (path === "/replay/components") {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
         return send(response, 200, components())
+      }
+      if (path === "/events") {
+        if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
+        return eventsRoute(request, response)
       }
       if (path === "/replay") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
