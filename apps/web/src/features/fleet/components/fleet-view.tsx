@@ -10,7 +10,13 @@ import { LanguageMark } from "../../../components/dashboard/language-mark"
 import { useFleet } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import { formatCount, formatInstant, formatMs, NOT_AVAILABLE } from "../../../lib/format"
-import { conformanceRows, REQUIRED, serviceRows, type ConformanceRow } from "../model/fleet"
+import {
+  conformanceRows,
+  REQUIRED,
+  serviceRows,
+  type ConformanceRow,
+  type ServiceRow,
+} from "../model/fleet"
 
 const short = (commit: string) => commit.slice(0, 7)
 const REQUIRED_IDS: readonly string[] = [...REQUIRED.tokenizers, ...REQUIRED.renderers]
@@ -42,14 +48,44 @@ function Outcomes({ counts }: { readonly counts: Record<string, number> | undefi
   )
 }
 
-function Contract({ commit, lock }: { readonly commit: string; readonly lock: string }) {
+/** An implementation report's contract: a commit, which is all a report says. */
+function RanAgainst({ commit, lock }: { readonly commit: string; readonly lock: string }) {
   return commit === lock ? (
     <>{short(commit)} · the lock's</>
   ) : (
-    <span data-drift="">
-      {short(commit)} · not the lock's {short(lock)}
-    </span>
+    <>
+      {short(commit)} · the lock pins {short(lock)}
+    </>
   )
+}
+
+/** A service's contract, by its files where the report knows them. */
+function ServiceContract({ service }: { readonly service: ServiceRow }) {
+  const commit = short(service.contract_commit)
+  const files = service.contractFiles
+  switch (service.contract) {
+    case "same-commit":
+      return <>{commit} · the lock's</>
+    case "same-files":
+      return (
+        <>
+          {commit} · the lock's {formatCount(files!.pinned)} files
+        </>
+      )
+    case "differing-files":
+      return (
+        <span data-drift="">
+          {commit} · {formatCount(files!.differing.length)} of {formatCount(files!.pinned)} files
+          differ
+        </span>
+      )
+    case "not-known":
+      return (
+        <>
+          {commit} · <span data-slot="cell-note">files not known</span>
+        </>
+      )
+  }
 }
 
 function Conformance({
@@ -86,7 +122,7 @@ function Conformance({
                 {row.source.dirty ? " · dirty" : ""}
               </td>
               <td data-mono="">
-                <Contract commit={row.contractCommit} lock={lock} />
+                <RanAgainst commit={row.contractCommit} lock={lock} />
               </td>
               <td data-mono="">
                 <Outcomes counts={row.cases} />
@@ -118,7 +154,7 @@ export function FleetView() {
       {(fleet) => {
         const lock = fleet.contract.commit
         const services = serviceRows(fleet)
-        const drifted = services.filter((s) => !s.sameContract)
+        const drifted = services.filter((s) => s.contract === "differing-files")
         return (
           <div data-slot="content">
             <div role="status" aria-label="Fleet status" data-slot="status-region">
@@ -131,10 +167,17 @@ export function FleetView() {
               <section aria-label="Contract drift" data-slot="note">
                 <p>
                   {formatCount(drifted.length)} of {formatCount(services.length)} services run an
-                  assembler built against a contract other than the one the dashboard's lock pins (
-                  {short(lock)}):{" "}
-                  {drifted.map((s) => `${s.name} (${short(s.contract_commit)})`).join(", ")}.
+                  assembler whose contract files differ from the ones the dashboard's lock pins (
+                  {short(lock)}):
                 </p>
+                <ul>
+                  {drifted.map((s) => (
+                    <li key={s.name}>
+                      <code>{s.name}</code> ({short(s.contract_commit)}):{" "}
+                      {s.contractFiles!.differing.join(", ")}
+                    </li>
+                  ))}
+                </ul>
               </section>
             ) : null}
             <Conformance rows={conformanceRows(fleet)} lock={lock} />
@@ -161,7 +204,7 @@ export function FleetView() {
                       </td>
                       <td data-mono="">{service.assembler_version}</td>
                       <td data-mono="">
-                        <Contract commit={service.contract_commit} lock={lock} />
+                        <ServiceContract service={service} />
                       </td>
                       <td data-mono="">{service.routes.join(", ")}</td>
                       <td data-mono="">

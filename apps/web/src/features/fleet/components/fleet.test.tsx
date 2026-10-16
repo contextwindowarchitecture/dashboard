@@ -35,7 +35,7 @@ describe("the fleet page", () => {
       const row = within(table).getByRole("link", { name: implementation.language }).closest("tr")!
       const ran = short(implementation.report.contract.commit)
       expect(row).toHaveTextContent(
-        ran === lock ? `${ran} · the lock's` : `${ran} · not the lock's ${lock}`,
+        ran === lock ? `${ran} · the lock's` : `${ran} · the lock pins ${lock}`,
       )
     }
   })
@@ -49,12 +49,36 @@ describe("the fleet page", () => {
     expect(row("go")).toHaveTextContent("not stated")
   })
 
-  it("lists the services whose contract is not the lock's in a drift note", async () => {
+  it("says the demo services run the lock's files under another commit, with no drift", async () => {
     renderApp("/fleet")
-    const drifted = fleet.services.filter((s) => s.contract_commit !== fleet.contract.commit)
-    expect(drifted.length).toBeGreaterThan(0)
+    const table = await screen.findByRole("table", { name: "Services" })
+    const service = fleet.services[0]!
+    const row = within(table).getByRole("rowheader", { name: service.name }).closest("tr")!
+    expect(row).toHaveTextContent(
+      `${short(service.contract_commit)} · the lock's ${service.contract_files!.pinned} files`,
+    )
+    expect(screen.queryByRole("region", { name: "Contract drift" })).toBeNull()
+  })
+
+  it("names in a drift note a service whose contract files differ from the lock's", async () => {
+    const drifted = structuredClone(fleet)
+    drifted.services[0]!.contract_files = { pinned: 303, differing: ["schema/trace.schema.json"] }
+    renderApp("/fleet", withFleet(drifted))
     const note = await screen.findByRole("region", { name: "Contract drift" })
-    for (const service of drifted) expect(note).toHaveTextContent(service.name)
+    expect(note).toHaveTextContent(drifted.services[0]!.name)
+    expect(note).toHaveTextContent("schema/trace.schema.json")
+  })
+
+  it("says when it cannot tell, rather than calling a different commit a different contract", async () => {
+    const unknown = structuredClone(fleet)
+    delete (unknown.services[0] as { contract_files?: unknown }).contract_files
+    renderApp("/fleet", withFleet(unknown))
+    const table = await screen.findByRole("table", { name: "Services" })
+    const row = within(table)
+      .getByRole("rowheader", { name: unknown.services[0]!.name })
+      .closest("tr")!
+    expect(row).toHaveTextContent("files not known")
+    expect(screen.queryByRole("region", { name: "Contract drift" })).toBeNull()
   })
 
   it("shows each service's latency as its wrapper measured it, and Not available where it measured none", async () => {

@@ -1,7 +1,8 @@
 // The fleet's view model (dashboard-plan.md 7.7): each implementation's published conformance run,
 // counted by outcome, with the contract it ran against and the required tokenizers and renderers it
 // says it lacks; each case with its rules; and each service's contract commit beside the one the
-// dashboard's lock pins, with the latency its wrapper measured, or none where it measured none.
+// dashboard's lock pins, read by its files where the report knows them (a different commit is not a
+// different contract), with the latency its wrapper measured, or none where it measured none.
 
 import { COMPONENTS } from "@cwa-dashboard/contract/data"
 import type { FleetReportV1 } from "@cwa-dashboard/telemetry/types"
@@ -77,9 +78,24 @@ export function serviceRows(fleet: FleetReportV1) {
       p95?: number
       p99?: number
     }
+    const files = (service as { contract_files?: { pinned: number; differing: string[] } })
+      .contract_files
     return {
       ...service,
-      sameContract: service.contract_commit === fleet.contract.commit,
+      contractFiles: files,
+      /**
+       * The service's contract against the dashboard's lock: the same commit; another commit whose
+       * pinned files are all the lock's; one with files that differ (drift); or another commit
+       * whose files the report does not know, which says nothing either way.
+       */
+      contract:
+        service.contract_commit === fleet.contract.commit
+          ? ("same-commit" as const)
+          : files === undefined
+            ? ("not-known" as const)
+            : files.differing.length === 0
+              ? ("same-files" as const)
+              : ("differing-files" as const),
       latency:
         latency.samples === 0
           ? undefined

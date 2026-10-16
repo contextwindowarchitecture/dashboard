@@ -86,11 +86,10 @@ describe("caseRows", () => {
 })
 
 describe("serviceRows", () => {
-  it("compares each service's contract commit with the lock's, and keeps unmeasured latency unmeasured", () => {
+  it("keeps unmeasured latency unmeasured", () => {
     const rows = serviceRows(fleet)
     for (const [i, row] of rows.entries()) {
       const service = fleet.services[i]!
-      expect(row.sameContract).toBe(service.contract_commit === fleet.contract.commit)
       if (service.latency_ms.samples === 0) expect(row.latency).toBeUndefined()
       else
         expect(row.latency).toEqual({
@@ -103,5 +102,30 @@ describe("serviceRows", () => {
     const silent = structuredClone(fleet)
     silent.services[0]!.latency_ms = { samples: 0 }
     expect(serviceRows(silent)[0]!.latency).toBeUndefined()
+  })
+
+  it("reads a service's contract by its files where they are known, never by its commit alone", () => {
+    const at = (commit: string, files?: { pinned: number; differing: string[] }) => {
+      const copy = structuredClone(fleet)
+      const service = copy.services[0]! as (typeof copy.services)[number] & {
+        contract_files?: unknown
+      }
+      service.contract_commit = commit
+      if (files === undefined) delete service.contract_files
+      else service.contract_files = files
+      return serviceRows(copy)[0]!.contract
+    }
+    const lock = fleet.contract.commit
+    const other = "c".repeat(40)
+    expect(at(lock)).toBe("same-commit")
+    expect(at(other, { pinned: 303, differing: [] })).toBe("same-files")
+    expect(at(other, { pinned: 303, differing: ["schema/trace.schema.json"] })).toBe(
+      "differing-files",
+    )
+    expect(at(other)).toBe("not-known")
+  })
+
+  it("finds the demo services on another commit with the same files", () => {
+    for (const row of serviceRows(fleet)) expect(row.contract).toBe("same-files")
   })
 })
