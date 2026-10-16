@@ -9,7 +9,7 @@
   "assembler": {
     "language": "typescript",
     "name": "@contextwindowarchitecture/assembler",
-    "version": "0.0.1"
+    "version": "0.0.2"
   },
   "contract": {
     "repository": "contextwindowarchitecture/contextwindowarchitecture",
@@ -18,7 +18,7 @@
   },
   "redaction_mode": "full",
   "timings_ms": {
-    "total": 0.22295900000000302
+    "total": 0.24112500000001091
   },
   "outcome": "assembled",
   "snapshot": {
@@ -696,12 +696,12 @@
       }
     ],
     "timings": {
-      "admission": 0.07383400000000506,
-      "conflicts": 0.0007500000000106866,
-      "supersession": 0.0008750000000077307,
-      "deduplication": 0.009791000000006989,
-      "diversity": 0.00633400000000961,
-      "fitting": 0.041082999999986214
+      "admission": 0.07083300000002168,
+      "conflicts": 0.0006659999999953925,
+      "supersession": 0.0007919999999899119,
+      "deduplication": 0.00941699999998491,
+      "diversity": 0.005834000000021433,
+      "fitting": 0.054708000000005086
     }
   },
   "payload": {
