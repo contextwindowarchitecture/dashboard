@@ -96,3 +96,30 @@ test("a table keeps its identifiers and chips whole, and scrolls in its region i
   expect(broken).toEqual([])
   await expectNoSidewaysScroll(page)
 })
+
+test("the overview's metrics fill their rows, each value on one line", async ({ page }) => {
+  await page.goto("/")
+  const grid = page.getByRole("list", { name: "Metrics" })
+  await grid.waitFor()
+  for (const width of [1440, 1024, 375]) {
+    await test.step(`${width}px`, async () => {
+      await page.setViewportSize({ width, height: 900 })
+      const layout = await grid.evaluate((list) => ({
+        columns: getComputedStyle(list).gridTemplateColumns.split(" ").length,
+        cells: list.children.length,
+        broken: [...list.querySelectorAll("[data-slot='metric-value']")]
+          .filter(
+            (value) =>
+              value.getBoundingClientRect().height >
+              1.5 * parseFloat(getComputedStyle(value).lineHeight),
+          )
+          .map((value) => value.textContent),
+      }))
+      expect(
+        layout.cells % layout.columns,
+        `${layout.cells} cells in ${layout.columns} columns`,
+      ).toBe(0)
+      expect(layout.broken).toEqual([])
+    })
+  }
+})

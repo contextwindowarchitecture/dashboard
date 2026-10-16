@@ -225,7 +225,7 @@ Dashboard pages are full width inside the sidebar: the tables need it. Narrative
 | Page header | `padding: 32px 32px 24px`: kicker, h1, lede, the mono meta row, actions on the right |
 | Filter bar | `padding: 0 32px 16px`, controls in a row that wraps, `gap: 10px` |
 | Status region | `padding: 0 32px 16px`, the source badge and the window as mono muted; each part `min-width: 0; overflow-wrap: anywhere`, since one can hold a repository path |
-| Metric grid | `margin: 0 32px 24px`, a hairline grid of `repeat(auto-fit, minmax(220px, 1fr))` |
+| Metric grid | `margin: 0 32px 24px`, a hairline grid of `repeat(3, minmax(0, 1fr))`: the overview's six metrics fill every row, and a cell is wide enough for a reason code at the metric size |
 | Content | `padding: 0 32px 32px`, a column of panels with `gap: 24px`; a two-column page is `minmax(0, 1fr) minmax(360px, 420px)` with `gap: 24px` |
 | Panel header | `padding: 12px 18px`, 1px `--line` bottom border, sticky at the masthead's bottom inside a scrolling panel |
 | Panel body | `padding: 18px`; tables run edge to edge inside it |
@@ -261,7 +261,7 @@ Common pairs: metric cells `18px 20px`; panel headers and key-value rows `12px 1
 
 - **Hairline grid** (cells that share borders): the container carries the lines, the cells carry the fill.
   `display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line);` with each cell `background: var(--bg);`. The metric grid, the guardrail cards, the registry cards, the conflict cards and the narrative pages' card rows are hairline grids.
-- **Responsive card grid:** `repeat(auto-fit, minmax(220px, 1fr))` for metrics, `minmax(280px, 1fr)` for guardrail and registry cards, `minmax(360px, 1fr)` for conflict cards, always as a hairline grid.
+- **Responsive card grid:** three columns for metrics (two below 1100px, one below 620px), `repeat(auto-fit, minmax(280px, 1fr))` for guardrail and registry cards, `minmax(360px, 1fr)` for conflict cards, always as a hairline grid.
 - **Key and value rows** (an event's context, a policy's flags, a profile's evaluation): `grid-template-columns: 140px minmax(0, 1fr); gap: 14px; padding: 12px 18px; border-bottom: 1px solid var(--line); align-items: baseline;` with the key in mono `var(--fs-label)` muted and the value in mono `var(--fs-mono)`.
 - **Item row:** `grid-template-columns: minmax(0, 1fr); gap: 5px` inside the row; the outcome chips, the id, the metadata line (producer, authority, trust, tier, lineage, freshness, expires, tokens), the body behind a `<details>`.
 - **Two-column page** (the inspector's items and its context, a session's timeline and its turn): `minmax(0, 1fr) minmax(360px, 420px); gap: 24px`, stacking below 1100px.
