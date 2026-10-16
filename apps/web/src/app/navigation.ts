@@ -3,6 +3,7 @@
 // it lands.
 
 import {
+  Layers,
   LayoutDashboard,
   ListTree,
   MessagesSquare,
@@ -58,6 +59,13 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: "/registry/policies",
         icon: ScrollText,
         patterns: ["/registry/policies", "/registry/policies/:route/:version"],
+      },
+      {
+        id: "profiles",
+        label: "Profiles",
+        to: "/registry/profiles",
+        icon: Layers,
+        patterns: ["/registry/profiles", "/registry/profiles/:id/:version"],
       },
     ],
   },

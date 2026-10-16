@@ -6,7 +6,7 @@
 // digests nothing.
 
 import type { Profile, RoutePolicy } from "@cwa-dashboard/contract/types"
-import type { EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
+import type { EventsIndexV1, SessionV1 } from "@cwa-dashboard/telemetry/types"
 
 type Row = EventsIndexV1["events"][number]
 
@@ -185,3 +185,20 @@ export function registryModel(registry: Registry, rows: readonly Row[]) {
 }
 
 export type RegistryModel = ReturnType<typeof registryModel>
+
+/**
+ * Part reuse over the sessions that ran a profile: each session's own sum (the session document's
+ * part_reuse), added up, with the number of sessions it came from. Undefined when no turn of any of
+ * them could be compared.
+ */
+export function profileReuse(sessions: readonly SessionV1[]) {
+  const sum = { sessions: 0, comparedTurns: 0, reusedParts: 0, parts: 0 }
+  for (const session of sessions) {
+    if (session.part_reuse.compared_turns === 0) continue
+    sum.sessions += 1
+    sum.comparedTurns += session.part_reuse.compared_turns
+    sum.reusedParts += session.part_reuse.reused_parts
+    sum.parts += session.part_reuse.parts
+  }
+  return sum.sessions === 0 ? undefined : sum
+}

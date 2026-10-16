@@ -5,7 +5,7 @@
 // they had while it does. A document that is not there, not JSON or not supported is never
 // retried; a network or server failure is retried once.
 
-import { useQuery, type UseQueryResult } from "@tanstack/react-query"
+import { useQueries, useQuery, type UseQueryResult } from "@tanstack/react-query"
 
 import { useData } from "./data-context"
 import { type EventSource, SourceError } from "./source"
@@ -26,17 +26,17 @@ const retry = (failures: number, error: Error) =>
   (error.kind === "network" || error.kind === "http") &&
   failures < 1
 
-function useDocument<K extends Kind>(
+function documentOptions<K extends Kind>(
+  { source, root }: { source: EventSource; root: string },
   kind: K,
   key: readonly string[],
   path: (source: EventSource) => string,
   load: (source: EventSource, signal: AbortSignal) => Promise<unknown>,
   live = false,
-): DocumentQuery<K> {
-  const { source, root } = useData()
-  return useQuery({
+) {
+  return {
     queryKey: ["data", root, ...key],
-    queryFn: async ({ signal }) => ({
+    queryFn: async ({ signal }: { signal: AbortSignal }): Promise<Fetched<K>> => ({
       result: parseDocument(kind, await load(source, signal)),
       path: path(source),
     }),
@@ -49,7 +49,17 @@ function useDocument<K extends Kind>(
           refetchIntervalInBackground: false,
         }
       : { staleTime: Infinity }),
-  })
+  }
+}
+
+function useDocument<K extends Kind>(
+  kind: K,
+  key: readonly string[],
+  path: (source: EventSource) => string,
+  load: (source: EventSource, signal: AbortSignal) => Promise<unknown>,
+  live = false,
+): DocumentQuery<K> {
+  return useQuery(documentOptions(useData(), kind, key, path, load, live))
 }
 
 export const useIndex = () =>
@@ -69,13 +79,23 @@ export const useEvent = (eventId: string) =>
     (s, signal) => s.event(eventId, signal),
   )
 
-export const useSession = (sessionId: string) =>
-  useDocument(
+const sessionOptions = (data: { source: EventSource; root: string }, sessionId: string) =>
+  documentOptions(
+    data,
     "session",
     ["session", sessionId],
     (s) => s.url(`sessions/${sessionId}.json`),
     (s, signal) => s.session(sessionId, signal),
   )
+
+export const useSession = (sessionId: string): DocumentQuery<"session"> =>
+  useQuery(sessionOptions(useData(), sessionId))
+
+/** Several sessions at once, one query each, sharing the cache useSession fills. */
+export const useSessions = (sessionIds: readonly string[]): DocumentQuery<"session">[] => {
+  const data = useData()
+  return useQueries({ queries: sessionIds.map((id) => sessionOptions(data, id)) })
+}
 
 export const useFleet = () =>
   useDocument(

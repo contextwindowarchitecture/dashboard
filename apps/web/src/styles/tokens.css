@@ -865,6 +865,20 @@ a:hover {
   display: block;
 }
 
+/* A profile's placement: each slot with its wrap, in order. */
+[data-slot="placement-list"] {
+  margin: 0;
+  padding-left: 1.5em;
+  display: grid;
+  gap: 6px;
+}
+[data-slot="placement-list"] li code {
+  margin-left: 8px;
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  color: var(--muted);
+}
+
 /* Drift is one of the three things the accent marks (STYLE.md 2). */
 [data-drift] {
   color: var(--accent);

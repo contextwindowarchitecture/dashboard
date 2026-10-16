@@ -5,10 +5,11 @@ import { Navigate, type Params, type RouteObject } from "react-router"
 
 import { Shell } from "../components/layout/shell"
 import { PolicyView } from "../features/registry/components/policy-view"
+import { ProfileView } from "../features/registry/components/profile-view"
 import { InspectorPage } from "./pages/inspector"
 import { NotFoundPage } from "./pages/not-found"
 import { OverviewPage } from "./pages/overview"
-import { PoliciesPage } from "./pages/registry"
+import { PoliciesPage, ProfilesPage } from "./pages/registry"
 import { SessionPage } from "./pages/session"
 import { SessionsPage } from "./pages/sessions"
 import { TracesPage } from "./pages/traces"
@@ -79,6 +80,21 @@ export const ROUTES: RouteObject[] = [
                 handle: handle(
                   (params) => `${params["route"] ?? ""} ${params["version"] ?? ""}`,
                   (params) => `${params["route"] ?? ""} ${params["version"] ?? ""}`,
+                ),
+              },
+            ],
+          },
+          {
+            path: "profiles",
+            handle: handle("Profiles", () => "Profiles"),
+            children: [
+              { index: true, element: <ProfilesPage />, handle: handle("Profiles") },
+              {
+                path: ":id/:version",
+                element: <ProfileView />,
+                handle: handle(
+                  (params) => `${params["id"] ?? ""} v${params["version"] ?? ""}`,
+                  (params) => `${params["id"] ?? ""} v${params["version"] ?? ""}`,
                 ),
               },
             ],

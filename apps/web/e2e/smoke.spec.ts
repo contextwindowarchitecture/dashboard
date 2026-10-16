@@ -291,9 +291,7 @@ test("a session plays to its last turn, in both motion preferences", async ({ pa
   }
 })
 
-test("the route policies and a policy's page read in both themes and at a phone's width", async ({
-  page,
-}) => {
+test("the registry's pages read in both themes and at a phone's width", async ({ page }) => {
   await page.goto("/registry/policies")
   await expect(page.getByRole("region", { name: "Drift" })).toBeVisible()
   await page
@@ -305,7 +303,12 @@ test("the route policies and a policy's page read in both themes and at a phone'
   await expectAccessible(page)
   await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
   await page.setViewportSize({ width: 400, height: 800 })
-  for (const path of ["/registry/policies", "/registry/policies/support-chat/conflict-fact%2Fv1"]) {
+  for (const path of [
+    "/registry/policies",
+    "/registry/policies/support-chat/conflict-fact%2Fv1",
+    "/registry/profiles",
+    "/registry/profiles/cache-first-chat/1",
+  ]) {
     await page.goto(path)
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
     await expectNoSidewaysScroll(page)
