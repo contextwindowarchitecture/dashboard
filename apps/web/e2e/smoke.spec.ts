@@ -456,3 +456,27 @@ test("the sandbox says so when the replay service does not answer", async ({ pag
   expect(expected).toHaveLength(1)
   seen.splice(seen.indexOf(expected[0]!), 1)
 })
+
+test("the sandbox replays a pasted snapshot through the service, and offers the results", async ({
+  page,
+}) => {
+  const snapshot = readFileSync(
+    resolve(
+      import.meta.dirname,
+      "../../../packages/contract/vendor/cwa/conformance/cases/budget-margin/snapshot.json",
+    ),
+    "utf8",
+  )
+  await page.goto("/sandbox")
+  await page.getByRole("textbox", { name: "Snapshot JSON" }).fill(snapshot)
+  await page.getByRole("button", { name: "Replay" }).click()
+  const result = page.getByRole("region", { name: "Replay result" })
+  await expect(result).toContainText("No recorded event to compare with")
+  await expect(result.getByRole("link", { name: "Download the trace" })).toHaveAttribute(
+    "download",
+    "snapshot.replay.trace.json",
+  )
+  await expectAccessible(page)
+  await page.setViewportSize({ width: 400, height: 800 })
+  await expectNoSidewaysScroll(page)
+})

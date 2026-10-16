@@ -1,6 +1,7 @@
 // The sandbox (dashboard-plan.md 7.8): an event replayed through the real assembler on the replay
 // service (D12, ADR-0005), with the reader's controls applied, its outcome, its parity with what the
-// event recorded and the trace diff. What a replay may claim is fidelity.ts's to decide; the page
+// event recorded and the trace diff; or a snapshot of the reader's own, pasted or uploaded, which
+// has nothing recorded to compare with. Either can be downloaded as replayed. What a replay may claim is fidelity.ts's to decide; the page
 // says it. Without a configured service the page says so and how to run one.
 
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
@@ -213,6 +214,66 @@ const FAILURE: Record<"rejected" | "unsupported" | "invalid-response", string> =
   "invalid-response": "The service's answer is not a replay:",
 }
 
+/** Any answer that is not a replay, in words. */
+function Failure({ answer }: { readonly answer: Exclude<ReplayAnswer, Replayed> }) {
+  switch (answer.kind) {
+    case "rejected":
+    case "unsupported":
+    case "invalid-response":
+      return (
+        <div data-slot="note">
+          <p>{FAILURE[answer.kind]}</p>
+          <ul>
+            {answer.problems.map((problem) => (
+              <li key={problem}>
+                <code>{problem}</code>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    default:
+      return (
+        <div data-slot="note">
+          <p>{answer.message}</p>
+        </div>
+      )
+  }
+}
+
+const asDataUrl = (value: unknown) =>
+  `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(value, null, 2))}`
+
+/** The snapshot replayed and the trace it gave, as JSON files to keep. */
+function Downloads({
+  name,
+  snapshot,
+  trace,
+}: {
+  readonly name: string
+  readonly snapshot: unknown
+  readonly trace: unknown
+}) {
+  return (
+    <ul aria-label="Downloads" data-slot="chip-row">
+      <li>
+        <a
+          href={asDataUrl(snapshot)}
+          download={`${name}.replay.snapshot.json`}
+          data-slot="ghost-button"
+        >
+          Download the snapshot
+        </a>
+      </li>
+      <li>
+        <a href={asDataUrl(trace)} download={`${name}.replay.trace.json`} data-slot="ghost-button">
+          Download the trace
+        </a>
+      </li>
+    </ul>
+  )
+}
+
 function Result({
   event,
   run,
@@ -233,29 +294,11 @@ function Result({
             <Outcome answer={answer} />
             <ParityPanel event={event} answer={answer} isEdited={isEdited} />
             <Settled key={run.id} event={event} answer={answer} snapshot={run.snapshot} />
+            <Downloads name={event.event_id} snapshot={run.snapshot} trace={answer.trace} />
           </>
         )
-      case "rejected":
-      case "unsupported":
-      case "invalid-response":
-        return (
-          <div data-slot="note">
-            <p>{FAILURE[answer.kind]}</p>
-            <ul>
-              {answer.problems.map((problem) => (
-                <li key={problem}>
-                  <code>{problem}</code>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
       default:
-        return (
-          <div data-slot="note">
-            <p>{answer.message}</p>
-          </div>
-        )
+        return <Failure answer={answer} />
     }
   }
   return (
@@ -345,6 +388,120 @@ function Replayer({
   )
 }
 
+/** The sandbox accepts a snapshot up to this size (dashboard-plan.md 9). */
+const MAX_SNAPSHOT_BYTES = 4 * 1024 * 1024
+
+type Pasted =
+  | { readonly status: "idle" }
+  | { readonly status: "invalid"; readonly message: string }
+  | { readonly status: "running" }
+  | { readonly status: "done"; readonly answer: ReplayAnswer; readonly snapshot: unknown }
+
+/** A snapshot of the reader's own, pasted or uploaded, replayed with nothing recorded to compare. */
+function PastedReplay({ client }: { readonly client: ReplayClient }) {
+  const [text, setText] = useState("")
+  const [state, setState] = useState<Pasted>({ status: "idle" })
+  const inFlight = useRef<AbortController | null>(null)
+  const replay = async () => {
+    if (new Blob([text]).size > MAX_SNAPSHOT_BYTES) {
+      setState({ status: "invalid", message: "The snapshot is over the sandbox's 4 MiB limit." })
+      return
+    }
+    let snapshot: unknown
+    try {
+      snapshot = JSON.parse(text)
+    } catch (error) {
+      setState({
+        status: "invalid",
+        message: `The snapshot is not JSON: ${error instanceof Error ? error.message : String(error)}`,
+      })
+      return
+    }
+    inFlight.current?.abort()
+    const controller = new AbortController()
+    inFlight.current = controller
+    setState({ status: "running" })
+    try {
+      const answer = await client.replay(snapshot, controller.signal)
+      if (!controller.signal.aborted) setState({ status: "done", answer, snapshot })
+    } catch (error) {
+      if (!controller.signal.aborted) throw error
+    }
+  }
+  return (
+    <div data-slot="stack">
+      <div data-slot="field">
+        <label htmlFor="sandbox-snapshot" data-label="">
+          Snapshot JSON
+        </label>
+        <textarea
+          id="sandbox-snapshot"
+          data-slot="textarea"
+          rows={10}
+          spellCheck={false}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+      </div>
+      <div data-slot="field">
+        <label htmlFor="sandbox-upload" data-label="">
+          Upload a snapshot
+        </label>
+        <input
+          id="sandbox-upload"
+          type="file"
+          accept="application/json,.json"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void file.text().then(setText)
+          }}
+        />
+      </div>
+      {state.status === "invalid" ? (
+        <p role="alert" data-slot="note">
+          {state.message}
+        </p>
+      ) : null}
+      <div>
+        <button
+          type="button"
+          data-slot="inverse-button"
+          onClick={() => void replay()}
+          disabled={text.trim() === ""}
+          aria-busy={state.status === "running"}
+        >
+          Replay
+        </button>
+      </div>
+      {state.status === "running" || state.status === "done" ? (
+        <section aria-label="Replay result" aria-live="polite" data-slot="stack">
+          {state.status === "running" ? (
+            <p data-slot="cell-note">Replaying…</p>
+          ) : state.answer.kind === "replayed" ? (
+            <>
+              <Outcome answer={state.answer} />
+              <p data-slot="panel-note">
+                No recorded event to compare with, so no parity is claimed.
+              </p>
+              <section aria-labelledby="sandbox-trace" data-slot="panel">
+                <h2 id="sandbox-trace" data-slot="panel-header" data-label="">
+                  Trace
+                </h2>
+                <pre tabIndex={0} aria-label="Trace JSON" data-slot="raw-json">
+                  {JSON.stringify(state.answer.trace, null, 2)}
+                </pre>
+              </section>
+              <Downloads name="snapshot" snapshot={state.snapshot} trace={state.answer.trace} />
+            </>
+          ) : (
+            <Failure answer={state.answer} />
+          )}
+        </section>
+      ) : null}
+    </div>
+  )
+}
+
 function EventReplay({
   eventId,
   client,
@@ -397,10 +554,13 @@ export function SandboxView() {
         <NotConfigured />
       ) : eventId === null ? (
         <div data-slot="content">
-          <p data-slot="panel-note">Choose “Replay in the sandbox” on an event’s page.</p>
+          <p data-slot="panel-note">
+            Choose “Replay in the sandbox” on an event’s page, or replay a snapshot of your own.
+          </p>
           <p>
             <Link to="/traces">Open the trace stream →</Link>
           </p>
+          <PastedReplay client={client} />
         </div>
       ) : (
         <EventReplay eventId={eventId} client={client} />

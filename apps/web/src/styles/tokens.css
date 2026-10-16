@@ -574,6 +574,22 @@ a:hover {
   background: var(--fg);
   border-color: var(--fg);
 }
+/* A snapshot pasted into the sandbox: a field like the others, as tall as it needs. */
+[data-slot="textarea"] {
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 8px 10px;
+  width: 100%;
+  min-height: 12em;
+  resize: vertical;
+}
+[data-slot="textarea"]:hover {
+  border-color: var(--fg);
+}
 /* The sandbox's controls: fields in a wrapping row, the items by producer, each with its box. */
 [data-slot="sandbox-controls"] {
   display: grid;
@@ -811,6 +827,7 @@ a:hover {
   padding: 12px 18px;
   border-bottom: 1px solid var(--line);
 }
+[data-slot="raw-json"],
 [data-slot="raw"] pre {
   margin: 0;
   padding: 18px;
