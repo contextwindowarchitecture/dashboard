@@ -10,7 +10,8 @@
       "types": "./generated/validators.d.ts",
       "default": "./generated/validators.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./derive": "./src/derive.ts"
   },
   "scripts": {
     "generate": "node scripts/generate.mjs",
