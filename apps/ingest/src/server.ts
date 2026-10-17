@@ -29,7 +29,12 @@ import { buildBundle, type SigningKey } from "./bundle.ts"
 import { CORPUS_NAME, DEFAULT_TENANT, type EventStore as Store, TENANT } from "./event-store.ts"
 import { shadowReport, type Candidate } from "./shadow.ts"
 import { validateDraftV1 } from "@cwa-dashboard/telemetry/validators"
+import { validateProfile, validateRoutePolicy } from "@cwa-dashboard/contract/validators"
+import type { DraftV1, ShadowReportV1 } from "@cwa-dashboard/telemetry/types"
 import { DRAFT_ID, type DraftStore } from "./drafts.ts"
+import type { Published, PublishRequest } from "./github.ts"
+import { fileText, policyPath } from "./policy-layout.ts"
+import { byHandCommands, commitMessage, pullBody, pullTitle, type ShadowRun } from "./publish.ts"
 import { type BodyVault, checkDeposit, type Deposit, SHA256 } from "./vault.ts"
 
 export interface IngestOptions {
@@ -54,6 +59,12 @@ export interface IngestOptions {
   readonly access?: Access
   /** Drafts of route policies and profiles, per author (ADR-0013); PostgreSQL's. */
   readonly drafts?: DraftStore
+  /** Publishing drafts as a GitHub App (ADR-0014); without it, Publish answers with the commands. */
+  readonly publish?: {
+    readonly publisher: { publish(request: PublishRequest): Promise<Published> }
+    /** Each tenant's policy repository, owner/name. */
+    readonly repositories: Readonly<Record<string, string>>
+  }
 }
 
 /** Who asks: their session, and with an access file, the roles it gives them. */
@@ -564,27 +575,43 @@ export function createIngestServer(options: IngestOptions): Server {
         "candidate must hold a route_policy, a profile, or both.",
       ])
     }
-    const store = options.store.forTenant(tenant)
+    const run = await shadow(tenant, name, candidate!)
+    if (run.kind !== "ok") {
+      const status = { "not-found": 404, busy: 503, timeout: 504 }[run.kind]
+      return fail(response, status, run.kind, [run.message])
+    }
+    return send(response, 200, run.report)
+  }
+
+  /** A shadow run over one of the tenant's corpora, one at a time; for /shadow and for Publish. */
+  async function shadow(
+    tenant: string,
+    name: unknown,
+    candidate: Candidate,
+  ): Promise<
+    | { readonly kind: "ok"; readonly report: ShadowReportV1 }
+    | { readonly kind: "not-found" | "busy" | "timeout"; readonly message: string }
+  > {
+    const store = options.store!.forTenant(tenant)
     const corpus = typeof name === "string" ? await store.corpus(name) : undefined
-    if (corpus === undefined)
-      return fail(response, 404, "not-found", [`No corpus ${String(name)}.`])
-    if (shadowing)
-      return fail(response, 503, "busy", ["A shadow run is under way; try again shortly."])
+    if (corpus === undefined) return { kind: "not-found", message: `No corpus ${String(name)}.` }
+    if (shadowing) {
+      return { kind: "busy", message: "A shadow run is under way; try again shortly." }
+    }
     shadowing = true
     try {
       const report = await shadowReport(
         { name: corpus.name, event_ids: corpus.events.map((e) => e.event_id) },
         {
-          candidate: candidate!,
+          candidate,
           load: (id) => store.event(id),
           run: (snapshot) => options.runner.run(snapshot),
           generatedAt: new Date().toISOString(),
         },
       )
-      return send(response, 200, report)
+      return { kind: "ok", report }
     } catch (error) {
-      if (error instanceof ReplayTimeoutError)
-        return fail(response, 504, "timeout", [error.message])
+      if (error instanceof ReplayTimeoutError) return { kind: "timeout", message: error.message }
       throw error
     } finally {
       shadowing = false
@@ -652,6 +679,8 @@ export function createIngestServer(options: IngestOptions): Server {
     if (reader.held !== undefined && !mayOwn(reader.held, route, tenant)) {
       return refuse(response, reader)
     }
+    // The pull request it was published to stays with it (ADR-0014).
+    const kept = (await drafts.get(author, tenant, id))?.published
     const draft = {
       $schema: "cwa-dashboard/draft/v1" as const,
       id,
@@ -661,6 +690,7 @@ export function createIngestServer(options: IngestOptions): Server {
       ...(tenant === DEFAULT_TENANT ? {} : { tenant }),
       document: given.document,
       updated_at: new Date().toISOString(),
+      ...(kept === undefined ? {} : { published: kept }),
     }
     if (!validateDraftV1(draft)) {
       return fail(
@@ -676,6 +706,126 @@ export function createIngestServer(options: IngestOptions): Server {
       return fail(response, 404, "not-found", [`No draft ${id}.`])
     }
     return send(response, 200, draft, PRIVATE)
+  }
+
+  // Publish (ADR-0014): the draft's author, signed in and still its route's owner, opens a pull
+  // request in the tenant's policy repository; without the App, the answer is the commands.
+  async function publishRoute(
+    request: IncomingMessage,
+    response: ServerResponse,
+    id: string,
+    tenant: string,
+  ) {
+    if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
+    const { drafts } = options
+    if (drafts === undefined) {
+      return fail(response, 503, "not-configured", [
+        "Drafts are kept in PostgreSQL, with sign-in: set DATABASE_URL and OIDC_*.",
+      ])
+    }
+    const reader = await readerOf(request)
+    if (reader.session === undefined) {
+      return fail(response, 401, "sign-in", ["Sign in to publish a draft."])
+    }
+    if (options.auth?.fromOtherSite(request)) {
+      return fail(response, 403, "forbidden", ["A draft is published from this site only."])
+    }
+    const author = reader.session.subject
+    const draft = DRAFT_ID.test(id) ? await drafts.get(author, tenant, id) : undefined
+    if (draft === undefined) return fail(response, 404, "not-found", [`No draft ${id}.`])
+    if (reader.held !== undefined && !mayOwn(reader.held, draft.route, tenant)) {
+      return refuse(response, reader)
+    }
+    const body = await readJsonBody(request, response, options.maxBodyBytes, "publish request")
+    if (!body.ok) return
+    const { corpus } = (body.value ?? {}) as { corpus?: unknown }
+    const validate = draft.kind === "profile" ? validateProfile : validateRoutePolicy
+    if (!validate(draft.document)) {
+      return fail(
+        response,
+        400,
+        "invalid",
+        (validate.errors ?? []).map((e) => `${e.instancePath || "/"} ${e.message ?? "is invalid"}`),
+      )
+    }
+    const placed = policyPath(draft.kind, draft.document)
+    if (!placed.ok) return fail(response, 400, "invalid", [placed.problem])
+    const { path } = placed
+    const branch = `cwa-dashboard/${draft.id}`
+    const file = fileText(draft.document)
+    const repository = options.publish?.repositories[tenant]
+    if (options.publish === undefined || repository === undefined) {
+      return send(
+        response,
+        200,
+        {
+          kind: "by-hand",
+          path,
+          file,
+          branch,
+          commands: byHandCommands({ draft, path, branch }),
+          problems: [
+            options.publish === undefined
+              ? "No GitHub App is configured: set GITHUB_APP_DIR and POLICY_REPOSITORIES."
+              : `POLICY_REPOSITORIES names no repository for the tenant ${tenant}.`,
+          ],
+        },
+        { "cache-control": "no-store" },
+      )
+    }
+    let run: ShadowRun = { kind: "not-asked" }
+    if (corpus !== undefined && options.store !== undefined) {
+      const ran = await shadow(tenant, corpus, { [draft.kind]: draft.document } as Candidate)
+      if (ran.kind === "not-found") return fail(response, 404, "not-found", [ran.message])
+      run =
+        ran.kind === "ok"
+          ? { kind: "ran", report: ran.report }
+          : { kind: "did-not-finish", reason: ran.message }
+    }
+    const answer = await options.publish.publisher.publish({
+      repository,
+      path,
+      text: file,
+      head: branch,
+      message: commitMessage(draft),
+      title: pullTitle(draft),
+      body: pullBody({
+        draft,
+        author: { name: reader.session.name, subject: author },
+        tenant,
+        path,
+        shadow: run,
+      }),
+    })
+    switch (answer.kind) {
+      case "published": {
+        const published: NonNullable<DraftV1["published"]> = {
+          repository: answer.repository,
+          path: answer.path,
+          branch: answer.branch,
+          number: answer.number,
+          url: answer.url,
+          at: new Date().toISOString(),
+        }
+        await drafts.put(author, tenant, { ...draft, published })
+        return send(response, 200, answer, { "cache-control": "no-store" })
+      }
+      case "conflict":
+        return send(response, 409, {
+          ok: false,
+          kind: "conflict",
+          path: answer.path,
+          problems: [
+            `${answer.repository} already holds ${answer.path}: a published version is not edited in place, so raise the version.`,
+          ],
+        })
+      case "empty":
+        return fail(response, 409, "empty", [
+          `${answer.repository} has no default branch to branch from: commit its layout first (deploy/policy-repository/README.md).`,
+        ])
+      default:
+        return fail(response, 502, answer.kind, [answer.message])
+    }
   }
 
   // The tenants a reader may read, with their events (ADR-0012).
@@ -814,6 +964,8 @@ export function createIngestServer(options: IngestOptions): Server {
       }
       if (path === "/drafts.json" || path.startsWith("/drafts/")) {
         if (!TENANT.test(tenant)) return fail(response, 404, "not-found", [`No tenant ${tenant}.`])
+        const publishing = /^\/drafts\/([^/]+)\/publish$/.exec(path)
+        if (publishing) return publishRoute(request, response, publishing[1]!, tenant)
         return draftsRoute(request, response, path, tenant)
       }
       if (path.startsWith("/bodies/")) {

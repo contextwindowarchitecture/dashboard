@@ -10,7 +10,12 @@ import { join } from "node:path"
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest"
 
-import { createPublisher, loadGitHubApp, type PublishRequest } from "../src/github.ts"
+import {
+  createPublisher,
+  loadGitHubApp,
+  publishConfigFrom,
+  type PublishRequest,
+} from "../src/github.ts"
 import { startGitHub, type FakeGitHub } from "./github-fake.ts"
 import { freePort } from "./sign-in.ts"
 
@@ -164,5 +169,55 @@ describe("the App's credentials", () => {
     writeFileSync(join(dir, "private-key.pem"), github.privateKey)
     expect(loadGitHubApp(dir)).toEqual(app())
     expect(() => loadGitHubApp(join(dir, "nowhere"))).toThrow(/app-id/)
+  })
+})
+
+describe("the configuration", () => {
+  const dir = () => {
+    const at = mkdtempSync(join(tmpdir(), "github-app-"))
+    writeFileSync(join(at, "app-id"), github.appId)
+    writeFileSync(join(at, "installation-id"), github.installationId)
+    writeFileSync(join(at, "private-key.pem"), github.privateKey)
+    return at
+  }
+
+  it("is absent without GITHUB_APP_DIR, and Publish answers with the commands", () => {
+    expect(publishConfigFrom({})).toBeUndefined()
+    expect(publishConfigFrom({ GITHUB_APP_DIR: "" })).toBeUndefined()
+  })
+
+  it("names the App, each tenant's repository and GitHub's API", () => {
+    const at = dir()
+    expect(
+      publishConfigFrom({
+        GITHUB_APP_DIR: at,
+        POLICY_REPOSITORIES: '{"default":"acme/policies","northwind":"northwind/policies"}',
+      }),
+    ).toEqual({
+      app: app(),
+      api: "https://api.github.com",
+      repositories: { default: "acme/policies", northwind: "northwind/policies" },
+    })
+    expect(
+      publishConfigFrom({
+        GITHUB_APP_DIR: at,
+        POLICY_REPOSITORIES: '{"default":"acme/policies"}',
+        GITHUB_API: "https://github.example/api/v3",
+      })?.api,
+    ).toBe("https://github.example/api/v3")
+  })
+
+  it("stops the service when it cannot be what it says", () => {
+    const at = dir()
+    expect(() => publishConfigFrom({ GITHUB_APP_DIR: at })).toThrow(/POLICY_REPOSITORIES/)
+    expect(() =>
+      publishConfigFrom({ GITHUB_APP_DIR: at, POLICY_REPOSITORIES: "acme/policies" }),
+    ).toThrow(/POLICY_REPOSITORIES/)
+    expect(() =>
+      publishConfigFrom({ GITHUB_APP_DIR: at, POLICY_REPOSITORIES: '{"default":"policies"}' }),
+    ).toThrow(/owner\/name/)
+    expect(() =>
+      publishConfigFrom({ GITHUB_APP_DIR: at, POLICY_REPOSITORIES: '{"Not A Tenant":"a/b"}' }),
+    ).toThrow(/tenant/)
   })
 })

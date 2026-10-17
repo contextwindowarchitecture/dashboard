@@ -61,6 +61,51 @@ export function loadGitHubApp(dir: string): GitHubApp {
   }
 }
 
+export interface PublishConfig {
+  readonly app: GitHubApp
+  readonly api: string
+  /** Each tenant's policy repository, owner/name. */
+  readonly repositories: Readonly<Record<string, string>>
+}
+
+const TENANT = /^[a-z0-9][a-z0-9._-]{0,63}$/
+const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/
+
+/**
+ * Publishing's configuration from the environment: GITHUB_APP_DIR (the App's secret, mounted),
+ * POLICY_REPOSITORIES (a JSON object, tenant to owner/name) and GITHUB_API. Undefined without
+ * GITHUB_APP_DIR; a configuration that cannot be what it says stops the service.
+ */
+export function publishConfigFrom(
+  env: Readonly<Record<string, string | undefined>>,
+): PublishConfig | undefined {
+  const dir = env["GITHUB_APP_DIR"]
+  if (dir === undefined || dir === "") return undefined
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(env["POLICY_REPOSITORIES"] ?? "")
+  } catch {
+    throw new Error('POLICY_REPOSITORIES must be a JSON object: {"<tenant>": "<owner>/<name>"}')
+  }
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    throw new Error('POLICY_REPOSITORIES must be a JSON object: {"<tenant>": "<owner>/<name>"}')
+  }
+  const repositories: Record<string, string> = {}
+  for (const [tenant, repository] of Object.entries(parsed)) {
+    if (!TENANT.test(tenant)) throw new Error(`POLICY_REPOSITORIES: ${tenant} is not a tenant`)
+    if (typeof repository !== "string" || !REPOSITORY.test(repository)) {
+      throw new Error(`POLICY_REPOSITORIES: ${tenant}'s repository must be owner/name`)
+    }
+    repositories[tenant] = repository
+  }
+  const api = env["GITHUB_API"]
+  return {
+    app: loadGitHubApp(dir),
+    api: api === undefined || api === "" ? "https://api.github.com" : api,
+    repositories,
+  }
+}
+
 const base64url = (data: string | Buffer) => Buffer.from(data).toString("base64url")
 
 /** The App's JWT: RS256, issued a minute back for clock skew, nine minutes long (GitHub's limit is ten). */

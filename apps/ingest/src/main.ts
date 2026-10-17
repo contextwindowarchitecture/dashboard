@@ -6,13 +6,15 @@
 // operator's, to read them, and, to sign readers in (ADR-0010), OIDC_ISSUER, OIDC_CLIENT_ID,
 // OIDC_CLIENT_SECRET and OIDC_REDIRECT_URI (OIDC_SCOPES; OIDC_ISSUER_INTERNAL, where the service
 // reaches an issuer served behind the site's proxy; OIDC_ALLOW_HTTP for an issuer on plain HTTP),
-// and ACCESS_FILE, who may read what (ADR-0011), from the environment.
+// ACCESS_FILE, who may read what (ADR-0011), and, to publish drafts as a GitHub App (ADR-0014),
+// GITHUB_APP_DIR and POLICY_REPOSITORIES (GITHUB_API for another GitHub), from the environment.
 
 import { createWorkerRunner } from "./runner.ts"
 import { createIngestServer } from "./server.ts"
 import { signingKeyFrom } from "./bundle.ts"
 import { loadAccess } from "./access.ts"
 import { authConfigFrom, createAuth } from "./auth.ts"
+import { createPublisher, publishConfigFrom } from "./github.ts"
 import { openStore, openVault } from "./open-store.ts"
 
 const number = (name: string, fallback: number) => {
@@ -50,6 +52,20 @@ const signingKey =
   signingPem === undefined || signingPem === "" ? undefined : signingKeyFrom(signingPem)
 // Who may read what (ADR-0011): ACCESS_FILE, a JSON file; without it every reader reads everything.
 const access = loadAccess(process.env)
+// Publishing (ADR-0014) publishes drafts, which PostgreSQL keeps.
+const publishConfig = publishConfigFrom(process.env)
+if (publishConfig !== undefined && opened?.drafts === undefined) {
+  throw new Error(
+    "Publishing publishes drafts, kept in PostgreSQL: set DATABASE_URL, or leave GITHUB_APP_DIR unset.",
+  )
+}
+const publish =
+  publishConfig === undefined
+    ? undefined
+    : {
+        publisher: createPublisher(publishConfig.app, { api: publishConfig.api }),
+        repositories: publishConfig.repositories,
+      }
 const server = createIngestServer({
   runner,
   ...(store === undefined ? {} : { store }),
@@ -60,12 +76,19 @@ const server = createIngestServer({
   ...(auth === undefined ? {} : { auth }),
   ...(access === undefined ? {} : { access }),
   ...(opened?.drafts === undefined ? {} : { drafts: opened.drafts }),
+  ...(publish === undefined ? {} : { publish }),
   maxBodyBytes: number("MAX_BODY_BYTES", 4 * 1024 * 1024),
   maxQueue: number("MAX_QUEUE", 8),
 })
 server.listen(port, () =>
   process.stdout.write(
-    `ingest: listening on ${port}, store: ${opened?.kind ?? "none"}, vault: ${vault === undefined ? "none" : "on"}, sign-in: ${auth === undefined ? "none" : authConfig!.issuer}, access: ${access === undefined ? "open" : "by role"}\n`,
+    `ingest: listening on ${port}, store: ${opened?.kind ?? "none"}, vault: ${vault === undefined ? "none" : "on"}, sign-in: ${auth === undefined ? "none" : authConfig!.issuer}, access: ${access === undefined ? "open" : "by role"}, publish: ${
+      publish === undefined
+        ? "by hand"
+        : Object.entries(publish.repositories)
+            .map(([t, r]) => `${t} to ${r}`)
+            .join(", ") || "by hand"
+    }\n`,
   ),
 )
 

@@ -230,7 +230,7 @@ export interface CWADashboardCorpus {
 export type CorpusV1 = CWADashboardCorpus
 
 /**
- * A route policy or a profile in the making (ADR-0013), kept per author by the API: its kind, the registry entry it started from or none, the route it is for, its tenant, the document as last saved, valid or not, and when.
+ * A route policy or a profile in the making (ADR-0013), kept per author by the API: its kind, the registry entry it started from or none, the route it is for, its tenant, the document as last saved, valid or not, when, and the pull request it was last published to.
  */
 export interface CWADashboardDraft {
   $schema: "cwa-dashboard/draft/v1"
@@ -257,6 +257,17 @@ export interface CWADashboardDraft {
   route: string
   document: unknown
   updated_at: string
+  /**
+   * The pull request Publish last opened or updated for the draft (ADR-0014), in the tenant's policy repository; absent until it is published.
+   */
+  published?: {
+    repository: string
+    path: string
+    branch: string
+    number: number
+    url: string
+    at: string
+  }
 }
 
 /** https://contextwindowarchitecture.io/schema/dashboard/draft.v1.schema.json */
