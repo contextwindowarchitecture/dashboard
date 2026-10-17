@@ -157,7 +157,24 @@ Locally, Dex with its mock connector, which signs a fixed test person in with no
 podman compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.signin.yml up --build
 ```
 
-Dex is at `http://localhost:${WEB_PORT}/dex`, behind the web container's proxy (`deploy/base/nginx/dex-proxy.conf`); its configuration is a template the image renders from the environment (`deploy/compose/dex.local.yaml.tpl`).
+Dex is at `http://localhost:${WEB_PORT}/dex`, behind the web container's proxy (`deploy/components/sign-in/dex-proxy.conf`); its configuration is a template the image renders from the environment (`deploy/compose/dex.local.yaml.tpl`).
+
+On the cluster, `deploy/overlays/prod-sign-in` is the PostgreSQL overlay plus `deploy/components/sign-in`: Dex at `https://dashboard.contextwindowarchitecture.io/dex`, signing in members of the `contextwindowarchitecture` GitHub organisation, whose teams arrive as groups (`contextwindowarchitecture:<team>`). Before applying it:
+
+1. A GitHub OAuth app, under the organisation's settings (Developer settings, OAuth apps): homepage `https://dashboard.contextwindowarchitecture.io`, authorization callback `https://dashboard.contextwindowarchitecture.io/dex/callback`. If the organisation restricts third-party access, approve the app for it, or Dex cannot read memberships.
+2. Its credentials, and the client secret Dex and the ingest service share, into secrets without printing them:
+
+```sh
+openssl rand -hex 32 | tr -d '\n' | oc -n cwa-dashboard create secret generic dashboard-oidc --from-file=client-secret=/dev/stdin
+read -r GITHUB_CLIENT_ID; read -rs GITHUB_CLIENT_SECRET
+printf %s "$GITHUB_CLIENT_SECRET" | oc -n cwa-dashboard create secret generic dashboard-dex-github \
+  --from-literal=client-id="$GITHUB_CLIENT_ID" --from-file=client-secret=/dev/stdin
+unset GITHUB_CLIENT_SECRET
+oc apply -k deploy/overlays/prod-sign-in
+oc -n cwa-dashboard rollout status deployment/dashboard-dex
+```
+
+Applying `deploy/overlays/prod-postgres` again takes sign-in away; Dex's Deployment then stays until deleted by hand.
 
 ## The vault
 

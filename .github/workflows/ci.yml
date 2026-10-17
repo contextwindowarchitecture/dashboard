@@ -98,9 +98,10 @@ jobs:
         working-directory: dashboard
         run: pnpm --filter web test:perf:api
 
-      # The manifests render: the production overlay and the one with PostgreSQL, as `oc apply -k` would build them.
+      # The manifests render: the production overlay, the one with PostgreSQL and the one with sign-in, as `oc apply -k` would build them.
       - name: Render the deployment
         working-directory: dashboard
         run: |
           kubectl kustomize deploy/overlays/prod > /dev/null
           kubectl kustomize deploy/overlays/prod-postgres > /dev/null
+          kubectl kustomize deploy/overlays/prod-sign-in > /dev/null

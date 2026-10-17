@@ -1,0 +1,95 @@
+# Dex, the issuer the dashboard signs readers in through (ADR-0010): one replica, its state in memory, reached by the
+# web pods' nginx at /dex/ (dex-proxy.conf) and by the ingest service directly (OIDC_ISSUER_INTERNAL), never by a
+# Route of its own.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-dex
+  labels:
+    app.kubernetes.io/name: dashboard-dex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dashboard-dex
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dashboard-dex
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: dex
+          image: ghcr.io/dexidp/dex:v2.45.1@sha256:8499afd690c437f52301efd2b05b2455da5bd2dfc20332cd697dc9937f808462
+          args: ["dex", "serve", "/etc/dex/config.yaml.tpl"]
+          ports:
+            - name: http
+              containerPort: 5556
+            - name: telemetry
+              containerPort: 5558
+          env:
+            - name: DEX_ISSUER
+              valueFrom: { configMapKeyRef: { name: dashboard-sign-in, key: issuer } }
+            - name: DEX_REDIRECT
+              valueFrom: { configMapKeyRef: { name: dashboard-sign-in, key: redirect-uri } }
+            - name: GITHUB_ORG
+              valueFrom: { configMapKeyRef: { name: dashboard-sign-in, key: github-org } }
+            - name: DEX_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: dashboard-oidc, key: client-secret } }
+            - name: GITHUB_CLIENT_ID
+              valueFrom: { secretKeyRef: { name: dashboard-dex-github, key: client-id } }
+            - name: GITHUB_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: dashboard-dex-github, key: client-secret } }
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: telemetry
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: telemetry
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/dex
+              readOnly: true
+            # The entrypoint renders the template here.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config
+          configMap:
+            name: dashboard-dex
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-dex
+  labels:
+    app.kubernetes.io/name: dashboard-dex
+spec:
+  selector:
+    app.kubernetes.io/name: dashboard-dex
+  ports:
+    - name: http
+      port: 5556
+      targetPort: http
+      protocol: TCP

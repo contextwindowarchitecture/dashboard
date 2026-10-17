@@ -1,0 +1,21 @@
+# dashboard.contextwindowarchitecture.io with sign-in (ADR-0010): the PostgreSQL overlay plus the sign-in component,
+# Dex at https://dashboard.contextwindowarchitecture.io/dex signing in members of the contextwindowarchitecture
+# GitHub organisation. Apply it once the secrets exist (deploy/README.md, Sign-in); applying prod-postgres again
+# takes sign-in away.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cwa-dashboard
+
+resources:
+  - ../prod-postgres
+
+components:
+  - ../../components/sign-in
+
+configMapGenerator:
+  - name: dashboard-sign-in
+    literals:
+      - issuer=https://dashboard.contextwindowarchitecture.io/dex
+      - redirect-uri=https://dashboard.contextwindowarchitecture.io/api/auth/callback
+      - github-org=contextwindowarchitecture

@@ -1,0 +1,50 @@
+# Sign-in (ADR-0010): Dex served at /dex behind the web pods' nginx, and the ingest service's OIDC settings. Needs the
+# PostgreSQL component, where sessions live, and three things the overlay or the operator supplies: the ConfigMap
+# dashboard-sign-in (issuer, redirect-uri, github-org), the secret dashboard-oidc (client-secret, shared by Dex's
+# client and the ingest service) and the secret dashboard-dex-github (the GitHub OAuth app's client-id and
+# client-secret). deploy/README.md says how.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - dex.yaml
+
+configMapGenerator:
+  - name: dashboard-dex
+    files:
+      - config.yaml.tpl=dex.yaml.tpl
+  - name: dashboard-nginx
+    behavior: merge
+    files:
+      - dex-proxy.conf
+
+patches:
+  - target:
+      kind: Deployment
+      name: dashboard-ingest
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: OIDC_ISSUER
+          valueFrom: { configMapKeyRef: { name: dashboard-sign-in, key: issuer } }
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: OIDC_REDIRECT_URI
+          valueFrom: { configMapKeyRef: { name: dashboard-sign-in, key: redirect-uri } }
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: OIDC_ISSUER_INTERNAL
+          value: http://dashboard-dex:5556/dex
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: OIDC_CLIENT_ID
+          value: cwa-dashboard
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: OIDC_CLIENT_SECRET
+          valueFrom: { secretKeyRef: { name: dashboard-oidc, key: client-secret } }

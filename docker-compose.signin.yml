@@ -26,4 +26,4 @@ services:
 
   web:
     volumes:
-      - ./deploy/base/nginx/dex-proxy.conf:/opt/app-root/etc/nginx.default.d/dex-proxy.conf:ro,Z
+      - ./deploy/components/sign-in/dex-proxy.conf:/opt/app-root/etc/nginx.default.d/dex-proxy.conf:ro,Z
