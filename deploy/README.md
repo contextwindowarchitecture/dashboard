@@ -156,7 +156,8 @@ Where the bodies are kept: with `DATABASE_URL`, in PostgreSQL's `cwa_bodies` tab
 ```sh
 # The token goes from openssl straight into the secret, never printed; the operator reads it back
 # from there when resolving: oc -n cwa-dashboard extract secret/dashboard-vault --to=-
-openssl rand -hex 32 | oc -n cwa-dashboard create secret generic dashboard-vault --from-file=token=/dev/stdin
+# tr drops openssl's newline, which would otherwise be part of the token.
+openssl rand -hex 32 | tr -d '\n' | oc -n cwa-dashboard create secret generic dashboard-vault --from-file=token=/dev/stdin
 oc -n cwa-dashboard rollout restart deployment/dashboard-ingest
 # The demo's vaulted bodies (the review agent's route), deposited as its wrapper would:
 node deploy/seed-vault.mjs packages/demo-traffic/vault https://dashboard.contextwindowarchitecture.io/api --token "$INGEST_TOKEN"
