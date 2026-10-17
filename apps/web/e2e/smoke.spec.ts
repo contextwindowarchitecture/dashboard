@@ -474,6 +474,42 @@ test("a body withheld from an anonymous reader is theirs to read once signed in 
   await expect(items).toContainText("body withheld · your role")
 })
 
+test("a reader switches tenant from the masthead, and from the sheet on a phone", async ({
+  page,
+}) => {
+  test.skip(!!process.env["PLAYWRIGHT_BASE_URL"], "a deployment's tenants are its own")
+  const northwind = (
+    JSON.parse(
+      readFileSync(
+        resolve(
+          import.meta.dirname,
+          "../../../packages/demo-traffic/fixtures/tenants/northwind/events/index.json",
+        ),
+        "utf8",
+      ),
+    ) as { events: { event_id: string }[] }
+  ).events
+  await page.goto("/traces")
+  await page.getByRole("banner").getByRole("combobox", { name: "Tenant" }).click()
+  await page.getByRole("option", { name: /^northwind/ }).click()
+  await expect(page).toHaveURL(/[?&]tenant=northwind/)
+  const stream = page.getByRole("table", { name: "Trace stream" })
+  await expect(stream.getByRole("link", { name: northwind[0]!.event_id })).toBeVisible()
+  // A link keeps the tenant.
+  await stream.getByRole("link", { name: northwind[0]!.event_id }).click()
+  await expect(page).toHaveURL(new RegExp(`/traces/${northwind[0]!.event_id}\\?tenant=northwind$`))
+  await expectAccessible(page)
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/traces")
+  await expect(page.getByRole("banner").getByRole("combobox", { name: "Tenant" })).toBeHidden()
+  await page.getByRole("button", { name: "menu" }).click()
+  const sheet = page.getByRole("dialog")
+  await sheet.getByRole("combobox", { name: "Tenant" }).click()
+  await page.getByRole("option", { name: /^northwind/ }).click()
+  await expect(page).toHaveURL(/[?&]tenant=northwind/)
+  await expectNoSidewaysScroll(page)
+})
+
 test("a session opens from the list, selects a turn, and reads in both themes and at 400px", async ({
   page,
 }) => {

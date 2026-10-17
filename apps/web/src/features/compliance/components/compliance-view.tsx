@@ -188,7 +188,7 @@ function Proof({
 export function ComplianceView() {
   const [search] = useSearchParams()
   const chosen = search.get("event") ?? undefined
-  const { apiBase } = useData()
+  const { apiBase, tenant = "default" } = useData()
   const query = useBundle(chosen)
   return (
     <div data-slot="content">
@@ -213,7 +213,7 @@ export function ComplianceView() {
       )}
       {chosen !== undefined && apiBase !== undefined && EVENT_ID.test(chosen) ? (
         <p data-slot="cell-note">
-          Read from <code data-mono="">{bundleUrl(apiBase, chosen)}</code>
+          Read from <code data-mono="">{bundleUrl(apiBase, chosen, tenant)}</code>
         </p>
       ) : null}
     </div>

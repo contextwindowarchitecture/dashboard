@@ -4,6 +4,7 @@
 import { Link, useLocation } from "react-router"
 
 import { isCurrent, NAVIGATION } from "../../app/navigation"
+import { TenantSwitch } from "./tenant-switch"
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +23,12 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
+        {/* On a phone the masthead has no room for it; the sheet does. */}
+        {isMobile ? (
+          <div data-slot="sidebar-tenant">
+            <TenantSwitch />
+          </div>
+        ) : null}
         <nav aria-label="Dashboard">
           {NAVIGATION.map((group) => (
             <SidebarGroup key={group.id}>

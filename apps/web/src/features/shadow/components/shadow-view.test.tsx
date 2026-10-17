@@ -122,4 +122,20 @@ describe("the shadow page", () => {
       /not a shadow report this dashboard reads/,
     )
   })
+
+  it("asks for the corpora and the run of the tenant the page reads", async () => {
+    const requests: string[] = []
+    at(
+      "/shadow?corpus=chat&tenant=northwind",
+      {
+        "/api/corpora.json?tenant=northwind": CORPORA,
+        "/api/shadow?tenant=northwind": json(503, { kind: "busy", problems: ["Busy."] }),
+      },
+      requests,
+    )
+    await shadowWith(JSON.stringify({ profile: REGISTRY.profiles[0] }))
+    await screen.findByRole("alert")
+    expect(requests).toContain("/api/corpora.json?tenant=northwind")
+    expect(requests).toContain("/api/shadow?tenant=northwind")
+  })
 })

@@ -414,6 +414,16 @@ a:hover {
     display: none;
   }
 }
+/* Below the sidebar's sheet breakpoint the masthead has no room for the tenant switch: the sheet,
+   behind "menu", offers it instead. */
+@media (max-width: 767px) {
+  [data-slot="masthead"] [data-slot="tenant-switch"] {
+    display: none;
+  }
+}
+[data-slot="sidebar-tenant"] {
+  padding: 12px 12px 0;
+}
 
 /* --- Chips (STYLE.md 6, Chips): the generated Badge, restyled; the tone names the outcome ------- */
 

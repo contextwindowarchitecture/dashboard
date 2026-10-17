@@ -20,6 +20,7 @@ import { planeStyle } from "../../../lib/plane"
 import { Badge } from "../../../components/ui/badge"
 import { formatCount, formatInstant, formatTokens } from "../../../lib/format"
 import { useData } from "../../../data/data-context"
+import { useMe } from "../../account/api/me"
 import { resolveBody, type VaultAnswer } from "../api/vault"
 import { type Body, type ItemRow, joinItems } from "../model/inspector"
 
@@ -28,6 +29,8 @@ interface VaultAccess {
   readonly apiBase: string
   /** The operator token, in this page's memory only; undefined until the reader gives one. */
   readonly token: string | undefined
+  /** A signed-in reader resolves by session, naming this event and its tenant (ADR-0012). */
+  readonly session: { readonly event: string; readonly tenant: string } | undefined
 }
 const VaultContext = createContext<VaultAccess | undefined>(undefined)
 
@@ -66,11 +69,14 @@ function VaultPanel({
   apiBase,
   token,
   onToken,
+  signedInAs,
 }: {
   readonly vault: NonNullable<AssemblyEventV1["vault"]>
   readonly apiBase: string | undefined
   readonly token: string | undefined
   readonly onToken: (token: string | undefined) => void
+  /** The signed-in reader's name; they resolve by session, as far as their roles own the route. */
+  readonly signedInAs: string | undefined
 }) {
   const [typed, setTyped] = useState("")
   // The control a token change replaces had the focus; it goes to the one that takes its place.
@@ -100,10 +106,14 @@ function VaultPanel({
             , under key <code data-mono="">{vault.kms_key_id}</code>
           </>
         ) : null}
-        . The operator resolves one with the operator token: the service decides, and a body is
-        shown only when its bytes are the ones the event digests.
+        . The route&rsquo;s owner resolves one signed in, the operator with the operator token: the
+        service decides, and a body is shown only when its bytes are the ones the event digests.
       </p>
-      {apiBase === undefined ? (
+      {apiBase !== undefined && signedInAs !== undefined && token === undefined ? (
+        <p data-slot="cell-note">
+          You resolve its bodies as {signedInAs}, where your roles own this route.
+        </p>
+      ) : apiBase === undefined ? (
         <p data-slot="cell-note">
           The service is not configured: <code>config.json</code> names no apiBase, so nothing can
           resolve a body.
@@ -159,15 +169,16 @@ function Resolve({ sha256 }: { readonly sha256: string }) {
   useEffect(() => {
     if (ok) resolved.current?.focus()
   }, [ok])
-  if (access === undefined || access.token === undefined) return null
-  const { apiBase, base, token } = access
+  if (access === undefined || (access.token === undefined && access.session === undefined))
+    return null
+  const { apiBase, base, token, session } = access
   const resolve = async () => {
     inFlight.current?.abort()
     const controller = new AbortController()
     inFlight.current = controller
     setAnswer("running")
     try {
-      const got = await resolveBody(apiBase, sha256, token, fetchFn, controller.signal)
+      const got = await resolveBody(apiBase, sha256, token ?? session!, fetchFn, controller.signal)
       if (!controller.signal.aborted) setAnswer(got)
     } catch (error) {
       if (!controller.signal.aborted) throw error
@@ -382,12 +393,20 @@ function Item({
 export function ItemsTab({ event }: { readonly event: AssemblyEventV1 }) {
   const rows = joinItems(event)
   const route = event.snapshot?.route_policy.route ?? ""
-  const { apiBase } = useData()
+  const { apiBase, tenant = "default" } = useData()
+  const me = useMe().data
+  const signedInAs = me?.kind === "signed-in" ? me.name : undefined
   const [token, setToken] = useState<string | undefined>(undefined)
   const vault = event.vault
   const panel =
     vault === undefined ? null : (
-      <VaultPanel vault={vault} apiBase={apiBase} token={token} onToken={setToken} />
+      <VaultPanel
+        vault={vault}
+        apiBase={apiBase}
+        token={token}
+        onToken={setToken}
+        signedInAs={signedInAs}
+      />
     )
   if (rows.length === 0) {
     return (
@@ -402,7 +421,12 @@ export function ItemsTab({ event }: { readonly event: AssemblyEventV1 }) {
       value={
         vault === undefined || apiBase === undefined
           ? undefined
-          : { base: vault.base, apiBase, token }
+          : {
+              base: vault.base,
+              apiBase,
+              token,
+              session: signedInAs === undefined ? undefined : { event: event.event_id, tenant },
+            }
       }
     >
       {panel}

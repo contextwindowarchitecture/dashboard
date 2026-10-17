@@ -18,21 +18,36 @@ async function digestOf(bytes: ArrayBuffer): Promise<string> {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("")
 }
 
-export const bodyUrl = (apiBase: string, sha256: string) =>
-  `${apiBase.replace(/\/+$/, "")}/bodies/${sha256}`
+/**
+ * Where a body is resolved: with the operator token, by digest alone; by session, naming the event
+ * whose digest it is and its tenant (ADR-0012).
+ */
+export const bodyUrl = (
+  apiBase: string,
+  sha256: string,
+  by?: { readonly event: string; readonly tenant: string },
+) => {
+  const base = `${apiBase.replace(/\/+$/, "")}/bodies/${sha256}`
+  if (by === undefined) return base
+  const params = new URLSearchParams({ event: by.event })
+  if (by.tenant !== "default") params.set("tenant", by.tenant)
+  return `${base}?${params}`
+}
 
 export async function resolveBody(
   apiBase: string,
   sha256: string,
-  token: string,
+  /** The operator token, or the session: the event whose digest it is, and its tenant. */
+  credential: string | { readonly event: string; readonly tenant: string },
   fetchFn: typeof fetch,
   signal?: AbortSignal,
 ): Promise<VaultAnswer> {
   if (!SHA256.test(sha256)) return { kind: "failed", message: `${sha256} is not a SHA-256 digest.` }
   let response: Response
   try {
-    response = await fetchFn(bodyUrl(apiBase, sha256), {
-      headers: { authorization: `Bearer ${token}` },
+    const byToken = typeof credential === "string"
+    response = await fetchFn(bodyUrl(apiBase, sha256, byToken ? undefined : credential), {
+      headers: byToken ? { authorization: `Bearer ${credential}` } : {},
       cache: "no-store",
       ...(signal ? { signal } : {}),
     })

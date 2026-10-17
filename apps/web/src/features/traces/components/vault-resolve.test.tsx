@@ -141,4 +141,42 @@ describe("the inspector's vault control", () => {
       "SHA-256 checked",
     )
   })
+
+  it("resolves by session for a signed-in reader, naming the event, with no token", async () => {
+    const requests: { url: string; headers: Headers }[] = []
+    renderApp(
+      `/traces/${VAULTED.event_id}`,
+      {
+        overrides: {
+          "/api/me": {
+            status: 200,
+            body: JSON.stringify({
+              sign_in: "configured",
+              signed_in: true,
+              name: "Ada",
+              groups: [],
+            }),
+          },
+          ...Object.fromEntries(
+            DEPOSITS.map((d) => [
+              `/api/bodies/${d.sha}?event=${VAULTED.event_id}`,
+              { status: 200, body: d.text },
+            ]),
+          ),
+        },
+        onRequest: (url, init) => requests.push({ url, headers: new Headers(init?.headers) }),
+      },
+      WITH_API,
+    )
+    const vault = await screen.findByRole("region", { name: "Vault" })
+    expect(await within(vault).findByText(/as Ada/)).toBeInTheDocument()
+    const [first] = await screen.findAllByRole("button", { name: "Resolve from the vault" })
+    await userEvent.click(first!)
+    expect(await screen.findByRole("region", { name: "Resolved body" })).toHaveTextContent(
+      "SHA-256 checked",
+    )
+    const asked = requests.find((r) => r.url.startsWith("/api/bodies/"))!
+    expect(asked.url).toMatch(new RegExp(`\\?event=${VAULTED.event_id}$`))
+    expect(asked.headers.get("authorization")).toBeNull()
+  })
 })

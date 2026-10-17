@@ -44,14 +44,20 @@ const isSummary = (value: unknown): value is CorpusSummary =>
   typeof value["created_at"] === "string" &&
   typeof value["events"] === "number"
 
-export const corporaUrl = (apiBase: string) => `${trim(apiBase)}/corpora.json`
+/** A route's query for a tenant (ADR-0012): none for the default. */
+const forTenant = (tenant: string) =>
+  tenant === "default" ? "" : `?tenant=${encodeURIComponent(tenant)}`
+
+export const corporaUrl = (apiBase: string, tenant = "default") =>
+  `${trim(apiBase)}/corpora.json${forTenant(tenant)}`
 
 export async function fetchCorpora(
   apiBase: string,
   fetchFn: typeof fetch,
   signal?: AbortSignal,
+  tenant = "default",
 ): Promise<CorporaAnswer> {
-  const url = corporaUrl(apiBase)
+  const url = corporaUrl(apiBase, tenant)
   let response: Response
   try {
     response = await fetchFn(url, signal ? { signal } : undefined)
@@ -80,10 +86,11 @@ export async function runShadow(
   request: { readonly corpus: string; readonly candidate: Candidate },
   fetchFn: typeof fetch,
   signal?: AbortSignal,
+  tenant = "default",
 ): Promise<ShadowAnswer> {
   let response: Response
   try {
-    response = await fetchFn(`${trim(apiBase)}/shadow`, {
+    response = await fetchFn(`${trim(apiBase)}/shadow${forTenant(tenant)}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(request),
@@ -123,10 +130,10 @@ export async function runShadow(
 
 /** The frozen corpora; live, since a corpus may be frozen while the page is open. */
 export function useCorpora() {
-  const { apiBase, fetchFn = fetch } = useData()
+  const { apiBase, fetchFn = fetch, tenant = "default" } = useData()
   return useQuery({
-    queryKey: ["corpora", apiBase ?? ""],
-    queryFn: ({ signal }) => fetchCorpora(apiBase!, fetchFn, signal),
+    queryKey: ["corpora", apiBase ?? "", tenant],
+    queryFn: ({ signal }) => fetchCorpora(apiBase!, fetchFn, signal, tenant),
     enabled: apiBase !== undefined,
     refetchOnWindowFocus: true,
     retry: false,

@@ -332,7 +332,7 @@ function ShadowRun({
   readonly apiBase: string
   readonly corpus: CorpusSummary
 }) {
-  const { fetchFn = fetch } = useData()
+  const { fetchFn = fetch, tenant = "default" } = useData()
   const [start, setStart] = useState(OWN)
   const [text, setText] = useState("")
   const [run, setRun] = useState<Run>({ status: "idle" })
@@ -353,6 +353,7 @@ function ShadowRun({
         { corpus: corpus.name, candidate: parsed.candidate },
         fetchFn,
         controller.signal,
+        tenant,
       )
       if (!controller.signal.aborted) setRun({ status: "done", answer })
     } catch (error) {
@@ -444,7 +445,7 @@ function ShadowRun({
 export function ShadowView() {
   const [search] = useSearchParams()
   const chosen = search.get("corpus") ?? undefined
-  const { apiBase } = useData()
+  const { apiBase, tenant = "default" } = useData()
   const query = useCorpora()
   if (apiBase === undefined) {
     return (
@@ -494,7 +495,7 @@ export function ShadowView() {
         <ShadowRun key={corpus.name} apiBase={apiBase} corpus={corpus} />
       )}
       <p data-slot="cell-note">
-        Read from <code data-mono="">{corporaUrl(apiBase)}</code>
+        Read from <code data-mono="">{corporaUrl(apiBase, tenant)}</code>
       </p>
     </div>
   )

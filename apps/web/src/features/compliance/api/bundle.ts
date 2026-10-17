@@ -17,16 +17,17 @@ export type BundleAnswer =
 
 export const EVENT_ID = /^[0-9A-HJKMNP-TV-Z]{26}$/
 
-export const bundleUrl = (apiBase: string, eventId: string) =>
-  `${apiBase}/bundles/${encodeURIComponent(eventId)}.json`
+export const bundleUrl = (apiBase: string, eventId: string, tenant = "default") =>
+  `${apiBase}/bundles/${encodeURIComponent(eventId)}.json${tenant === "default" ? "" : `?tenant=${encodeURIComponent(tenant)}`}`
 
 export async function fetchBundle(
   apiBase: string,
   eventId: string,
   fetchFn: typeof fetch,
   signal?: AbortSignal,
+  tenant = "default",
 ): Promise<BundleAnswer> {
-  const url = bundleUrl(apiBase, eventId)
+  const url = bundleUrl(apiBase, eventId, tenant)
   let response: Response
   try {
     response = await fetchFn(url, signal ? { signal } : undefined)
@@ -52,10 +53,10 @@ export async function fetchBundle(
 
 /** The bundle for an event; nothing is asked of the service without a base or a valid id. */
 export function useBundle(eventId: string | undefined) {
-  const { apiBase, fetchFn = fetch } = useData()
+  const { apiBase, fetchFn = fetch, tenant = "default" } = useData()
   return useQuery({
-    queryKey: ["bundle", apiBase ?? "", eventId ?? ""],
-    queryFn: ({ signal }) => fetchBundle(apiBase!, eventId!, fetchFn, signal),
+    queryKey: ["bundle", apiBase ?? "", tenant, eventId ?? ""],
+    queryFn: ({ signal }) => fetchBundle(apiBase!, eventId!, fetchFn, signal, tenant),
     enabled: apiBase !== undefined && eventId !== undefined && EVENT_ID.test(eventId),
     // Each one is a replay signed when asked for; ask again only when the reader does.
     staleTime: Infinity,

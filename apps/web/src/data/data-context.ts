@@ -16,6 +16,10 @@ export interface Data {
   readonly apiBase?: string
   /** The fetch the source uses, for those requests too; the tests' reads the fixtures. */
   readonly fetchFn?: typeof fetch
+  /** The tenant the page reads (ADR-0012), from ?tenant=; the default when absent. */
+  readonly tenant?: string
+  /** The data root of the default tenant, where tenants.json lists them all. */
+  readonly dataRoot?: string
 }
 
 export const DataContext = createContext<Data | null>(null)

@@ -9,6 +9,7 @@ import { LINKS } from "../../lib/links"
 import { useTheme } from "../../lib/theme"
 import { useSidebar } from "../ui/sidebar"
 import { Breadcrumbs } from "./breadcrumbs"
+import { TenantSwitch } from "./tenant-switch"
 
 function PlaneMark() {
   return (
@@ -60,6 +61,7 @@ export function Masthead() {
       </Link>
       <Breadcrumbs />
       <div data-slot="masthead-actions">
+        <TenantSwitch />
         <Account />
         <button type="button" data-slot="ghost-button" onClick={toggleTheme}>
           {theme === "dark" ? "light" : "dark"}

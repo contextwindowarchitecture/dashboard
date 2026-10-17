@@ -219,7 +219,7 @@ Dashboard pages are full width inside the sidebar: the tables need it. Narrative
 
 | Measure | Value |
 |---|---|
-| Masthead | `var(--mast-h)` (68px), sticky, `z-index: 50`, blurred `--bg` at 88%, 1px `--line` bottom border; on the right the account ("sign in", or the reader's name, at most `16ch`, opening a square hairline menu), the theme and GitHub, ghost pills; each crumb at least 24px tall, a target of its own |
+| Masthead | `var(--mast-h)` (68px), sticky, `z-index: 50`, blurred `--bg` at 88%, 1px `--line` bottom border; on the right the tenant switch when there is more than one tenant (the tenant's name alone; below 768px it moves into the sidebar's sheet, where there is room), the account ("sign in", or the reader's name, at most `16ch`, opening a square hairline menu), the theme and GitHub, ghost pills; each crumb at least 24px tall, a target of its own |
 | Sidebar | `var(--sidebar-w)` expanded, `var(--sidebar-w-icon)` collapsed, `--surface`, 1px `--line` right border, scrolls independently; a sheet below 900px |
 | Page gutter | `32px`, tightened to `20px` below 900px |
 | Page header | `padding: 32px 32px 24px`: kicker, h1, lede, the mono meta row, actions on the right |

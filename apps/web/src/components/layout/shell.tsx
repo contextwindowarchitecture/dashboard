@@ -9,6 +9,7 @@ import { AppSidebar } from "./app-sidebar"
 import { Footer } from "./footer"
 import { Masthead } from "./masthead"
 import { RouteEffects } from "./route-effects"
+import { TenantScope } from "./tenant-scope"
 
 const COOKIE = "sidebar_state"
 
@@ -22,19 +23,21 @@ function initiallyOpen(): boolean {
 
 export function Shell() {
   return (
-    <SidebarProvider defaultOpen={initiallyOpen()}>
-      <a href="#main" data-slot="skip-link">
-        Skip to content
-      </a>
-      <AppSidebar />
-      <div data-slot="inset" className="relative flex min-w-0 flex-1 flex-col bg-background">
-        <Masthead />
-        <main id="main" tabIndex={-1} className="flex-1">
-          <Outlet />
-        </main>
-        <Footer />
-      </div>
-      <RouteEffects />
-    </SidebarProvider>
+    <TenantScope>
+      <SidebarProvider defaultOpen={initiallyOpen()}>
+        <a href="#main" data-slot="skip-link">
+          Skip to content
+        </a>
+        <AppSidebar />
+        <div data-slot="inset" className="relative flex min-w-0 flex-1 flex-col bg-background">
+          <Masthead />
+          <main id="main" tabIndex={-1} className="flex-1">
+            <Outlet />
+          </main>
+          <Footer />
+        </div>
+        <RouteEffects />
+      </SidebarProvider>
+    </TenantScope>
   )
 }
