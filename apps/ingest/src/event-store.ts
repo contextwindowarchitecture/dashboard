@@ -43,6 +43,10 @@ export interface EventStore {
   corpus(name: string): Promise<CorpusV1 | undefined>
   /** Every corpus, by name, with when it was frozen and how many events it holds. */
   corpora(): Promise<CorpusSummary[]>
+  /** The same store, for another tenant's documents (ADR-0012); a write still goes to its event's own. */
+  forTenant(tenant: string): EventStore
+  /** Every tenant holding events, with how many: the default first, then by name. */
+  tenants(): Promise<TenantSummary[]>
   /** Brings every document up to date with the events written so far. */
   flush(): Promise<void>
   close(): Promise<void>
@@ -56,6 +60,15 @@ export const EVENT_ID = /^[0-9A-HJKMNP-TV-Z]{26}$/
 export const SESSION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/
 export const DAY = /^\d{4}-\d{2}-\d{2}$/
 export const CORPUS_NAME = /^[a-z0-9][a-z0-9._-]{0,63}$/
+/** A tenant's name, as assembly-event v1 holds it: safe as a directory and a path segment. */
+export const TENANT = /^[a-z0-9][a-z0-9._-]{0,63}$/
+/** The tenant of an event that names none. */
+export const DEFAULT_TENANT = "default"
+
+export interface TenantSummary {
+  readonly tenant: string
+  readonly events: number
+}
 
 export interface CorpusSummary {
   readonly name: string

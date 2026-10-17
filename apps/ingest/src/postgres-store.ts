@@ -25,11 +25,13 @@ import { validateAssemblyEventV1 } from "@cwa-dashboard/telemetry/validators"
 import {
   CORPUS_NAME,
   DAY,
+  DEFAULT_TENANT,
   describeProblems,
   EVENT_ID,
   type EventStore,
   fleetInputs,
   SESSION_ID,
+  TENANT,
   WINDOW,
 } from "./event-store.ts"
 import {
@@ -113,6 +115,12 @@ const MIGRATIONS: (string | ((db: Queryable) => Promise<void>))[] = [
      last_seen timestamptz not null,
      expires_at timestamptz not null
    )`,
+  // 7: tenants (ADR-0012): every event and corpus belongs to one, the default when it names none.
+  `alter table cwa_events add column tenant text not null default 'default';
+   create index cwa_events_tenant_order on cwa_events (tenant, recorded_at desc, event_id desc);
+   alter table cwa_corpora add column tenant text not null default 'default';
+   alter table cwa_corpora drop constraint cwa_corpora_pkey;
+   alter table cwa_corpora add primary key (tenant, name)`,
 ]
 
 async function migrate(db: Queryable) {
@@ -151,18 +159,19 @@ export async function createPostgresStore(
   await migrate(db)
 
   /** The current window's rows, and the oldest of them, which every closed row comes before. */
-  async function current(): Promise<{ rows: IndexRow[]; oldest?: IndexRow }> {
+  async function current(tenant: string): Promise<{ rows: IndexRow[]; oldest?: IndexRow }> {
     const newest = await db.query<{ recorded_at: Date }>(
-      "select recorded_at from cwa_events order by recorded_at desc, event_id desc limit 1",
+      "select recorded_at from cwa_events where tenant = $1 order by recorded_at desc, event_id desc limit 1",
+      [tenant],
     )
     if (newest.rows.length === 0) return { rows: [] }
     const since = new Date(newest.rows[0]!.recorded_at.getTime() - window.hours * 3_600_000)
     const candidates = parse<IndexRow>(
       (
         await db.query<{ value: string }>(
-          `select index_row as value from cwa_events where recorded_at >= $1
+          `select index_row as value from cwa_events where recorded_at >= $1 and tenant = $3
            order by recorded_at desc, event_id desc limit $2`,
-          [since.toISOString(), window.max],
+          [since.toISOString(), window.max, tenant],
         )
       ).rows,
     )
@@ -173,143 +182,177 @@ export async function createPostgresStore(
   // Rows the window has let go: those after its oldest row in newest-first order.
   const BEFORE = "(recorded_at, event_id) < ($1::timestamptz, $2::text)"
 
-  const store: EventStore = {
-    async write(candidate) {
-      if (!validateAssemblyEventV1(candidate)) {
-        return {
-          ok: false,
-          kind: "invalid",
-          problems: describeProblems(validateAssemblyEventV1.errors),
+  // One tenant's view (ADR-0012): every query below is scoped to it; a write goes to the event's own.
+  const views = new Map<string, EventStore>()
+  function scoped(tenant: string): EventStore {
+    if (!TENANT.test(tenant)) throw new Error(`${JSON.stringify(tenant)} names no tenant`)
+    const known = views.get(tenant)
+    if (known !== undefined) return known
+    const view: EventStore = {
+      async write(candidate) {
+        if (!validateAssemblyEventV1(candidate)) {
+          return {
+            ok: false,
+            kind: "invalid",
+            problems: describeProblems(validateAssemblyEventV1.errors),
+          }
         }
-      }
-      const event = candidate as AssemblyEventV1
-      const { rows } = await db.query<{ event_id: string }>(
-        `insert into cwa_events
-           (event_id, recorded_at, session_id, turn_index, event, index_row, facts, source_facts)
-         values ($1, $2, $3, $4, $5, $6, $7, $8)
+        const event = candidate as AssemblyEventV1
+        const { rows } = await db.query<{ event_id: string }>(
+          `insert into cwa_events
+           (event_id, recorded_at, session_id, turn_index, event, index_row, facts, source_facts, tenant)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          on conflict (event_id) do nothing returning event_id`,
-        [
-          event.event_id,
-          event.recorded_at,
-          event.session?.id ?? null,
-          event.session?.turn_index ?? null,
-          JSON.stringify(event),
-          JSON.stringify(indexRow(event)),
-          JSON.stringify(fleetFacts(event)),
-          JSON.stringify(sourceFacts(event)),
-        ],
-      )
-      if (rows.length === 0) {
-        return {
-          ok: false,
-          kind: "duplicate",
-          problems: [`The store already holds an event ${event.event_id}.`],
+          [
+            event.event_id,
+            event.recorded_at,
+            event.session?.id ?? null,
+            event.session?.turn_index ?? null,
+            JSON.stringify(event),
+            JSON.stringify(indexRow(event)),
+            JSON.stringify(fleetFacts(event)),
+            JSON.stringify(sourceFacts(event)),
+            event.tenant ?? DEFAULT_TENANT,
+          ],
+        )
+        if (rows.length === 0) {
+          return {
+            ok: false,
+            kind: "duplicate",
+            problems: [`The store already holds an event ${event.event_id}.`],
+          }
         }
-      }
-      return { ok: true, eventId: event.event_id }
-    },
+        return { ok: true, eventId: event.event_id }
+      },
 
-    async index() {
-      const generatedAt = new Date().toISOString()
-      const { rows, oldest } = await current()
-      const index = indexFromRows(rows, generatedAt)
-      if (oldest === undefined) return index
-      const days = await db.query<{ day: string; events: string | number }>(
-        `select ${UTC_DAY} as day, count(*) as events from cwa_events where ${BEFORE}
+      async index() {
+        const generatedAt = new Date().toISOString()
+        const { rows, oldest } = await current(tenant)
+        const index = indexFromRows(rows, generatedAt)
+        if (oldest === undefined) return index
+        const days = await db.query<{ day: string; events: string | number }>(
+          `select ${UTC_DAY} as day, count(*) as events from cwa_events where ${BEFORE} and tenant = $3
          group by day order by day desc`,
-        [oldest.recorded_at, oldest.event_id],
-      )
-      if (days.rows.length === 0) return index
-      const windows: NonNullable<EventsIndexV1["windows"]> = days.rows.map((row) => ({
-        day: row.day,
-        path: `index/${row.day}.json`,
-        events: Number(row.events),
-      }))
-      return { ...index, windows }
-    },
+          [oldest.recorded_at, oldest.event_id, tenant],
+        )
+        if (days.rows.length === 0) return index
+        const windows: NonNullable<EventsIndexV1["windows"]> = days.rows.map((row) => ({
+          day: row.day,
+          path: `index/${row.day}.json`,
+          events: Number(row.events),
+        }))
+        return { ...index, windows }
+      },
 
-    async window(day) {
-      if (!DAY.test(day)) return undefined
-      const { oldest } = await current()
-      if (oldest === undefined) return undefined
-      const rows = parse<IndexRow>(
-        (
-          await db.query<{ value: string }>(
-            `select index_row as value from cwa_events where ${BEFORE} and ${UTC_DAY} = $3`,
-            [oldest.recorded_at, oldest.event_id, day],
-          )
-        ).rows,
-      )
-      return rows.length === 0 ? undefined : indexFromRows(rows, new Date().toISOString())
-    },
+      async window(day) {
+        if (!DAY.test(day)) return undefined
+        const { oldest } = await current(tenant)
+        if (oldest === undefined) return undefined
+        const rows = parse<IndexRow>(
+          (
+            await db.query<{ value: string }>(
+              `select index_row as value from cwa_events
+             where ${BEFORE} and ${UTC_DAY} = $3 and tenant = $4`,
+              [oldest.recorded_at, oldest.event_id, day, tenant],
+            )
+          ).rows,
+        )
+        return rows.length === 0 ? undefined : indexFromRows(rows, new Date().toISOString())
+      },
 
-    async event(eventId) {
-      if (!EVENT_ID.test(eventId)) return undefined
-      const { rows } = await db.query<{ value: string }>(
-        "select event as value from cwa_events where event_id = $1",
-        [eventId],
-      )
-      return parse<AssemblyEventV1>(rows)[0]
-    },
+      async event(eventId) {
+        if (!EVENT_ID.test(eventId)) return undefined
+        const { rows } = await db.query<{ value: string }>(
+          "select event as value from cwa_events where event_id = $1 and tenant = $2",
+          [eventId, tenant],
+        )
+        return parse<AssemblyEventV1>(rows)[0]
+      },
 
-    async session(sessionId) {
-      if (!SESSION_ID.test(sessionId)) return undefined
-      const { rows } = await db.query<{ value: string }>(
-        "select event as value from cwa_events where session_id = $1",
-        [sessionId],
-      )
-      return rows.length === 0 ? undefined : buildSessions(parse<AssemblyEventV1>(rows))[0]
-    },
+      async session(sessionId) {
+        if (!SESSION_ID.test(sessionId)) return undefined
+        const { rows } = await db.query<{ value: string }>(
+          "select event as value from cwa_events where session_id = $1 and tenant = $2",
+          [sessionId, tenant],
+        )
+        return rows.length === 0 ? undefined : buildSessions(parse<AssemblyEventV1>(rows))[0]
+      },
 
-    async fleet() {
-      const { rows } = await db.query<{ value: string }>("select facts as value from cwa_events")
-      return fleetReport(parse<FleetFacts>(rows), fleetInputs(new Date().toISOString()))
-    },
+      async fleet() {
+        const { rows } = await db.query<{ value: string }>(
+          "select facts as value from cwa_events where tenant = $1",
+          [tenant],
+        )
+        return fleetReport(parse<FleetFacts>(rows), fleetInputs(new Date().toISOString()))
+      },
 
-    async sources() {
-      const { rows } = await current()
-      const facts = parse<SourceFacts>(
-        (
-          await db.query<{ value: string }>(
-            "select source_facts as value from cwa_events where event_id = any($1)",
-            [rows.map((row) => row.event_id)],
-          )
-        ).rows,
-      )
-      return sourcesFromFacts(facts, new Date().toISOString())
-    },
+      async sources() {
+        const { rows } = await current(tenant)
+        const facts = parse<SourceFacts>(
+          (
+            await db.query<{ value: string }>(
+              "select source_facts as value from cwa_events where event_id = any($1) and tenant = $2",
+              [rows.map((row) => row.event_id), tenant],
+            )
+          ).rows,
+        )
+        return sourcesFromFacts(facts, new Date().toISOString())
+      },
 
-    async saveCorpus(corpus) {
-      const { rows } = await db.query<{ name: string }>(
-        `insert into cwa_corpora (name, created_at, corpus) values ($1, $2, $3)
-         on conflict (name) do nothing returning name`,
-        [corpus.name, corpus.created_at, JSON.stringify(corpus)],
-      )
-      return rows.length === 0 ? "exists" : "saved"
-    },
-    async corpus(name) {
-      if (!CORPUS_NAME.test(name)) return undefined
-      const { rows } = await db.query<{ value: string }>(
-        "select corpus as value from cwa_corpora where name = $1",
-        [name],
-      )
-      return parse<CorpusV1>(rows)[0]
-    },
-    async corpora() {
-      const { rows } = await db.query<{ value: string }>(
-        "select corpus as value from cwa_corpora order by name",
-      )
-      return parse<CorpusV1>(rows).map((c) => ({
-        name: c.name,
-        created_at: c.created_at,
-        events: c.events.length,
-      }))
-    },
+      async saveCorpus(corpus) {
+        const { rows } = await db.query<{ name: string }>(
+          `insert into cwa_corpora (name, created_at, corpus, tenant) values ($1, $2, $3, $4)
+         on conflict (tenant, name) do nothing returning name`,
+          [corpus.name, corpus.created_at, JSON.stringify(corpus), tenant],
+        )
+        return rows.length === 0 ? "exists" : "saved"
+      },
+      async corpus(name) {
+        if (!CORPUS_NAME.test(name)) return undefined
+        const { rows } = await db.query<{ value: string }>(
+          "select corpus as value from cwa_corpora where name = $1 and tenant = $2",
+          [name, tenant],
+        )
+        return parse<CorpusV1>(rows)[0]
+      },
+      async corpora() {
+        const { rows } = await db.query<{ value: string }>(
+          "select corpus as value from cwa_corpora where tenant = $1 order by name",
+          [tenant],
+        )
+        return parse<CorpusV1>(rows).map((c) => ({
+          name: c.name,
+          created_at: c.created_at,
+          events: c.events.length,
+        }))
+      },
 
-    // Every document is derived when it is read, so there is nothing to bring up to date.
-    flush: async () => undefined,
-    close: async () => options.end?.(),
+      forTenant: (other) => scoped(other),
+      tenants,
+      // Every document is derived when it is read, so there is nothing to bring up to date.
+      flush: async () => undefined,
+      close: async () => options.end?.(),
+    }
+    views.set(tenant, view)
+    return view
   }
+
+  async function tenants() {
+    const { rows } = await db.query<{ tenant: string; events: string | number }>(
+      "select tenant, count(*) as events from cwa_events group by tenant",
+    )
+    return rows
+      .map((row) => ({ tenant: row.tenant, events: Number(row.events) }))
+      .sort((a, b) =>
+        a.tenant === DEFAULT_TENANT
+          ? -1
+          : b.tenant === DEFAULT_TENANT
+            ? 1
+            : a.tenant.localeCompare(b.tenant),
+      )
+  }
+
+  const store = scoped(DEFAULT_TENANT)
   const vault: BodyVault = {
     async put(sha256, deposit) {
       const { rows } = await db.query<{ sha256: string }>(

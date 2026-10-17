@@ -95,10 +95,38 @@ describe("migration 3", () => {
     await db.query("drop table if exists cwa_corpora")
     await db.query("drop table if exists cwa_bodies")
     await db.query("drop table if exists cwa_logins, cwa_sessions")
+    await db.query("alter table cwa_events drop column if exists tenant")
     await db.query("delete from cwa_schema where version > 2")
     const reopened = await createPostgresStore(db)
     const index = await reopened.index()
     expect(index.events.filter((row) => row.compressed_saved !== undefined).length).toBe(86)
+    await db.close()
+  })
+})
+
+describe("migration 7", () => {
+  it("puts the events and corpora a version 6 database holds in the default tenant", async () => {
+    const { DEMO_EVENTS } = await import("./store-contract.ts")
+    const db = new PGlite()
+    const store = await createPostgresStore(db)
+    for (const event of DEMO_EVENTS) await store.write(event)
+    await store.saveCorpus({
+      $schema: "cwa-dashboard/corpus/v1",
+      name: "chat",
+      created_at: "2026-10-17T12:00:00.000Z",
+      events: [{ event_id: DEMO_EVENTS[0]!.event_id }],
+    })
+    // As version 6 left them: no tenant anywhere, corpora keyed by name alone.
+    await db.query("alter table cwa_events drop column tenant")
+    await db.query("alter table cwa_corpora drop constraint cwa_corpora_pkey")
+    await db.query("alter table cwa_corpora drop column tenant")
+    await db.query("alter table cwa_corpora add primary key (name)")
+    await db.query("delete from cwa_schema where version > 6")
+    const reopened = await createPostgresStore(db)
+    expect(await reopened.tenants()).toEqual([{ tenant: "default", events: DEMO_EVENTS.length }])
+    expect((await reopened.index()).events).toHaveLength(DEMO_EVENTS.length)
+    expect(await reopened.corpus("chat")).toBeDefined()
+    expect(await reopened.forTenant("northwind").corpus("chat")).toBeUndefined()
     await db.close()
   })
 })

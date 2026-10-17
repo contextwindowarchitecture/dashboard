@@ -3,6 +3,7 @@
 // day and the fleet report, generated times aside. The tree store and the PostgreSQL store each run
 // this suite, so the web app reads the same documents whichever one a deployment uses.
 
+import { createHash } from "node:crypto"
 import { readdirSync, readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
@@ -39,6 +40,20 @@ async function writeAll(store: EventStore, events: readonly AssemblyEventV1[]) {
     expect(result, event.event_id).toEqual({ ok: true, eventId: event.event_id })
   }
   await store.flush()
+}
+
+/**
+ * One demo session's events again for another tenant, as that tenant's wrapper would have recorded
+ * them: the same calls, each with a new id (the time kept, the rest derived from the old id and the
+ * tenant) and the tenant named.
+ */
+export function inTenant(events: readonly AssemblyEventV1[], tenant: string): AssemblyEventV1[] {
+  const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+  return events.map((event) => {
+    const digest = createHash("sha256").update(`${tenant}/${event.event_id}`).digest()
+    const tail = [...digest.subarray(0, 16)].map((byte) => CROCKFORD[byte % 32]).join("")
+    return { ...structuredClone(event), event_id: event.event_id.slice(0, 10) + tail, tenant }
+  })
 }
 
 export function storeContract(name: string, open: () => Promise<StoreFixture>) {
@@ -149,6 +164,101 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
       } finally {
         await done()
       }
+    })
+
+    describe("tenants (ADR-0012)", () => {
+      const SESSION = DEMO_EVENTS.filter((e) => e.session?.id === "refund-7")
+      const NORTHWIND = inTenant(SESSION, "northwind")
+
+      it("keeps another tenant's events out of every document of the default's, and the reverse", async () => {
+        const { store, done } = await open()
+        try {
+          await writeAll(store, [...DEMO_EVENTS, ...NORTHWIND])
+          const theirs = store.forTenant("northwind")
+          await theirs.flush()
+          const ours = new Set((await store.index()).events.map((row) => row.event_id))
+          const north = new Set((await theirs.index()).events.map((row) => row.event_id))
+          expect(north).toEqual(new Set(NORTHWIND.map((e) => e.event_id)))
+          for (const event of NORTHWIND) expect(ours.has(event.event_id)).toBe(false)
+          expect(ours.size).toBe(DEMO_EVENTS.length)
+          // An event is found under its own tenant only.
+          expect(await theirs.event(NORTHWIND[0]!.event_id)).toEqual(NORTHWIND[0])
+          expect(await store.event(NORTHWIND[0]!.event_id)).toBeUndefined()
+          expect(await theirs.event(SESSION[0]!.event_id)).toBeUndefined()
+          // The same session id in two tenants is two sessions.
+          expect((await theirs.session("refund-7"))!.turns.map((t) => t.event_id)).toEqual(
+            NORTHWIND.map((e) => e.event_id),
+          )
+          expect((await store.session("refund-7"))!.turns.map((t) => t.event_id)).toEqual(
+            SESSION.map((e) => e.event_id),
+          )
+          // The derived documents count their own tenant's events.
+          expect((await theirs.sources()).window.events).toBe(NORTHWIND.length)
+          const services = (await theirs.fleet()).services.map((x) => x.name)
+          expect(services).toEqual([...new Set(NORTHWIND.map((e) => e.service.name))])
+        } finally {
+          await done()
+        }
+      })
+
+      it("lists its tenants and their events, the default first", async () => {
+        const { store, done } = await open()
+        try {
+          expect(await store.tenants()).toEqual([])
+          await writeAll(store, [
+            ...SESSION,
+            ...NORTHWIND,
+            { ...inTenant([SESSION[0]!], "acme")[0]! },
+          ])
+          await store.forTenant("northwind").flush()
+          await store.forTenant("acme").flush()
+          expect(await store.tenants()).toEqual([
+            { tenant: "default", events: SESSION.length },
+            { tenant: "acme", events: 1 },
+            { tenant: "northwind", events: NORTHWIND.length },
+          ])
+        } finally {
+          await done()
+        }
+      })
+
+      it("takes an event naming the default tenant as the default's", async () => {
+        const { store, done } = await open()
+        try {
+          const named = { ...inTenant([SESSION[0]!], "default")[0]! }
+          await writeAll(store, [named])
+          expect(await store.event(named.event_id)).toEqual(named)
+        } finally {
+          await done()
+        }
+      })
+
+      it("keeps each tenant's corpora apart, a name free in each", async () => {
+        const { store, done } = await open()
+        try {
+          await writeAll(store, [...SESSION, ...NORTHWIND])
+          const corpus = (tenant: string, events: readonly AssemblyEventV1[]) => ({
+            $schema: "cwa-dashboard/corpus/v1" as const,
+            name: "chat",
+            ...(tenant === "default" ? {} : { tenant }),
+            created_at: "2026-10-17T12:00:00.000Z",
+            events: events.map((e) => ({ event_id: e.event_id })),
+          })
+          expect(await store.saveCorpus(corpus("default", SESSION))).toBe("saved")
+          expect(
+            await store.forTenant("northwind").saveCorpus(corpus("northwind", NORTHWIND)),
+          ).toBe("saved")
+          expect((await store.corpus("chat"))!.events.map((e) => e.event_id)).toEqual(
+            SESSION.map((e) => e.event_id),
+          )
+          expect(
+            (await store.forTenant("northwind").corpus("chat"))!.events.map((e) => e.event_id),
+          ).toEqual(NORTHWIND.map((e) => e.event_id))
+          expect(await store.forTenant("acme").corpora()).toEqual([])
+        } finally {
+          await done()
+        }
+      })
     })
   })
 }

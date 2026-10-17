@@ -39,11 +39,14 @@ import {
   CORPUS_NAME,
   type CorpusSummary,
   DAY,
+  DEFAULT_TENANT,
   describeProblems,
   EVENT_ID,
   type EventStore,
   fleetInputs,
   SESSION_ID,
+  TENANT,
+  type TenantSummary,
   WINDOW,
   type WriteResult,
 } from "./event-store.ts"
@@ -68,7 +71,103 @@ async function replace(path: string, value: unknown) {
   await rename(tmp, path)
 }
 
+/**
+ * The tree store (ADR-0012): the default tenant's tree at `root`, and each other tenant's, the same
+ * layout, under `root/tenants/<tenant>/`, opened when first written or read. A write goes to its
+ * event's tenant; `tenants.json` at the root lists them, so a static host can too.
+ */
 export async function createStore(root: string, options: StoreOptions = {}): Promise<EventStore> {
+  const trees = new Map<string, Promise<TenantTree>>()
+  const treeOf = (tenant: string): Promise<TenantTree> => {
+    if (!TENANT.test(tenant)) throw new Error(`${JSON.stringify(tenant)} names no tenant`)
+    let tree = trees.get(tenant)
+    if (tree === undefined) {
+      tree = createTree(tenant === DEFAULT_TENANT ? root : join(root, "tenants", tenant), options)
+      trees.set(tenant, tree)
+    }
+    return tree
+  }
+  await treeOf(DEFAULT_TENANT)
+
+  async function tenants(): Promise<TenantSummary[]> {
+    const names = [
+      DEFAULT_TENANT,
+      ...(existsSync(join(root, "tenants"))
+        ? (await readdir(join(root, "tenants"))).filter((n) => TENANT.test(n)).sort()
+        : []),
+    ]
+    const list: TenantSummary[] = []
+    for (const tenant of names) {
+      const events = await (await treeOf(tenant)).count()
+      if (events > 0) list.push({ tenant, events })
+    }
+    return list
+  }
+
+  // tenants.json follows the writes, rewritten after them, a moment later.
+  let listing: Promise<void> = Promise.resolve()
+  const relist = () => {
+    listing = listing
+      .then(async () =>
+        replace(join(root, "tenants.json"), {
+          $schema: "cwa-dashboard/tenants/v1",
+          tenants: await tenants(),
+        }),
+      )
+      .catch(() => undefined)
+  }
+
+  const views = new Map<string, EventStore>()
+  function view(tenant: string): EventStore {
+    const known = views.get(tenant)
+    if (known !== undefined) return known
+    const tree = () => treeOf(tenant)
+    const made: EventStore = {
+      async write(candidate) {
+        if (!validateAssemblyEventV1(candidate)) {
+          return {
+            ok: false,
+            kind: "invalid",
+            problems: describeProblems(validateAssemblyEventV1.errors),
+          }
+        }
+        const result = await (await treeOf(candidate.tenant ?? DEFAULT_TENANT)).write(candidate)
+        if (result.ok) relist()
+        return result
+      },
+      index: async () => (await tree()).index(),
+      window: async (day) => (await tree()).window(day),
+      event: async (eventId) => (await tree()).event(eventId),
+      session: async (sessionId) => (await tree()).session(sessionId),
+      fleet: async () => (await tree()).fleet(),
+      sources: async () => (await tree()).sources(),
+      saveCorpus: async (corpus) => (await tree()).saveCorpus(corpus),
+      corpus: async (name) => (await tree()).corpus(name),
+      corpora: async () => (await tree()).corpora(),
+      forTenant: (other) => {
+        if (!TENANT.test(other)) throw new Error(`${JSON.stringify(other)} names no tenant`)
+        return view(other)
+      },
+      tenants,
+      async flush() {
+        await (await tree()).flush()
+        await listing
+      },
+      async close() {
+        for (const each of trees.values()) await (await each).close()
+        await listing
+      },
+    }
+    views.set(tenant, made)
+    return made
+  }
+  return view(DEFAULT_TENANT)
+}
+
+/** One tenant's tree: the store's documents for it, and how many events it holds. */
+type TenantTree = Omit<EventStore, "forTenant" | "tenants"> & { count(): Promise<number> }
+
+async function createTree(root: string, options: StoreOptions): Promise<TenantTree> {
   const window = options.window ?? WINDOW
   const debounceMs = options.debounceMs ?? 200
   const events = join(root, "events")
@@ -172,7 +271,10 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
 
   if (stale) schedule()
 
-  const store: EventStore = {
+  const store: TenantTree = {
+    async count() {
+      return (await readdir(events)).filter((n) => n.endsWith(".json") && n !== "index.json").length
+    },
     async write(candidate: unknown): Promise<WriteResult> {
       if (!validateAssemblyEventV1(candidate)) {
         return {
