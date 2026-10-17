@@ -1,6 +1,6 @@
 // Remote data ownership (dashboard-plan.md 9): TanStack Query over the EventSource, one hook per
 // document kind, each parsed at the boundary. An event never changes once written, so it is fresh
-// for good. The index, a session and the fleet report change as events arrive (a store rebuilds
+// for good. The index, a session, the fleet report and the sources report change as events arrive (a store rebuilds
 // them, ADR-0007), so they refetch on focus and every 30 seconds while the page is visible, and
 // pages keep showing what they had while they do. A document that is not there, not JSON or not supported is never
 // retried; a network or server failure is retried once.
@@ -118,6 +118,15 @@ export const useFleet = () =>
     ["fleet"],
     (s) => s.url("fleet.json"),
     (s, signal) => s.fleet(signal),
+    true,
+  )
+
+export const useSourcesReport = () =>
+  useDocument(
+    "sources-report",
+    ["sources"],
+    (s) => s.url("sources.json"),
+    (s, signal) => s.sources(signal),
     true,
   )
 

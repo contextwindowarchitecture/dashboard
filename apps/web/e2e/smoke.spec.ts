@@ -214,6 +214,26 @@ test("the sessions list reads in both themes and at a phone's width", async ({ p
   await expectAccessible(page)
 })
 
+test("the sources page reads in both themes and at a phone's width, and links to the stream", async ({
+  page,
+}) => {
+  await page.goto("/sources")
+  const table = page.getByRole("table", { name: "Producers" })
+  await expect(table.getByRole("rowheader", { name: "wiki-corpus" })).toBeVisible()
+  await expectAccessible(page)
+  await table
+    .getByRole("link", { name: /duplicate_content/ })
+    .first()
+    .click()
+  await expect(page).toHaveURL(/\/traces\?reason=duplicate_content$/)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/sources")
+  await expect(table.getByRole("rowheader", { name: "wiki-corpus" })).toBeVisible()
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})
+
 test("a session opens from the list, selects a turn, and reads in both themes and at 400px", async ({
   page,
 }) => {

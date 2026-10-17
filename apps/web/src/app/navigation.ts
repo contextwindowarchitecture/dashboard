@@ -7,6 +7,7 @@ import {
   Info,
   RadioTower,
   Boxes,
+  Inbox,
   FlaskConical,
   Layers,
   LayoutDashboard,
@@ -53,6 +54,7 @@ export const NAVIGATION: readonly NavGroup[] = [
         icon: MessagesSquare,
         patterns: ["/sessions", "/sessions/:sessionId"],
       },
+      { id: "sources", label: "Sources", to: "/sources", icon: Inbox, patterns: ["/sources"] },
       {
         id: "guardrails",
         label: "Guardrails",

@@ -31,6 +31,8 @@ export interface EventSource {
   event(eventId: string, signal?: AbortSignal): Promise<unknown>
   session(sessionId: string, signal?: AbortSignal): Promise<unknown>
   fleet(signal?: AbortSignal): Promise<unknown>
+  /** What each producer sent in the current window, and what became of it. */
+  sources(signal?: AbortSignal): Promise<unknown>
   /** The URL a file of the tree is served at, for download links. */
   url(path: string): string
 }
@@ -84,6 +86,7 @@ export function createFileSource(root: string, fetchFn: typeof fetch = fetch): E
     event: (eventId, signal) => byId("events", EVENT_ID, eventId, signal),
     session: (sessionId, signal) => byId("sessions", SESSION_ID, sessionId, signal),
     fleet: (signal) => json(url("fleet.json"), signal),
+    sources: (signal) => json(url("sources.json"), signal),
     url,
   }
 }

@@ -9,6 +9,7 @@ import { GuardrailView } from "../features/guardrails/components/guardrails-view
 import { PolicyView } from "../features/registry/components/policy-view"
 import { ProfileView } from "../features/registry/components/profile-view"
 import { FleetPage } from "./pages/fleet"
+import { SourcesPage } from "./pages/sources"
 import { GuardrailsPage } from "./pages/guardrails"
 import { InspectorPage } from "./pages/inspector"
 import { NotFoundPage } from "./pages/not-found"
@@ -104,6 +105,11 @@ export const ROUTES: RouteObject[] = [
             ],
           },
         ],
+      },
+      {
+        path: "sources",
+        element: <SourcesPage />,
+        handle: handle("Sources", () => "Sources"),
       },
       {
         path: "guardrails",

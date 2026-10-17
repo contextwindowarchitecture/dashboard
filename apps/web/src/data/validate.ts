@@ -9,12 +9,14 @@ import type {
   EventsIndexV1,
   FleetReportV1,
   SessionV1,
+  SourcesReportV1,
 } from "@cwa-dashboard/telemetry/types"
 import {
   validateAssemblyEventV1,
   validateEventsIndexV1,
   validateFleetReportV1,
   validateSessionV1,
+  validateSourcesReportV1,
 } from "@cwa-dashboard/telemetry/validators"
 import type { ErrorObject, ValidateFunction } from "ajv"
 
@@ -23,6 +25,7 @@ export interface DocumentByKind {
   "events-index": EventsIndexV1
   session: SessionV1
   "fleet-report": FleetReportV1
+  "sources-report": SourcesReportV1
 }
 export type Kind = keyof DocumentByKind
 
@@ -31,6 +34,7 @@ const VALIDATORS: { [K in Kind]: ValidateFunction<DocumentByKind[K]> } = {
   "events-index": validateEventsIndexV1,
   session: validateSessionV1,
   "fleet-report": validateFleetReportV1,
+  "sources-report": validateSourcesReportV1,
 }
 const KINDS = Object.keys(VALIDATORS) as Kind[]
 const VERSION = "v1"

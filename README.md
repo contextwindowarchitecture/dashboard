@@ -12,6 +12,7 @@ Phase 1 is built (DP-0 to DP-7 of the working plan), and Phase 2 is under way: e
 - the sessions, each with its turn timeline, turn detail and the played session;
 - the registry's route policies and profiles, and the events that ran them pinned, drifted or unregistered;
 - the fleet: every implementation's conformance run, the services, their contract and latency;
+- the sources: what each producer sent in the current window and what became of it, admitted, compressed or excluded by reason, each reason linked to the stream;
 - the seven guardrails, each with its codes counted and linked to the stream;
 - the sandbox, which replays an event or a snapshot of your own through the real TypeScript assembler on the replay service (`apps/ingest`), with its controls, its parity with what the event recorded, and the trace diff;
 - the glossary, the telemetry page and the about page.

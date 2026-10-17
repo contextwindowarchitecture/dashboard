@@ -35,6 +35,7 @@ const PAGES = [
   `/traces/${first("rejected")}`,
   "/sessions",
   "/sessions/refund-7",
+  "/sources",
   "/guardrails",
   "/guardrails/05",
   "/registry/policies",
