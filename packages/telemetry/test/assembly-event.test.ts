@@ -302,3 +302,50 @@ describe("assembly-event v1: redaction (R-DASH-1, R-DASH-2)", () => {
     expectInvalid(event)
   })
 })
+
+// What the API serves a reader whose role does not cover a route's bodies (ADR-0011): each body
+// and variant body withheld, with its digest, under whatever mode the wrapper recorded.
+function withhold(event: Event): Event {
+  const snapshot = event["snapshot"] as { batches: { items: Record<string, unknown>[] }[] }
+  const replace = (body: Body) => ({
+    withheld: "role",
+    content_sha256:
+      typeof body === "object" && body !== null && "content_sha256" in body
+        ? (body as { content_sha256: string }).content_sha256
+        : sha256(body),
+  })
+  for (const batch of snapshot.batches) {
+    for (const item of batch.items) {
+      item["body"] = replace(item["body"] as Body)
+      for (const variant of (item["variants"] as Event[] | undefined) ?? []) {
+        variant["body"] = replace(variant["body"] as Body)
+      }
+    }
+  }
+  return event
+}
+
+describe("assembly-event v1: bodies withheld by role (ADR-0011)", () => {
+  it("accepts withheld bodies under every mode, the mode kept as the wrapper recorded it", () => {
+    expectValid(withhold(withVariants()))
+    expectValid(withhold(redact(withVariants(), "digest_only")))
+    expectValid(withhold(redact(withVariants(), "pii_scrubbed")))
+    expect(withhold(redact(withVariants(), "pii_scrubbed"))["redaction_mode"]).toBe("pii_scrubbed")
+  })
+
+  it("holds a withheld body to its form: why, and the digest, nothing else", () => {
+    for (const mode of ["full", "digest_only", "pii_scrubbed"] as const) {
+      const make = () =>
+        mode === "full" ? withhold(assembled()) : withhold(redact(assembled(), mode))
+      const unknownReason = make()
+      firstItem(unknownReason)["body"] = { withheld: "whim", content_sha256: "f".repeat(64) }
+      expectInvalid(unknownReason)
+      const noDigest = make()
+      firstItem(noDigest)["body"] = { withheld: "role" }
+      expectInvalid(noDigest)
+      const leaking = make()
+      firstItem(leaking)["body"] = { withheld: "role", content_sha256: "f".repeat(64), text: "x" }
+      expectInvalid(leaking)
+    }
+  })
+})

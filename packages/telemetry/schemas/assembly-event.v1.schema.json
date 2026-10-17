@@ -439,15 +439,23 @@
       }
     },
     "notRedacted": {
-      "description": "Any body except a redacted one: a full event carries what the producer emitted.",
+      "description": "Any body except a redacted or a withheld one: a full event carries what the producer emitted.",
       "not": {
-        "type": "object",
-        "required": ["redacted"],
-        "properties": {
-          "redacted": {
-            "enum": ["digest_only", "pii_scrubbed"]
+        "anyOf": [
+          {
+            "type": "object",
+            "required": ["redacted"],
+            "properties": {
+              "redacted": {
+                "enum": ["digest_only", "pii_scrubbed"]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["withheld"]
           }
-        }
+        ]
       }
     },
     "fullBodies": {
@@ -459,13 +467,27 @@
                 "items": {
                   "properties": {
                     "body": {
-                      "$ref": "#/$defs/notRedacted"
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/notRedacted"
+                        },
+                        {
+                          "$ref": "#/$defs/withheldBody"
+                        }
+                      ]
                     },
                     "variants": {
                       "items": {
                         "properties": {
                           "body": {
-                            "$ref": "#/$defs/notRedacted"
+                            "anyOf": [
+                              {
+                                "$ref": "#/$defs/notRedacted"
+                              },
+                              {
+                                "$ref": "#/$defs/withheldBody"
+                              }
+                            ]
                           }
                         }
                       }
@@ -487,13 +509,27 @@
                 "items": {
                   "properties": {
                     "body": {
-                      "$ref": "#/$defs/digestOnlyBody"
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/digestOnlyBody"
+                        },
+                        {
+                          "$ref": "#/$defs/withheldBody"
+                        }
+                      ]
                     },
                     "variants": {
                       "items": {
                         "properties": {
                           "body": {
-                            "$ref": "#/$defs/digestOnlyBody"
+                            "anyOf": [
+                              {
+                                "$ref": "#/$defs/digestOnlyBody"
+                              },
+                              {
+                                "$ref": "#/$defs/withheldBody"
+                              }
+                            ]
                           }
                         }
                       }
@@ -515,13 +551,27 @@
                 "items": {
                   "properties": {
                     "body": {
-                      "$ref": "#/$defs/piiScrubbedBody"
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/piiScrubbedBody"
+                        },
+                        {
+                          "$ref": "#/$defs/withheldBody"
+                        }
+                      ]
                     },
                     "variants": {
                       "items": {
                         "properties": {
                           "body": {
-                            "$ref": "#/$defs/piiScrubbedBody"
+                            "anyOf": [
+                              {
+                                "$ref": "#/$defs/piiScrubbedBody"
+                              },
+                              {
+                                "$ref": "#/$defs/withheldBody"
+                              }
+                            ]
                           }
                         }
                       }
@@ -531,6 +581,20 @@
               }
             }
           }
+        }
+      }
+    },
+    "withheldBody": {
+      "description": "A body the API withholds from a reader whose role does not cover the route's bodies (ADR-0011): why, and the SHA-256 of the original as the conventions define it. Served, never emitted by a wrapper; the event's redaction_mode stays what the wrapper recorded.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["withheld", "content_sha256"],
+      "properties": {
+        "withheld": {
+          "const": "role"
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/sha256"
         }
       }
     }
