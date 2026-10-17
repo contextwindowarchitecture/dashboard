@@ -406,6 +406,7 @@ React draws the SVG; D3 computes the geometry; nothing animates except inside th
 - **Turn timeline:** one stacked bar per turn on a band scale, the budget as the dashed rule, the first compression, the first shed and the first refusal as `--fg` markers above the bars with mono labels, the selected turn's bar outlined `--fg`.
 - **Placement strip:** the profile's placement as a row of `plane` chips in order, each with its wrap in `--muted` after a middle dot and its token count; an unplaced slot as a `quiet` chip struck through.
 - **Latency dots:** one row per language, P50, P95 and P99 as the language's symbol on a log axis, with n in mono beside the row.
+- **Conflict forest:** an event's items as an outline (`d3-hierarchy`'s `stratify`; each leaf a row, a parent level with its first child, each generation a 340px column): each excluded item under the item it lost to, was superseded by or duplicated, a group with no winner as a box of its own on `--surface`; kept items outlined in `--fg`, excluded ones dashed in `--accent`; the links in `--line`, each code in muted mono `var(--fs-label)` beside the item it labels; a label longer than the box ends in an ellipsis, with the whole id in the box's `<title>` and in the table beside.
 - **Conformance matrix:** a table whose cells carry the fraction as text; a failed or skipped case is a `bad` or `quiet` chip, never a coloured cell.
 
 ### Code, JSON and text
