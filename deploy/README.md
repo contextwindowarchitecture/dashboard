@@ -176,6 +176,24 @@ oc -n cwa-dashboard rollout status deployment/dashboard-dex
 
 Applying `deploy/overlays/prod-postgres` again takes sign-in away; Dex's Deployment then stays until deleted by hand.
 
+## Who may read what
+
+With `ACCESS_FILE`, a JSON file, the service grants roles and refuses what they do not cover (`docs/adr/0011-roles.md`); without it, every reader reads everything, as before sign-in. The file grants roles to readers who have not signed in, to every signed-in reader, and by the issuer's groups; a reader holds the union of what applies to them:
+
+```json
+{
+  "anonymous": [],
+  "signed_in": ["viewer"],
+  "groups": {
+    "contextwindowarchitecture:support": ["owner:support-chat"],
+    "contextwindowarchitecture:compliance": ["auditor"],
+    "contextwindowarchitecture:maintainers": ["operator", "owner:*"]
+  }
+}
+```
+
+`viewer` reads every event's metadata and every document derived from them; `owner:<route>` (or `owner:*`) also reads that route's bodies and its compliance bundles; `auditor` reads every bundle; `operator` reads what a viewer does. A body a reader's roles do not cover is served withheld, with its digest, and the inspector says so. An unknown key or role stops the service at start. A reader with no role is told to sign in (401), or that their roles do not reach (403).
+
 ## The vault
 
 A route under `pii_scrubbed` or `digest_only` may keep its original bodies in the vault (`docs/adr/0009-body-vault.md`): its wrapper deposits each body with the ingest token at `PUT /api/bodies/<sha256>`, and the operator resolves one in the inspector with the operator token, `VAULT_TOKEN`, which must differ from the ingest token (the service refuses to start otherwise). The inspector shows a body only when its bytes hash to the digest the event holds.

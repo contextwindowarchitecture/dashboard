@@ -12,7 +12,17 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { RENDERERS, TOKENIZERS } from "@cwa-dashboard/assembler"
 import { COMPONENTS } from "@cwa-dashboard/contract/data"
 
+import {
+  type Access,
+  mayOwn,
+  mayRead,
+  type Role,
+  rolesOf,
+  routeOf,
+  withholdBodies,
+} from "./access.ts"
 import type { Auth } from "./auth.ts"
+import type { Session } from "./sessions.ts"
 import { ReplayTimeoutError, type Runner } from "./runner.ts"
 import { buildBundle, type SigningKey } from "./bundle.ts"
 import { CORPUS_NAME, type EventStore as Store } from "./event-store.ts"
@@ -37,6 +47,14 @@ export interface IngestOptions {
   readonly vaultToken?: string
   /** Sign-in (ADR-0010); without it /auth answers 503 and every reader is anonymous. */
   readonly auth?: Auth
+  /** Who may read what (ADR-0011); without it every reader reads everything. */
+  readonly access?: Access
+}
+
+/** Who asks: their session, and with an access file, the roles it gives them. */
+interface Reader {
+  readonly session: Session | undefined
+  readonly held: Set<Role> | undefined
 }
 
 /** A corpus's most events (ADR-0008): a shadow run is two replays an event. */
@@ -137,6 +155,31 @@ export function createIngestServer(options: IngestOptions): Server {
     throw new Error("VAULT_TOKEN must differ from INGEST_TOKEN: a wrapper holds the ingest token.")
   }
   let inFlight = 0
+
+  async function readerOf(request: IncomingMessage): Promise<Reader> {
+    const session = await options.auth?.identify(request)
+    return {
+      session,
+      held: options.access === undefined ? undefined : rolesOf(options.access, session),
+    }
+  }
+
+  /** Runs a read for a reader who holds a role at all; every role reads what a viewer reads. */
+  async function asReader(
+    request: IncomingMessage,
+    response: ServerResponse,
+    then: (reader: Reader) => Promise<void>,
+  ) {
+    const reader = await readerOf(request)
+    if (reader.held !== undefined && !mayRead(reader.held)) return refuse(response, reader)
+    return then(reader)
+  }
+
+  /** A reader without the role: sign in, if they have not; else, the role does not reach. */
+  const refuse = (response: ServerResponse, reader: Reader) =>
+    reader.session === undefined
+      ? fail(response, 401, "sign-in", ["Sign in to read this."])
+      : fail(response, 403, "forbidden", ["Your roles do not include this."])
 
   // The vault (ADR-0009): a deposit with the ingest token; a read or an erasure with the operator's.
   async function bodiesRoute(request: IncomingMessage, response: ServerResponse, path: string) {
@@ -252,7 +295,7 @@ export function createIngestServer(options: IngestOptions): Server {
 
   // The tree's documents at the tree's paths, from the store (ADR-0007), with the cache rules nginx
   // gives the tree: an event never changes; every other document does.
-  async function dataRoute(path: string, response: ServerResponse) {
+  async function dataRoute(path: string, response: ServerResponse, reader: Reader) {
     const { store } = options
     if (store === undefined) {
       return fail(response, 503, "not-configured", [
@@ -277,17 +320,23 @@ export function createIngestServer(options: IngestOptions): Server {
     else if (id(/^\/data\/events\/index\/([^/]+)\.json$/) !== undefined) {
       document = await store.window(id(/^\/data\/events\/index\/([^/]+)\.json$/)!)
     } else if (id(/^\/data\/events\/([^/]+)\.json$/) !== undefined) {
-      document = await store.event(id(/^\/data\/events\/([^/]+)\.json$/)!)
+      const event = await store.event(id(/^\/data\/events\/([^/]+)\.json$/)!)
+      document =
+        event === undefined || reader.held === undefined || mayOwn(reader.held, routeOf(event))
+          ? event
+          : withholdBodies(event)
       headers = { "cache-control": "public, max-age=31536000, immutable" }
     } else if (id(/^\/data\/sessions\/([^/]+)\.json$/) !== undefined) {
       document = await store.session(id(/^\/data\/sessions\/([^/]+)\.json$/)!)
     }
     if (document === undefined) return fail(response, 404, "not-found", [`No document at ${path}.`])
+    // What a reader gets depends on who they are: no cache may keep it for another (ADR-0011).
+    if (options.access !== undefined) headers = { "cache-control": "private, no-cache" }
     return send(response, 200, document, headers)
   }
 
   // A compliance bundle for a stored event, its replay through the same bounded runner as /replay.
-  async function bundleRoute(path: string, response: ServerResponse) {
+  async function bundleRoute(path: string, response: ServerResponse, reader: Reader) {
     const { store, signingKey } = options
     if (store === undefined || signingKey === undefined) {
       return fail(response, 503, "not-configured", [
@@ -305,6 +354,14 @@ export function createIngestServer(options: IngestOptions): Server {
     }
     const event = eventId === undefined ? undefined : await store.event(eventId)
     if (event === undefined) return fail(response, 404, "not-found", [`No event at ${path}.`])
+    // A bundle holds the event as stored, bodies and all: an auditor's, or the route's owner's.
+    if (
+      reader.held !== undefined &&
+      !reader.held.has("auditor") &&
+      !mayOwn(reader.held, routeOf(event))
+    ) {
+      return refuse(response, reader)
+    }
     if (inFlight >= options.maxQueue) {
       return fail(response, 503, "busy", ["Too many replays are waiting; try again shortly."])
     }
@@ -486,11 +543,11 @@ export function createIngestServer(options: IngestOptions): Server {
       }
       if (path === "/corpora.json" || path.startsWith("/corpora/")) {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
-        return corporaGet(path, response)
+        return asReader(request, response, () => corporaGet(path, response))
       }
       if (path === "/shadow") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
-        return shadowPost(request, response)
+        return asReader(request, response, () => shadowPost(request, response))
       }
       if (path === "/signing-key.pem") {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
@@ -505,14 +562,25 @@ export function createIngestServer(options: IngestOptions): Server {
       }
       if (path.startsWith("/bundles/")) {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
-        return bundleRoute(path, response)
+        return asReader(request, response, (reader) => bundleRoute(path, response, reader))
       }
       if (path === "/me") {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
-        if (options.auth === undefined) {
-          return send(response, 200, { sign_in: "not-configured", signed_in: false })
-        }
-        return options.auth.me(request, response)
+        const reader = await readerOf(request)
+        const session = reader.session
+        return send(response, 200, {
+          sign_in: options.auth === undefined ? "not-configured" : "configured",
+          signed_in: session !== undefined,
+          ...(session === undefined
+            ? {}
+            : {
+                name: session.name,
+                ...(session.email === undefined ? {} : { email: session.email }),
+                groups: session.groups,
+                expires_at: session.expiresAt.toISOString(),
+              }),
+          ...(reader.held === undefined ? {} : { roles: [...reader.held].sort() }),
+        })
       }
       if (path.startsWith("/auth/")) {
         const auth = options.auth
@@ -545,11 +613,11 @@ export function createIngestServer(options: IngestOptions): Server {
         if (request.method !== "GET" && request.method !== "HEAD") {
           return send(response, 405, { ok: false }, { allow: "GET, HEAD" })
         }
-        return dataRoute(path, response)
+        return asReader(request, response, (reader) => dataRoute(path, response, reader))
       }
       if (path === "/replay") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
-        return replayRoute(request, response)
+        return asReader(request, response, () => replayRoute(request, response))
       }
       return fail(response, 404, "not-found", [`No route ${path}.`])
     }

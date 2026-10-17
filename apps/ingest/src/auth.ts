@@ -270,19 +270,5 @@ export function createAuth({ config, sessions, now = () => new Date(), allowHttp
     response.end()
   }
 
-  async function me(request: IncomingMessage, response: ServerResponse) {
-    const session = await identify(request)
-    if (session === undefined)
-      return send(response, 200, { sign_in: "configured", signed_in: false })
-    return send(response, 200, {
-      sign_in: "configured",
-      signed_in: true,
-      name: session.name,
-      ...(session.email === undefined ? {} : { email: session.email }),
-      groups: session.groups,
-      expires_at: session.expiresAt.toISOString(),
-    })
-  }
-
-  return { identify, login, callback, logout, me }
+  return { identify, login, callback, logout }
 }

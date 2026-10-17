@@ -6,11 +6,12 @@
 // operator's, to read them, and, to sign readers in (ADR-0010), OIDC_ISSUER, OIDC_CLIENT_ID,
 // OIDC_CLIENT_SECRET and OIDC_REDIRECT_URI (OIDC_SCOPES; OIDC_ISSUER_INTERNAL, where the service
 // reaches an issuer served behind the site's proxy; OIDC_ALLOW_HTTP for an issuer on plain HTTP),
-// from the environment.
+// and ACCESS_FILE, who may read what (ADR-0011), from the environment.
 
 import { createWorkerRunner } from "./runner.ts"
 import { createIngestServer } from "./server.ts"
 import { signingKeyFrom } from "./bundle.ts"
+import { loadAccess } from "./access.ts"
 import { authConfigFrom, createAuth } from "./auth.ts"
 import { openStore, openVault } from "./open-store.ts"
 
@@ -47,6 +48,8 @@ const auth =
 const signingPem = process.env["SIGNING_KEY"]
 const signingKey =
   signingPem === undefined || signingPem === "" ? undefined : signingKeyFrom(signingPem)
+// Who may read what (ADR-0011): ACCESS_FILE, a JSON file; without it every reader reads everything.
+const access = loadAccess(process.env)
 const server = createIngestServer({
   runner,
   ...(store === undefined ? {} : { store }),
@@ -55,12 +58,13 @@ const server = createIngestServer({
   ...(vault === undefined ? {} : { vault }),
   ...(vaultToken === undefined || vaultToken === "" ? {} : { vaultToken }),
   ...(auth === undefined ? {} : { auth }),
+  ...(access === undefined ? {} : { access }),
   maxBodyBytes: number("MAX_BODY_BYTES", 4 * 1024 * 1024),
   maxQueue: number("MAX_QUEUE", 8),
 })
 server.listen(port, () =>
   process.stdout.write(
-    `ingest: listening on ${port}, store: ${opened?.kind ?? "none"}, vault: ${vault === undefined ? "none" : "on"}, sign-in: ${auth === undefined ? "none" : authConfig!.issuer}\n`,
+    `ingest: listening on ${port}, store: ${opened?.kind ?? "none"}, vault: ${vault === undefined ? "none" : "on"}, sign-in: ${auth === undefined ? "none" : authConfig!.issuer}, access: ${access === undefined ? "open" : "by role"}\n`,
   ),
 )
 
