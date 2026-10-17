@@ -23,6 +23,22 @@ The event travels by HTTP, never through an OpenTelemetry collector: it holds th
 
 Every attribute this document defines is under `cwa.`. OpenTelemetry's naming guidance says "It is not recommended to use existing OpenTelemetry semantic convention namespace as a prefix" for a project's own attributes, since it "may result in a name clash in the future", so none sits under `gen_ai.` or any other namespace OpenTelemetry defines. Where OpenTelemetry defines an attribute with the same meaning, a wrapper sets it as well: `service.name`, `service.instance.id` and `deployment.environment.name` below, and, for a call in a session, the GenAI conventions' `gen_ai.conversation.id` ("the unique identifier for a conversation (session, thread)") with the value of `cwa.session.id`. `gen_ai.usage.input_tokens` is not reused: it counts a model call's tokens, and `cwa.result.input_tokens` counts what the assembler fitted.
 
+## Span
+
+Every wrapper records one span per `assemble()` call, the same in every language:
+
+| Property | Value |
+| --- | --- |
+| Name | `cwa.assemble` |
+| Kind | `INTERNAL` |
+| Parent | The caller's active span, so the span shares its trace with the model call the payload feeds (`traceparent`) |
+| Start | When the wrapper calls `assemble()`: the event's `recorded_at` |
+| End | When the event is built, after `assemble()` returns or throws |
+| Status | `ERROR` when the outcome is `rejected` (the call threw), with the first problem as its description; unset otherwise, since a refusal is the assembler's decision, not a failure |
+| Attributes | The `cwa.*` rows of the table below that the event has; `service.*` and `deployment.*` are the resource's, set once by the service's SDK, not on each span |
+
+The event carries the span's ids as `otel.trace_id` and `otel.span_id` when the span is recorded; with no OpenTelemetry SDK installed the span is not recorded and the event has no `otel`.
+
 ## Attributes
 
 One row per event field. A field path uses dots between properties and `[]` for the items of an array; `snapshot.` and `trace.` paths are the published contract's fields. A test holds this table to the event schema: every field it names exists, and every field of the envelope is here.
