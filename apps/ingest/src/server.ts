@@ -11,6 +11,7 @@ import { RENDERERS, TOKENIZERS } from "@cwa-dashboard/assembler"
 import { COMPONENTS } from "@cwa-dashboard/contract/data"
 
 import { ReplayTimeoutError, type Runner } from "./runner.ts"
+import { buildBundle, type SigningKey } from "./bundle.ts"
 import type { EventStore as Store } from "./event-store.ts"
 
 export interface IngestOptions {
@@ -23,6 +24,8 @@ export interface IngestOptions {
   readonly store?: Store
   /** The bearer token POST /events requires; without it the route takes no writes. */
   readonly token?: string
+  /** The Ed25519 key compliance bundles are signed with; without it none is signed. */
+  readonly signingKey?: SigningKey
 }
 
 function send(
@@ -191,6 +194,46 @@ export function createIngestServer(options: IngestOptions): Server {
     return send(response, 200, document, headers)
   }
 
+  // A compliance bundle for a stored event, its replay through the same bounded runner as /replay.
+  async function bundleRoute(path: string, response: ServerResponse) {
+    const { store, signingKey } = options
+    if (store === undefined || signingKey === undefined) {
+      return fail(response, 503, "not-configured", [
+        store === undefined
+          ? "No event store: set DATABASE_URL or EVENTS_DIR to serve events."
+          : "No signing key: set SIGNING_KEY to sign compliance bundles.",
+      ])
+    }
+    const match = /^\/bundles\/([^/]+)\.json$/.exec(path)
+    let eventId: string | undefined
+    try {
+      eventId = match === null ? undefined : decodeURIComponent(match[1]!)
+    } catch {
+      eventId = undefined
+    }
+    const event = eventId === undefined ? undefined : await store.event(eventId)
+    if (event === undefined) return fail(response, 404, "not-found", [`No event at ${path}.`])
+    if (inFlight >= options.maxQueue) {
+      return fail(response, 503, "busy", ["Too many replays are waiting; try again shortly."])
+    }
+    inFlight += 1
+    try {
+      const bundle = await buildBundle(
+        event,
+        (snapshot) => options.runner.run(snapshot),
+        signingKey,
+        new Date().toISOString(),
+      )
+      return send(response, 200, bundle)
+    } catch (error) {
+      if (error instanceof ReplayTimeoutError)
+        return fail(response, 504, "timeout", [error.message])
+      throw error
+    } finally {
+      inFlight -= 1
+    }
+  }
+
   return createServer((request, response) => {
     const path = new URL(request.url ?? "/", "http://localhost").pathname
     const route = async () => {
@@ -205,6 +248,21 @@ export function createIngestServer(options: IngestOptions): Server {
       if (path === "/events") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
         return eventsRoute(request, response)
+      }
+      if (path === "/signing-key.pem") {
+        if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
+        if (options.signingKey === undefined) {
+          return fail(response, 503, "not-configured", ["No signing key: set SIGNING_KEY."])
+        }
+        response.writeHead(200, {
+          "content-type": "application/x-pem-file",
+          "cache-control": "no-cache",
+        })
+        return void response.end(options.signingKey.publicPem)
+      }
+      if (path.startsWith("/bundles/")) {
+        if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
+        return bundleRoute(path, response)
       }
       if (path.startsWith("/data/")) {
         // HEAD as GET: Node's server sends the headers and leaves the body out.
