@@ -147,6 +147,18 @@ node deploy/verify-bundle.mjs <event id>.json signing-key.pem
 **Rotating the key**: create a new secret value and restart the service. Every bundle names its key's id (the SHA-256 of the public key), so a bundle signed before the rotation still verifies against the old public key: keep each retired public key where readers can find it, beside the date it was retired.
 
 
+## Sign-in
+
+The ingest service signs readers in through an OpenID Connect issuer (`docs/adr/0010-sign-in.md`) when it has `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and `OIDC_REDIRECT_URI` (the public address of `/api/auth/callback`) and keeps its events in PostgreSQL, where the sessions live. `OIDC_ISSUER_INTERNAL` names where the service reaches an issuer served behind the site's own proxy; the issuer's public name, which the tokens carry, is still checked. Without the settings every reader is anonymous, as before, and the masthead offers no sign-in.
+
+Locally, Dex with its mock connector, which signs a fixed test person in with no password:
+
+```sh
+podman compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.signin.yml up --build
+```
+
+Dex is at `http://localhost:${WEB_PORT}/dex`, behind the web container's proxy (`deploy/base/nginx/dex-proxy.conf`); its configuration is a template the image renders from the environment (`deploy/compose/dex.local.yaml.tpl`).
+
 ## The vault
 
 A route under `pii_scrubbed` or `digest_only` may keep its original bodies in the vault (`docs/adr/0009-body-vault.md`): its wrapper deposits each body with the ingest token at `PUT /api/bodies/<sha256>`, and the operator resolves one in the inspector with the operator token, `VAULT_TOKEN`, which must differ from the ingest token (the service refuses to start otherwise). The inspector shows a body only when its bytes hash to the digest the event holds.

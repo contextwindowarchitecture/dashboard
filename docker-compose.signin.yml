@@ -1,0 +1,29 @@
+# Sign-in on the local stack (ADR-0010), layered on the PostgreSQL one, since sessions live there:
+#
+#   podman compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.signin.yml up --build
+#
+# Dex at http://localhost:${WEB_PORT}/dex, behind the web container's proxy, with its mock connector: "sign in"
+# signs a fixed test person in, no password. The ingest service reaches Dex directly (OIDC_ISSUER_INTERNAL) and
+# names it by the address a browser uses.
+services:
+  dashboard-dex:
+    image: ghcr.io/dexidp/dex:v2.45.1@sha256:8499afd690c437f52301efd2b05b2455da5bd2dfc20332cd697dc9937f808462
+    command: ["dex", "serve", "/etc/dex/config.yaml.tpl"]
+    environment:
+      DEX_ISSUER: http://localhost:${WEB_PORT:-8080}/dex
+      DEX_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-local-dev-dex-secret}
+      DEX_REDIRECT: http://localhost:${WEB_PORT:-8080}/api/auth/callback
+    volumes:
+      - ./deploy/compose/dex.local.yaml.tpl:/etc/dex/config.yaml.tpl:ro,Z
+
+  dashboard-ingest:
+    environment:
+      OIDC_ISSUER: http://localhost:${WEB_PORT:-8080}/dex
+      OIDC_ISSUER_INTERNAL: http://dashboard-dex:5556/dex
+      OIDC_CLIENT_ID: cwa-dashboard
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-local-dev-dex-secret}
+      OIDC_REDIRECT_URI: http://localhost:${WEB_PORT:-8080}/api/auth/callback
+
+  web:
+    volumes:
+      - ./deploy/base/nginx/dex-proxy.conf:/opt/app-root/etc/nginx.default.d/dex-proxy.conf:ro,Z
