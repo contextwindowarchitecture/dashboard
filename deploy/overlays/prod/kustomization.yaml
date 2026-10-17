@@ -17,9 +17,9 @@ resources:
 
 images:
   - name: quay.io/contextwindowarchitecture/dashboard
-    newTag: d34a69ea5ef6 # the 12-character git SHA of the commit the image was built from
+    newTag: 90dd9f0fa93d # the 12-character git SHA of the commit the image was built from
   - name: quay.io/contextwindowarchitecture/dashboard-ingest
-    newTag: d34a69ea5ef6 # the 12-character git SHA of the commit the image was built from
+    newTag: 90dd9f0fa93d # the 12-character git SHA of the commit the image was built from
 
 patches:
   # The organisation's Quay repositories are private: both Deployments pull with the secret dashboard-pull, a robot
