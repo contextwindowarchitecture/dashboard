@@ -3,7 +3,7 @@
 // (validate.ts), so that a document of an unknown schema is a state, not an exception. Phase 1 reads
 // the static tree; Phase 2's query API is a second implementation of the same interface.
 
-import { errorMessage } from "./config"
+import { errorMessage } from "./config.ts"
 
 export type SourceErrorKind = "not-found" | "http" | "network" | "parse" | "aborted"
 

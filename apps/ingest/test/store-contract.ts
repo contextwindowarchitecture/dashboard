@@ -18,7 +18,7 @@ import type { EventStore } from "../src/event-store.ts"
 
 const TREE = resolve(import.meta.dirname, "../../../packages/demo-traffic/fixtures")
 const read = <T>(path: string) => JSON.parse(readFileSync(join(TREE, path), "utf8")) as T
-const EVENTS = readdirSync(join(TREE, "events"))
+export const DEMO_EVENTS = readdirSync(join(TREE, "events"))
   .filter((name) => name.endsWith(".json") && name !== "index.json")
   .map((name) => read<AssemblyEventV1>(`events/${name}`))
 const SESSIONS = readdirSync(join(TREE, "sessions")).map((name) => name.replace(/\.json$/, ""))
@@ -45,11 +45,11 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
     it("serves the demo tree's documents once it holds the demo tree's events", async () => {
       const { store, done } = await open()
       try {
-        await writeAll(store, EVENTS)
+        await writeAll(store, DEMO_EVENTS)
         expect(generatedAside(await store.index())).toEqual(
           generatedAside(read<EventsIndexV1>("events/index.json")),
         )
-        for (const event of EVENTS) expect(await store.event(event.event_id)).toEqual(event)
+        for (const event of DEMO_EVENTS) expect(await store.event(event.event_id)).toEqual(event)
         for (const id of SESSIONS) {
           expect(await store.session(id), id).toEqual(read<SessionV1>(`sessions/${id}.json`))
         }
@@ -64,9 +64,9 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
     it("closes what falls out of the window into its day, and lists the day", async () => {
       const { store, done } = await open()
       try {
-        await writeAll(store, EVENTS)
+        await writeAll(store, DEMO_EVENTS)
         const later = {
-          ...EVENTS.find((e) => e.session === undefined && e.outcome === "assembled")!,
+          ...DEMO_EVENTS.find((e) => e.session === undefined && e.outcome === "assembled")!,
           event_id: "01M5ZZZZZZZZZZZZZZZZZZZZZZ",
           recorded_at: "2026-10-17T12:00:00.000Z",
         }
@@ -74,7 +74,7 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
         const index = await store.index()
         expect(index.events.map((row) => row.event_id)).toEqual([later.event_id])
         expect(index.windows).toEqual([
-          { day: "2026-10-15", path: "index/2026-10-15.json", events: EVENTS.length },
+          { day: "2026-10-15", path: "index/2026-10-15.json", events: DEMO_EVENTS.length },
         ])
         const day = await store.window("2026-10-15")
         expect(day?.events.map((row) => row.event_id).sort()).toEqual(
@@ -90,7 +90,7 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
     it("refuses a second event with the same id, and an invalid one, writing neither", async () => {
       const { store, done } = await open()
       try {
-        const [first] = EVENTS
+        const [first] = DEMO_EVENTS
         await writeAll(store, [first!])
         const again = await store.write(first)
         expect(again).toMatchObject({ ok: false, kind: "duplicate" })
@@ -107,7 +107,7 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
     it("has nothing for an id, a session or a day it does not hold, or one that names no document", async () => {
       const { store, done } = await open()
       try {
-        await writeAll(store, [EVENTS[0]!])
+        await writeAll(store, [DEMO_EVENTS[0]!])
         expect(await store.event("01M5ZZZZZZZZZZZZZZZZZZZZZY")).toBeUndefined()
         expect(await store.event("../fleet")).toBeUndefined()
         expect(await store.session("no-such-session")).toBeUndefined()

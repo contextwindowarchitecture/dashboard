@@ -11,7 +11,7 @@ import { RENDERERS, TOKENIZERS } from "@cwa-dashboard/assembler"
 import { COMPONENTS } from "@cwa-dashboard/contract/data"
 
 import { ReplayTimeoutError, type Runner } from "./runner.ts"
-import type { Store } from "./store.ts"
+import type { EventStore as Store } from "./event-store.ts"
 
 export interface IngestOptions {
   readonly runner: Runner
@@ -155,6 +155,41 @@ export function createIngestServer(options: IngestOptions): Server {
     }
   }
 
+  // The tree's documents at the tree's paths, from the store (ADR-0007), with the cache rules nginx
+  // gives the tree: an event never changes; every other document does.
+  async function dataRoute(path: string, response: ServerResponse) {
+    const { store } = options
+    if (store === undefined) {
+      return fail(response, 503, "not-configured", [
+        "No event store: set DATABASE_URL or EVENTS_DIR to serve events.",
+      ])
+    }
+    const id = (pattern: RegExp) => {
+      const match = pattern.exec(path)
+      if (match === null) return undefined
+      try {
+        return decodeURIComponent(match[1]!)
+      } catch {
+        return undefined
+      }
+    }
+    const NO_CACHE = { "cache-control": "no-cache" }
+    let document: unknown
+    let headers = NO_CACHE
+    if (path === "/data/events/index.json") document = await store.index()
+    else if (path === "/data/fleet.json") document = await store.fleet()
+    else if (id(/^\/data\/events\/index\/([^/]+)\.json$/) !== undefined) {
+      document = await store.window(id(/^\/data\/events\/index\/([^/]+)\.json$/)!)
+    } else if (id(/^\/data\/events\/([^/]+)\.json$/) !== undefined) {
+      document = await store.event(id(/^\/data\/events\/([^/]+)\.json$/)!)
+      headers = { "cache-control": "public, max-age=31536000, immutable" }
+    } else if (id(/^\/data\/sessions\/([^/]+)\.json$/) !== undefined) {
+      document = await store.session(id(/^\/data\/sessions\/([^/]+)\.json$/)!)
+    }
+    if (document === undefined) return fail(response, 404, "not-found", [`No document at ${path}.`])
+    return send(response, 200, document, headers)
+  }
+
   return createServer((request, response) => {
     const path = new URL(request.url ?? "/", "http://localhost").pathname
     const route = async () => {
@@ -169,6 +204,10 @@ export function createIngestServer(options: IngestOptions): Server {
       if (path === "/events") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
         return eventsRoute(request, response)
+      }
+      if (path.startsWith("/data/")) {
+        if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
+        return dataRoute(path, response)
       }
       if (path === "/replay") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
