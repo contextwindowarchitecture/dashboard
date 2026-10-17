@@ -415,8 +415,12 @@ function ShadowRun({
         <button
           type="button"
           data-slot="inverse-button"
-          onClick={() => void shadow()}
-          disabled={text.trim() === "" || run.status === "running"}
+          // Not disabled while running: a disabled button would drop the reader's focus.
+          onClick={() => {
+            if (run.status !== "running") void shadow()
+          }}
+          disabled={text.trim() === ""}
+          aria-disabled={run.status === "running"}
           aria-busy={run.status === "running"}
         >
           Shadow

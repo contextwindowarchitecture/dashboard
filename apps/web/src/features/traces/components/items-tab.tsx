@@ -5,7 +5,15 @@
 // service decides, and the body is shown only when its bytes are the ones the event digests.
 
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
-import { createContext, type FormEvent, type ReactNode, useContext, useRef, useState } from "react"
+import {
+  createContext,
+  type FormEvent,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 
 import { SlotBadge } from "../../../components/dashboard/slot-badge"
 import { planeStyle } from "../../../lib/plane"
@@ -65,9 +73,21 @@ function VaultPanel({
   readonly onToken: (token: string | undefined) => void
 }) {
   const [typed, setTyped] = useState("")
+  // The control a token change replaces had the focus; it goes to the one that takes its place.
+  const moved = useRef(false)
+  const field = useRef<HTMLInputElement>(null)
+  const forget = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!moved.current) return
+    moved.current = false
+    ;(token === undefined ? field.current : forget.current)?.focus()
+  }, [token])
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    if (typed !== "") onToken(typed)
+    if (typed !== "") {
+      moved.current = true
+      onToken(typed)
+    }
     setTyped("")
   }
   return (
@@ -95,6 +115,7 @@ function VaultPanel({
               Operator token
             </label>
             <input
+              ref={field}
               id="vault-token"
               type="password"
               autoComplete="off"
@@ -110,7 +131,15 @@ function VaultPanel({
       ) : (
         <p data-slot="chip-row">
           <span data-slot="cell-note">The token is held for this page only.</span>
-          <button type="button" data-slot="ghost-button" onClick={() => onToken(undefined)}>
+          <button
+            ref={forget}
+            type="button"
+            data-slot="ghost-button"
+            onClick={() => {
+              moved.current = true
+              onToken(undefined)
+            }}
+          >
             Forget the token
           </button>
         </p>
@@ -124,6 +153,12 @@ function Resolve({ sha256 }: { readonly sha256: string }) {
   const { fetchFn = fetch } = useData()
   const [answer, setAnswer] = useState<VaultAnswer | "running" | undefined>(undefined)
   const inFlight = useRef<AbortController | null>(null)
+  // A resolved body takes the place of the button that had the focus, so it takes the focus.
+  const resolved = useRef<HTMLElement>(null)
+  const ok = answer !== undefined && answer !== "running" && answer.kind === "ok"
+  useEffect(() => {
+    if (ok) resolved.current?.focus()
+  }, [ok])
   if (access === undefined || access.token === undefined) return null
   const { apiBase, base, token } = access
   const resolve = async () => {
@@ -140,7 +175,7 @@ function Resolve({ sha256 }: { readonly sha256: string }) {
   }
   if (answer !== undefined && answer !== "running" && answer.kind === "ok") {
     return (
-      <section aria-label="Resolved body" data-slot="stack">
+      <section ref={resolved} tabIndex={-1} aria-label="Resolved body" data-slot="stack">
         <p data-label="">resolved from the vault · SHA-256 checked</p>
         <pre>{answer.text}</pre>
       </section>
@@ -162,8 +197,11 @@ function Resolve({ sha256 }: { readonly sha256: string }) {
         <button
           type="button"
           data-slot="ghost-button"
-          onClick={() => void resolve()}
-          disabled={answer === "running"}
+          // Not disabled while running: a disabled button would drop the reader's focus.
+          onClick={() => {
+            if (answer !== "running") void resolve()
+          }}
+          aria-disabled={answer === "running"}
           aria-busy={answer === "running"}
         >
           Resolve from the vault
