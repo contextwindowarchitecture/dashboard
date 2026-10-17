@@ -1,8 +1,8 @@
 // Remote data ownership (dashboard-plan.md 9): TanStack Query over the EventSource, one hook per
-// document kind, each parsed at the boundary. Events, sessions and the fleet report never change
-// once written, so they are fresh for good; the index is the one document that changes, so it
-// refetches on focus and every 30 seconds while the page is visible, and pages keep showing what
-// they had while it does. A document that is not there, not JSON or not supported is never
+// document kind, each parsed at the boundary. An event never changes once written, so it is fresh
+// for good. The index, a session and the fleet report change as events arrive (a store rebuilds
+// them, ADR-0007), so they refetch on focus and every 30 seconds while the page is visible, and
+// pages keep showing what they had while they do. A document that is not there, not JSON or not supported is never
 // retried; a network or server failure is retried once.
 
 import { useQueries, useQuery, type UseQueryResult } from "@tanstack/react-query"
@@ -86,6 +86,7 @@ const sessionOptions = (data: { source: EventSource; root: string }, sessionId: 
     ["session", sessionId],
     (s) => s.url(`sessions/${sessionId}.json`),
     (s, signal) => s.session(sessionId, signal),
+    true,
   )
 
 export const useSession = (sessionId: string): DocumentQuery<"session"> =>
@@ -103,6 +104,7 @@ export const useFleet = () =>
     ["fleet"],
     (s) => s.url("fleet.json"),
     (s, signal) => s.fleet(signal),
+    true,
   )
 
 export type { DocumentByKind }

@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, renderHook, waitFor } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { describe, expect, it } from "vitest"
@@ -43,6 +43,33 @@ describe("the queries and their region states", () => {
     const fleet = renderHook(() => regionOf(useFleet(), { what: "the fleet report" }), { wrapper })
     await waitFor(() => expect(session.result.current.status).toBe("ok"))
     await waitFor(() => expect(fleet.result.current.status).toBe("ok"))
+  })
+
+  it("reads the index, a session and the fleet report again on focus, an event never", async () => {
+    // A store keeps sessions and the fleet report current as events arrive; an event never changes.
+    const requests: string[] = []
+    const { wrapper } = harness({ onRequest: (url) => requests.push(url) })
+    const { events } = (await (await fixtureFetch()("/data/events/index.json")).json()) as {
+      events: { event_id: string }[]
+    }
+    const id = events[0]!.event_id
+    const hooks = [
+      renderHook(() => regionOf(useIndex(), { what: "the index" }), { wrapper }),
+      renderHook(() => regionOf(useSession("refund-7"), { what: "the session" }), { wrapper }),
+      renderHook(() => regionOf(useFleet(), { what: "the fleet report" }), { wrapper }),
+      renderHook(() => regionOf(useEvent(id), { what: "the event" }), { wrapper }),
+    ]
+    for (const hook of hooks) await waitFor(() => expect(hook.result.current.status).toBe("ok"))
+    const count = (part: string) => requests.filter((url) => url.endsWith(part)).length
+    act(() => {
+      focusManager.setFocused(false)
+      focusManager.setFocused(true)
+    })
+    await waitFor(() => expect(count("fleet.json")).toBe(2))
+    await waitFor(() => expect(count("sessions/refund-7.json")).toBe(2))
+    await waitFor(() => expect(count("events/index.json")).toBe(2))
+    expect(count(`events/${id}.json`)).toBe(1)
+    focusManager.setFocused(undefined)
   })
 
   it("says a missing event is not found, and never retries it", async () => {
