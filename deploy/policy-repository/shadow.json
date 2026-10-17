@@ -2,7 +2,7 @@
   "api": "https://dashboard.contextwindowarchitecture.io/api",
   "tenant": "default",
   "corpora": {
-    "support-chat": "support-chat-baseline"
+    "support-chat": "cache-first-chat-baseline"
   },
   "limits": {
     "max-refusals-added": 0,

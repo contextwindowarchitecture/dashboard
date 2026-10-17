@@ -41,7 +41,7 @@ Every pull request runs `policy-check`, which:
    dashboard's assembler, as recorded and with the new route policy and profile together, and fails over the
    limits.
 
-A route with no corpus in `shadow.json` fails, so nothing merges unshadowed: add the route's corpus first. A check
+A route with no corpus in `shadow.json` fails, so nothing merges unshadowed: add the route's corpus first. A route's corpus holds its calls under the route policy version its profiles bind: a profile binds one (R-20), so in a snapshot running another the assembler rejects it, and a corpus frozen from every call of a route that has run several route policies fails every profile on the calls of the others. A check
 that cannot reach the dashboard fails rather than passes. Each route's shadow report is kept as the run's artifact.
 
 `shadow.json`:
