@@ -40,12 +40,11 @@ import {
   RENDERERS,
   TOKENIZERS,
 } from "@cwa-dashboard/assembler"
-import { IMPLEMENTATIONS } from "@cwa-dashboard/contract/implementations"
 import {
   buildSessions,
+  fleetReport,
   indexFromRows,
   indexRow,
-  serviceRows,
   windowRows,
 } from "@cwa-dashboard/telemetry/derive"
 import type { AssemblyEventV1, FleetReportV1 } from "@cwa-dashboard/telemetry/types"
@@ -152,37 +151,22 @@ function volumeCalls(count: number, random: () => number): Call[] {
   })
 }
 
-function fleetReport(events: readonly AssemblyEventV1[], generatedAt: string): FleetReportV1 {
+function fleet(events: readonly AssemblyEventV1[], generatedAt: string): FleetReportV1 {
   const lock = readJson(join(ROOT, "packages/contract/vendor/cwa.lock.json")) as {
     repository: string
     spec_commit: string
   }
-  return {
-    $schema: "cwa-dashboard/fleet-report/v1",
-    generated_at: generatedAt,
+  return fleetReport(events, {
+    generatedAt,
     contract: { repository: lock.repository, commit: lock.spec_commit },
-    implementations: IMPLEMENTATIONS.map((implementation) => ({
-      language: implementation.id as FleetReportV1["implementations"][number]["language"],
-      name: implementation.report.implementation.name,
-      version: implementation.report.implementation.version,
-      source: {
-        repository: implementation.source.repository,
-        commit: implementation.source.commit,
-        dirty: implementation.source.dirty,
-      },
-      report: implementation.report,
-      // Known only where the implementation says: the built TypeScript assembler exports its tables.
-      ...(implementation.id === "typescript"
-        ? { tokenizers: Object.keys(TOKENIZERS).sort(), renderers: [...RENDERERS].sort() }
-        : {}),
-    })),
     // The one lock this generator knows is the built assembler's, so every demo service, which
     // runs it, is compared with the dashboard's contract file by file.
-    services: serviceRows(events, {
+    contractFiles: {
       files: CONTRACT_FILES,
       knownLocks: { [BUILT_ASSEMBLER.contract.lock_sha256]: BUILT_CONTRACT_FILES },
-    }),
-  }
+    },
+    typescriptTables: { tokenizers: Object.keys(TOKENIZERS), renderers: [...RENDERERS] },
+  })
 }
 
 const text = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`
@@ -227,7 +211,7 @@ export function generateTree(options: Options = {}): Map<string, string> {
   for (const event of events) files.set(`events/${event.event_id}.json`, text(event))
   for (const session of buildSessions(events))
     files.set(`sessions/${session.session_id}.json`, text(session))
-  files.set("fleet.json", text(fleetReport(events, generatedAt)))
+  files.set("fleet.json", text(fleet(events, generatedAt)))
   return files
 }
 

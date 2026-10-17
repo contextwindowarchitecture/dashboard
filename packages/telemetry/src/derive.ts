@@ -4,6 +4,7 @@
 // the events and the contract; nothing is estimated, and what an event cannot say is left out.
 
 import { REASONS, SLOT_DEFAULTS } from "@cwa-dashboard/contract/data"
+import { IMPLEMENTATIONS } from "@cwa-dashboard/contract/implementations"
 
 import type {
   AssemblyEventV1,
@@ -235,7 +236,6 @@ export function percentile(sorted: readonly number[], p: number): number {
   return sorted[Math.min(index, sorted.length - 1)]!
 }
 
-/** Each service seen in the events: its assembler, contract lock, routes and measured latency. */
 /** The dashboard's contract files and the locks the writer knows, each by path with its SHA-256. */
 export interface ContractFiles {
   readonly files: Readonly<Record<string, string>>
@@ -253,6 +253,7 @@ function compareFiles(lockSha256: string, contract: ContractFiles | undefined) {
   }
 }
 
+/** Each service seen in the events: its assembler, contract lock, routes and measured latency. */
 export function serviceRows(
   events: readonly AssemblyEventV1[],
   contract?: ContractFiles,
@@ -295,4 +296,53 @@ export function serviceRows(
               },
       }
     })
+}
+
+/** What the fleet report needs besides the events, each known to its writer only. */
+export interface FleetInputs {
+  readonly generatedAt: string
+  /** The specification repository and commit the dashboard's contract lock pins. */
+  readonly contract: { readonly repository: string; readonly commit: string }
+  /** The dashboard's contract files, and the assembler locks the writer can compare with them. */
+  readonly contractFiles: ContractFiles
+  /** The TypeScript assembler's tokenizer and renderer ids, which only its build exports. */
+  readonly typescriptTables?: {
+    readonly tokenizers: readonly string[]
+    readonly renderers: readonly string[]
+  }
+}
+
+/**
+ * The fleet report: every implementation's published conformance run, from the vendored reports,
+ * and every service the events name, from the events. The generator, the tree store and the
+ * PostgreSQL store build it here, one way.
+ */
+export function fleetReport(
+  events: readonly AssemblyEventV1[],
+  inputs: FleetInputs,
+): FleetReportV1 {
+  return {
+    $schema: "cwa-dashboard/fleet-report/v1",
+    generated_at: inputs.generatedAt,
+    contract: { repository: inputs.contract.repository, commit: inputs.contract.commit },
+    implementations: IMPLEMENTATIONS.map((implementation) => ({
+      language: implementation.id as FleetReportV1["implementations"][number]["language"],
+      name: implementation.report.implementation.name,
+      version: implementation.report.implementation.version,
+      source: {
+        repository: implementation.source.repository,
+        commit: implementation.source.commit,
+        dirty: implementation.source.dirty,
+      },
+      report: implementation.report,
+      // Known only where the implementation says: the built TypeScript assembler exports its tables.
+      ...(implementation.id === "typescript" && inputs.typescriptTables !== undefined
+        ? {
+            tokenizers: [...inputs.typescriptTables.tokenizers].sort(),
+            renderers: [...inputs.typescriptTables.renderers].sort(),
+          }
+        : {}),
+    })),
+    services: serviceRows(events, inputs.contractFiles),
+  }
 }
