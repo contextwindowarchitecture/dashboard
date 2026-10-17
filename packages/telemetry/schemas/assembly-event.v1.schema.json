@@ -48,6 +48,11 @@
         }
       }
     },
+    "tenant": {
+      "description": "The tenant the event belongs to (ADR-0012), set by the wrapper's configuration; absent, the default.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
     "assembler": {
       "description": "The implementation that assembled: its language, as implementations/index.json names it, its package name and its version.",
       "type": "object",

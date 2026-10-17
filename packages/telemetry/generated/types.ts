@@ -26,6 +26,10 @@ export type CWADashboardAssemblyEvent = {
     environment?: string
   }
   /**
+   * The tenant the event belongs to (ADR-0012), set by the wrapper's configuration; absent, the default.
+   */
+  tenant?: string
+  /**
    * The implementation that assembled: its language, as implementations/index.json names it, its package name and its version.
    */
   assembler: {
@@ -202,11 +206,15 @@ export interface Lock {
 export type ComplianceBundleV1 = CWADashboardComplianceBundle
 
 /**
- * A named, frozen list of events for shadow regression (ADR-0008): each event's id and, when it was assembled or refused, the digest of the snapshot it froze, so a later run replays the same snapshots. Never overwritten.
+ * A named, frozen list of events for shadow regression (ADR-0008): each event's id and, when it was assembled or refused, the digest of the snapshot it froze, so a later run replays the same snapshots. Never overwritten. A corpus holds one tenant's events.
  */
 export interface CWADashboardCorpus {
   $schema: "cwa-dashboard/corpus/v1"
   name: string
+  /**
+   * The tenant whose events the corpus holds (ADR-0012); absent, the default.
+   */
+  tenant?: string
   created_at: string
   /**
    * @minItems 1
@@ -645,3 +653,17 @@ export interface Producer {
 
 /** https://contextwindowarchitecture.io/schema/dashboard/sources-report.v1.schema.json */
 export type SourcesReportV1 = CWADashboardSourcesReport
+
+/**
+ * The tenants a store holds events for (ADR-0012), each with its number of events; the API lists those the reader may read. The default tenant's documents are at the data root, another's under tenants/<tenant>/.
+ */
+export interface CWADashboardTenants {
+  $schema: "cwa-dashboard/tenants/v1"
+  tenants: {
+    tenant: string
+    events: number
+  }[]
+}
+
+/** https://contextwindowarchitecture.io/schema/dashboard/tenants.v1.schema.json */
+export type TenantsV1 = CWADashboardTenants

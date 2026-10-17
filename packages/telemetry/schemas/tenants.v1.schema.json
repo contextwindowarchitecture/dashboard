@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contextwindowarchitecture.io/schema/dashboard/tenants.v1.schema.json",
+  "title": "CWA dashboard tenants",
+  "description": "The tenants a store holds events for (ADR-0012), each with its number of events; the API lists those the reader may read. The default tenant's documents are at the data root, another's under tenants/<tenant>/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "tenants"],
+  "properties": {
+    "$schema": {
+      "const": "cwa-dashboard/tenants/v1"
+    },
+    "tenants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tenant", "events"],
+        "properties": {
+          "tenant": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          },
+          "events": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

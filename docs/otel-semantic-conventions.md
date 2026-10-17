@@ -53,6 +53,7 @@ One row per event field. A field path uses dots between properties and `[]` for 
 | `service.name` | `service.name` | string | OpenTelemetry's resource attribute |
 | `service.instance.id` | `service.instance` | string | OpenTelemetry's resource attribute |
 | `deployment.environment.name` | `service.environment` | string | `demo` for demo traffic |
+| `cwa.tenant` | `tenant` | string | Absent for the default tenant; the wrapper's `tenant` setting (`docs/adr/0012-tenants.md`) |
 | `cwa.assembler.language` | `assembler.language` | string | `python`, `typescript`, `go` or `rust`, as `implementations/index.json` names them |
 | `cwa.assembler.name` | `assembler.name` | string | The package name |
 | `cwa.assembler.version` | `assembler.version` | string | |

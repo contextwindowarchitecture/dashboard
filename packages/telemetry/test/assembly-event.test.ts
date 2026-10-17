@@ -349,3 +349,17 @@ describe("assembly-event v1: bodies withheld by role (ADR-0011)", () => {
     }
   })
 })
+
+describe("assembly-event v1: the tenant (ADR-0012)", () => {
+  it("accepts an event that names its tenant, and one that names none (the default)", () => {
+    expectValid({ ...assembled(), tenant: "northwind" })
+    expectValid({ ...assembled(), tenant: "default" })
+    expectValid(assembled())
+  })
+
+  it("holds a tenant to lowercase letters, digits, dots, dashes and underscores, at most 64", () => {
+    for (const tenant of ["", "North Wind", "../x", "-x", "a".repeat(65), 3]) {
+      expectInvalid({ ...assembled(), tenant })
+    }
+  })
+})
