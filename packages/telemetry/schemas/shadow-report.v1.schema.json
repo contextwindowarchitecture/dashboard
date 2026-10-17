@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contextwindowarchitecture.io/schema/dashboard/shadow-report.v1.schema.json",
+  "title": "CWA dashboard shadow report",
+  "description": "What a candidate route policy or profile would change over a frozen corpus (ADR-0008): each full event's snapshot replayed as stored and with the candidate, through the same pinned assembler, compared by outcome, refusal, input tokens, exclusions and the included items in order. Events that cannot be replayed faithfully are counted as skipped, with why.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "generated_at", "corpus", "assembler", "candidate", "summary", "events"],
+  "properties": {
+    "$schema": {
+      "const": "cwa-dashboard/shadow-report/v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "corpus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "events"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "events": {
+          "$ref": "#/$defs/tally"
+        }
+      }
+    },
+    "assembler": {
+      "description": "The assembler both sides were replayed through.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "name", "version"],
+      "properties": {
+        "language": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "name": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "version": {
+          "$ref": "#/$defs/nonblank"
+        }
+      }
+    },
+    "candidate": {
+      "description": "What the candidate replaces: the route policy's route and version, the profile's id and version.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "route_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["route", "version"],
+          "properties": {
+            "route": {
+              "$ref": "#/$defs/nonblank"
+            },
+            "version": {
+              "$ref": "#/$defs/nonblank"
+            }
+          }
+        },
+        "profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "version"],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/nonblank"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "replayed",
+        "skipped",
+        "changed",
+        "refusals_added",
+        "refusals_removed",
+        "candidate_rejected",
+        "shedding_change",
+        "placement_changed",
+        "baseline_differs"
+      ],
+      "properties": {
+        "replayed": {
+          "$ref": "#/$defs/tally"
+        },
+        "skipped": {
+          "description": "Events not replayed, by why: redacted, rejected (before assembly when recorded), missing (no longer in the store).",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/tally"
+          }
+        },
+        "changed": {
+          "$ref": "#/$defs/tally"
+        },
+        "refusals_added": {
+          "description": "Events the baseline assembled and the candidate refuses.",
+          "$ref": "#/$defs/tally"
+        },
+        "refusals_removed": {
+          "description": "Events the baseline refused and the candidate assembles.",
+          "$ref": "#/$defs/tally"
+        },
+        "candidate_rejected": {
+          "description": "Events whose snapshot the assembler rejects with the candidate in it (R-20 binding, a schema, a check).",
+          "$ref": "#/$defs/tally"
+        },
+        "shedding_change": {
+          "description": "The candidate's over_budget exclusions minus the baseline's, over the replayed events.",
+          "type": "integer"
+        },
+        "placement_changed": {
+          "description": "Events both sides assemble whose included items, in order, differ.",
+          "$ref": "#/$defs/tally"
+        },
+        "baseline_differs": {
+          "description": "Events whose baseline replay does not reproduce the recorded payload hash: a difference between implementations, not the candidate's.",
+          "$ref": "#/$defs/tally"
+        }
+      }
+    },
+    "events": {
+      "description": "Every event of the corpus: changed, unchanged or skipped; a changed one with both sides.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/shadowEvent"
+      }
+    }
+  },
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "shadowEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "status"],
+      "properties": {
+        "event_id": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "status": {
+          "enum": ["changed", "unchanged", "skipped"]
+        },
+        "skipped": {
+          "enum": ["redacted", "rejected", "missing"]
+        },
+        "baseline_parity": {
+          "enum": ["match", "differ"]
+        },
+        "baseline": {
+          "$ref": "#/$defs/shadowSide"
+        },
+        "candidate": {
+          "$ref": "#/$defs/shadowSide"
+        }
+      }
+    },
+    "shadowSide": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "excluded", "included"],
+      "properties": {
+        "outcome": {
+          "enum": ["assembled", "refused", "rejected"]
+        },
+        "refused_reason": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "input_tokens": {
+          "$ref": "#/$defs/tally"
+        },
+        "excluded": {
+          "description": "The trace's exclusions, counted by reason code.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/tally"
+          }
+        },
+        "included": {
+          "description": "The included items' ids, in placement order.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "problems": {
+          "description": "For a rejected snapshot, the assembler's problems.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tally": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

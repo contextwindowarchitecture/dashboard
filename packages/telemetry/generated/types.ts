@@ -459,6 +459,109 @@ export interface CWADashboardSession {
 /** https://contextwindowarchitecture.io/schema/dashboard/session.v1.schema.json */
 export type SessionV1 = CWADashboardSession
 
+export type Tally = number
+
+/**
+ * What a candidate route policy or profile would change over a frozen corpus (ADR-0008): each full event's snapshot replayed as stored and with the candidate, through the same pinned assembler, compared by outcome, refusal, input tokens, exclusions and the included items in order. Events that cannot be replayed faithfully are counted as skipped, with why.
+ */
+export interface CWADashboardShadowReport {
+  $schema: "cwa-dashboard/shadow-report/v1"
+  generated_at: string
+  corpus: {
+    name: string
+    events: Tally
+  }
+  /**
+   * The assembler both sides were replayed through.
+   */
+  assembler: {
+    language: string
+    name: string
+    version: string
+  }
+  /**
+   * What the candidate replaces: the route policy's route and version, the profile's id and version.
+   */
+  candidate: {
+    route_policy?: {
+      route: string
+      version: string
+    }
+    profile?: {
+      id: string
+      version: number
+    }
+  }
+  summary: {
+    replayed: Tally
+    /**
+     * Events not replayed, by why: redacted, rejected (before assembly when recorded), missing (no longer in the store).
+     */
+    skipped: {
+      [k: string]: Tally | undefined
+    }
+    changed: Tally
+    /**
+     * Events the baseline assembled and the candidate refuses.
+     */
+    refusals_added: number
+    /**
+     * Events the baseline refused and the candidate assembles.
+     */
+    refusals_removed: number
+    /**
+     * Events whose snapshot the assembler rejects with the candidate in it (R-20 binding, a schema, a check).
+     */
+    candidate_rejected: number
+    /**
+     * The candidate's over_budget exclusions minus the baseline's, over the replayed events.
+     */
+    shedding_change: number
+    /**
+     * Events both sides assemble whose included items, in order, differ.
+     */
+    placement_changed: number
+    /**
+     * Events whose baseline replay does not reproduce the recorded payload hash: a difference between implementations, not the candidate's.
+     */
+    baseline_differs: number
+  }
+  /**
+   * Every event of the corpus: changed, unchanged or skipped; a changed one with both sides.
+   */
+  events: ShadowEvent[]
+}
+export interface ShadowEvent {
+  event_id: string
+  status: "changed" | "unchanged" | "skipped"
+  skipped?: "redacted" | "rejected" | "missing"
+  baseline_parity?: "match" | "differ"
+  baseline?: ShadowSide
+  candidate?: ShadowSide
+}
+export interface ShadowSide {
+  outcome: "assembled" | "refused" | "rejected"
+  refused_reason?: string
+  input_tokens?: Tally
+  /**
+   * The trace's exclusions, counted by reason code.
+   */
+  excluded: {
+    [k: string]: Tally | undefined
+  }
+  /**
+   * The included items' ids, in placement order.
+   */
+  included: string[]
+  /**
+   * For a rejected snapshot, the assembler's problems.
+   */
+  problems?: string[]
+}
+
+/** https://contextwindowarchitecture.io/schema/dashboard/shadow-report.v1.schema.json */
+export type ShadowReportV1 = CWADashboardShadowReport
+
 export type Count = number
 
 /**
