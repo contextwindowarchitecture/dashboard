@@ -229,6 +229,35 @@ export interface CWADashboardCorpus {
 /** https://contextwindowarchitecture.io/schema/dashboard/corpus.v1.schema.json */
 export type CorpusV1 = CWADashboardCorpus
 
+/**
+ * A route policy or a profile in the making (ADR-0013), kept per author by the API: its kind, the registry entry it started from or none, the route it is for, the document as last saved, valid or not, and when.
+ */
+export interface CWADashboardDraft {
+  $schema: "cwa-dashboard/draft/v1"
+  id: string
+  kind: "route_policy" | "profile"
+  started_from:
+    | null
+    | {
+        profile: {
+          id: string
+          version: number
+        }
+      }
+    | {
+        route_policy: {
+          route: string
+          version: string
+        }
+      }
+  route: string
+  document: unknown
+  updated_at: string
+}
+
+/** https://contextwindowarchitecture.io/schema/dashboard/draft.v1.schema.json */
+export type DraftV1 = CWADashboardDraft
+
 export type Row = {
   event_id: string
   recorded_at: string
