@@ -101,7 +101,12 @@ beforeAll(async () => {
     else withApp = base
   }
   // Sessions live in the shared store, so a session made on one server holds on both.
-  issuer.signInAs({ sub: "ada", name: "Ada Lovelace", groups: ["owners"] })
+  issuer.signInAs({
+    sub: "ada",
+    name: "Ada Lovelace",
+    preferred_username: "ada-l",
+    groups: ["owners"],
+  })
   cookie.ada = (await signIn(withApp)).session!.value
   issuer.signInAs({ sub: "grace", name: "Grace", groups: ["owners"] })
   cookie.grace = (await signIn(withApp)).session!.value
@@ -167,8 +172,9 @@ describe("publishing a draft", () => {
     expect(github.branches.get(`cwa-dashboard/${ID}`)!.get(PATH)).toBe(fileText(NEXT))
     const [pull] = github.pulls
     expect(pull!.title).toBe(`Profile ${PROFILE.id} v${NEXT.version} for ${PROFILE.route}`)
-    expect(pull!.body).toContain("Ada Lovelace")
-    expect(pull!.body).toContain("`ada`")
+    // The author by name and login, which GitHub links; the issuer's subject kept for the record.
+    expect(pull!.body).toContain("by **Ada Lovelace** (@ada-l)")
+    expect(pull!.body).toContain("| Author's subject | `ada` |")
     expect(pull!.body).toContain(`profile ${PROFILE.id} v${PROFILE.version}`)
     expect(pull!.body).toMatch(/Shadow over `chat`/)
     expect(pull!.body).toMatch(/\| replayed \| 3 \|/)

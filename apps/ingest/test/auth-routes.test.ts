@@ -19,6 +19,7 @@ const CLIENT = { clientId: "cwa-dashboard", clientSecret: "client-secret" }
 const ADA = {
   sub: "github|42",
   name: "Ada Lovelace",
+  preferred_username: "ada-l",
   email: "ada@example.com",
   groups: ["cwa:owners"],
 }
@@ -94,6 +95,8 @@ describe("sign-in", () => {
       sign_in: "configured",
       signed_in: true,
       name: "Ada Lovelace",
+      // The issuer's preferred_username: through Dex, the GitHub login.
+      username: "ada-l",
       email: "ada@example.com",
       groups: ["cwa:owners"],
     })

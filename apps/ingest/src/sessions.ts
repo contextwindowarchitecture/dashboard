@@ -22,6 +22,8 @@ export interface Login {
 export interface Identity {
   readonly subject: string
   readonly name: string
+  /** The issuer's preferred_username: through Dex, the GitHub login. */
+  readonly username?: string
   readonly email?: string
   readonly groups: readonly string[]
 }

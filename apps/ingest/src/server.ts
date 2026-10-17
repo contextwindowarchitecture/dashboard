@@ -791,7 +791,11 @@ export function createIngestServer(options: IngestOptions): Server {
       title: pullTitle(draft),
       body: pullBody({
         draft,
-        author: { name: reader.session.name, subject: author },
+        author: {
+          name: reader.session.name,
+          subject: author,
+          ...(reader.session.username === undefined ? {} : { username: reader.session.username }),
+        },
         tenant,
         path,
         shadow: run,
@@ -935,6 +939,7 @@ export function createIngestServer(options: IngestOptions): Server {
             ? {}
             : {
                 name: session.name,
+                ...(session.username === undefined ? {} : { username: session.username }),
                 ...(session.email === undefined ? {} : { email: session.email }),
                 groups: session.groups,
                 expires_at: session.expiresAt.toISOString(),

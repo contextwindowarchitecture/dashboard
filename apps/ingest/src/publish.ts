@@ -7,7 +7,12 @@ import type { DraftV1, ShadowReportV1 } from "@cwa-dashboard/telemetry/types"
 export interface Author {
   readonly name: string
   readonly subject: string
+  /** The issuer's preferred_username; through Dex, the GitHub login, which the body mentions. */
+  readonly username?: string
 }
+
+// A GitHub login: letters, digits and single dashes, at most 39; anything else is not mentioned.
+const LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/
 
 /** The draft's document as it is named: "profile cache-first-chat v2", "route policy support-chat illustrative/v2". */
 export function documentName(draft: DraftV1): string {
@@ -69,7 +74,7 @@ export function pullBody(input: {
 }): string {
   const { draft, author, tenant, path, shadow } = input
   const lines = [
-    `Drafted on the CWA dashboard by **${author.name}** (\`${author.subject}\`), from ${startedFrom(draft.started_from)}.`,
+    `Drafted on the CWA dashboard by **${author.name}**${author.username !== undefined && LOGIN.test(author.username) ? ` (@${author.username})` : ""}, from ${startedFrom(draft.started_from)}.`,
     "",
     "| | |",
     "| --- | --- |",
@@ -77,6 +82,7 @@ export function pullBody(input: {
     `| Route | \`${draft.route}\` |`,
     `| Tenant | \`${tenant}\` |`,
     `| Draft | \`${draft.id}\` |`,
+    `| Author's subject | \`${author.subject}\` |`,
     "",
   ]
   if (shadow.kind === "ran") {

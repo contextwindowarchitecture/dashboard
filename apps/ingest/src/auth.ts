@@ -237,12 +237,14 @@ export function createAuth({ config, sessions, now = () => new Date(), allowHttp
       ? claims["groups"].filter((g): g is string => typeof g === "string")
       : []
     const email = text("email")
+    const username = text("preferred_username")
     const session = newId()
     await sessions.createSession(
       hash(session),
       {
         subject: claims.sub,
         name: text("name") ?? text("preferred_username") ?? email ?? claims.sub,
+        ...(username === undefined ? {} : { username }),
         ...(email === undefined ? {} : { email }),
         groups,
       },
