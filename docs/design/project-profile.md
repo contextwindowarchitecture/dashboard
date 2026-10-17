@@ -16,8 +16,9 @@ The maintainer's decisions of 2026-10-15 (plan section 0):
 | D6 | The prototype's "R-25" proposal is RFC-D1 | ADR-0004 |
 | D7 | The published contract is the only vocabulary | `AGENTS.md`; the vocabulary test |
 | D8 | Redaction stays available destructively at the wrapper, and a route may opt into a content-addressed vault from Phase 2 | not yet: DP-1 (the envelope reserves `vault`) |
-| D9 | A minimal ingest service ships in Phase 1 | `apps/ingest`: `POST /events` (EVENTS_DIR, INGEST_TOKEN) and `POST /replay` (ADR-0005) |
-| D10 | The first wrapper is TypeScript, extracted from the generator | not yet: Phase 2 |
+| D9 | A minimal ingest service ships in Phase 1 | `apps/ingest`: `POST /events` (EVENTS_DIR or DATABASE_URL, INGEST_TOKEN), the read routes under `/data/` (ADR-0007) and `POST /replay` (ADR-0005) |
+| D10 | The first wrapper is TypeScript, extracted from the generator | `@contextwindowarchitecture/telemetry` in `toolkit` (`telemetry/typescript`), not yet published |
+| P2-D3 | Events in PostgreSQL first, behind a store interface; the query API serves the tree's documents at the tree's paths, so the app reads them with the source it has (`dataRoot` `/api/data`) | ADR-0007; `apps/ingest` (`DATABASE_URL`), `deploy/components/postgres` |
 | D11 | Hosting on the organisation's OpenShift cluster and quay.io, at `dashboard.contextwindowarchitecture.io`, demo traffic only | `deploy/`; live at https://dashboard.contextwindowarchitecture.io since 2026-10-16, images `24f9dbd2beb9` (linux/amd64, private on Quay, pulled with `dashboard-pull`), Let's Encrypt through cert-manager, the demo tree published |
 | D12 | Sandbox replay runs the real assembler server-side, never in the browser | ADR-0005 |
 

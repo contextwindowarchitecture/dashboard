@@ -6,7 +6,7 @@ It is not an assembler, not a gateway and not a policy store. It never decides w
 
 ## Status
 
-Phase 1 is built (DP-0 to DP-7 of the working plan). Over the committed demo traffic (`packages/demo-traffic/fixtures`, produced by the real TypeScript assembler and labelled `demo`), the web app shows:
+Phase 1 is built (DP-0 to DP-7 of the working plan), and Phase 2 is under way: events can be kept in PostgreSQL as well as the tree (`docs/adr/0007-store-and-query-api.md`), and the stream pages back through the closed days. Over the committed demo traffic (`packages/demo-traffic/fixtures`, produced by the real TypeScript assembler and labelled `demo`), the web app shows:
 
 - the overview and the trace stream, and each event in the trace inspector, with the stage walk;
 - the sessions, each with its turn timeline, turn detail and the played session;
