@@ -21,6 +21,7 @@ FROM registry.access.redhat.com/ubi9/nginx-124:latest
 COPY --from=build /src/apps/web/dist/ /opt/app-root/src/
 COPY deploy/base/nginx/dashboard.conf deploy/base/nginx/headers.inc /opt/app-root/etc/nginx.default.d/
 COPY deploy/image-config.json /opt/app-root/src/config.json
+COPY LICENSE NOTICE /licenses/
 USER 0
 RUN mkdir -p /srv/data && chown -R 1001:0 /srv/data && chmod -R g+rwX /srv/data
 USER 1001

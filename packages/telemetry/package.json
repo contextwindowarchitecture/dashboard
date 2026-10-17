@@ -1,6 +1,7 @@
 {
   "name": "@cwa-dashboard/telemetry",
   "private": true,
+  "license": "Apache-2.0",
   "version": "0.0.0",
   "description": "The dashboard's telemetry envelope: the event, index, session and fleet schemas at v1, with their generated types and validators",
   "type": "module",

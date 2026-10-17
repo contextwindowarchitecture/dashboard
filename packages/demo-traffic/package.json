@@ -1,6 +1,7 @@
 {
   "name": "@cwa-dashboard/demo-traffic",
   "private": true,
+  "license": "Apache-2.0",
   "version": "0.0.0",
   "description": "Demo traffic: authored scenarios and the vendored conformance cases run through the pinned assembler into an event tree",
   "type": "module",

@@ -1,6 +1,7 @@
 {
   "name": "cwa-dashboard",
   "private": true,
+  "license": "Apache-2.0",
   "version": "0.0.0",
   "description": "The observability and audit plane for Context Window Architecture assemblies",
   "type": "module",

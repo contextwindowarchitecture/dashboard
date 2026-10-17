@@ -1,0 +1,9 @@
+Context Window Architecture dashboard
+Copyright 2026 Melvin Hillsman
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+It vendors the CWA specification's files under packages/contract/vendor/cwa/ (pinned by
+packages/contract/vendor/cwa.lock.json) and builds the CWA TypeScript assembler (packages/assembler/pin.json);
+those keep their own copyright and license notices, which are Apache-2.0 too. The built web app, the container
+images and the generated validators include third-party packages under their own licenses, listed by
+pnpm-lock.yaml.

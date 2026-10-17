@@ -1,6 +1,7 @@
 {
   "name": "@cwa-dashboard/ingest",
   "private": true,
+  "license": "Apache-2.0",
   "version": "0.0.0",
   "description": "The Phase 1 Node service: POST /replay runs the pinned assembler over a snapshot for the sandbox (D12); POST /events writes an event into the tree (D9)",
   "type": "module",

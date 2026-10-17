@@ -28,3 +28,7 @@ The app is held to its performance budgets over a generated tree of 50,000 event
 ## Working here
 
 Read [`AGENTS.md`](AGENTS.md) before changing anything: it holds the rules (test-first, real fixtures, the contract as the only vocabulary), the commands and the commit conventions. [`STYLE.md`](STYLE.md) is the visual language, the CWA website's style guide applied to this app.
+
+## License
+
+Apache License 2.0: see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). The vendored specification files and the assembler this repository builds keep their own notices.

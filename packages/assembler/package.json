@@ -1,6 +1,7 @@
 {
   "name": "@cwa-dashboard/assembler",
   "private": true,
+  "license": "Apache-2.0",
   "version": "0.0.0",
   "description": "The TypeScript assembler at the pinned tag, built by this repository (ADR-0003)",
   "type": "module",

@@ -1,6 +1,7 @@
 {
   "name": "@cwa-dashboard/contract",
   "private": true,
+  "license": "Apache-2.0",
   "version": "0.0.0",
   "description": "The CWA contract vendored at a pinned commit, with its generated types, validators and data",
   "type": "module",
