@@ -1,0 +1,5 @@
+{
+  "anonymous": ["viewer@default"],
+  "signed_in": ["viewer@*"],
+  "groups": { "cwa:owners": ["owner:*@*"] }
+}

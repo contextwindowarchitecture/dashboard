@@ -5,9 +5,10 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { expect, test, type Page } from "@playwright/test"
+import { expect, test } from "@playwright/test"
 
 import { PERF_TREE } from "../e2e/env"
+import { expectNoSidewaysScroll, measureFilterChange } from "./measure"
 
 interface Batch {
   producer: { id: string }
@@ -29,14 +30,6 @@ function wideEvent(): Event {
   return read<Event>(`events/${row.event_id}.json`)
 }
 
-async function expectNoSidewaysScroll(page: Page) {
-  await page.setViewportSize({ width: 400, height: 800 })
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  )
-  expect(overflow).toBeLessThanOrEqual(0)
-}
-
 test("the stream at 20,000 rows answers a filter change within 100 ms", async ({ page }) => {
   const started = Date.now()
   await page.goto("/traces")
@@ -44,33 +37,7 @@ test("the stream at 20,000 rows answers a filter change within 100 ms", async ({
   await table.getByRole("row").nth(1).waitFor()
   const firstRender = Date.now() - started
   await expect(table).toHaveAttribute("aria-rowcount", "20001")
-  await page.getByRole("combobox", { name: "Outcome" }).click()
-  const option = page.getByRole("option", { name: /^refused/ })
-  await option.waitFor()
-  // Timed in the page, from the option's pointerup to the status naming the new count.
-  await page.evaluate(() => {
-    const status = document.querySelector('[aria-label="Stream status"]')!
-    const before = status.textContent
-    const target = window as unknown as { measured: Promise<number> }
-    target.measured = new Promise((done) => {
-      document.addEventListener(
-        "pointerup",
-        () => {
-          const start = performance.now()
-          new MutationObserver((_, observer) => {
-            if (status.textContent === before) return
-            observer.disconnect()
-            done(performance.now() - start)
-          }).observe(status, { subtree: true, childList: true, characterData: true })
-        },
-        { once: true, capture: true },
-      )
-    })
-  })
-  await option.click()
-  const filter = await page.evaluate(
-    () => (window as unknown as { measured: Promise<number> }).measured,
-  )
+  const filter = await measureFilterChange(page)
   console.log(
     `stream: first render ${firstRender} ms; filter change ${Math.round(filter)} ms (budget 100 ms)`,
   )

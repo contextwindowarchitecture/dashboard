@@ -13,6 +13,9 @@ export const INGEST_PORT = 8091
 /** The generated tree the performance tests serve (playwright.perf.config.ts). */
 export const PERF_TREE = join(tmpdir(), "cwa-dashboard-perf-tree")
 
+/** The second tenant the performance tests over the query API seed and read (e2e-perf). */
+export const PERF_SECOND_TENANT = "perf-b"
+
 /** The port the ingest service listens on in the browser tests over the query API. */
 export const API_INGEST_PORT = 8093
 
