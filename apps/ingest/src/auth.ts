@@ -19,6 +19,12 @@ export interface AuthConfig {
   readonly redirectUri: string
   /** The scopes asked for; `groups` is how roles arrive (Dex, Keycloak). */
   readonly scopes?: string
+  /**
+   * Where this service reaches the issuer, when not at its public address: an issuer served behind
+   * the site's own proxy, as Dex is at /dex. Every request to the issuer goes there; the issuer's
+   * name, which every ID token carries and which is checked, stays the public one.
+   */
+  readonly internal?: string
 }
 
 const SETTINGS = [
@@ -45,6 +51,9 @@ export function authConfigFrom(
     clientSecret: env["OIDC_CLIENT_SECRET"]!,
     redirectUri: env["OIDC_REDIRECT_URI"]!,
     ...((env["OIDC_SCOPES"] ?? "") === "" ? {} : { scopes: env["OIDC_SCOPES"]! }),
+    ...((env["OIDC_ISSUER_INTERNAL"] ?? "") === ""
+      ? {}
+      : { internal: env["OIDC_ISSUER_INTERNAL"]! }),
   }
 }
 
@@ -86,6 +95,18 @@ export function createAuth({ config, sessions, now = () => new Date(), allowHttp
   const insecure =
     issuer.protocol === "http:" && (allowHttp === true || LOOPBACK.has(issuer.hostname))
   const site = new URL(config.redirectUri).origin
+  // Requests to the issuer's public address go to its internal one, when there is one.
+  const publicBase = config.issuer.replace(/\/+$/, "")
+  const reach: oidc.CustomFetch | undefined =
+    config.internal === undefined
+      ? undefined
+      : (url, init) =>
+          fetch(
+            url.startsWith(publicBase)
+              ? config.internal!.replace(/\/+$/, "") + url.slice(publicBase.length)
+              : url,
+            init as RequestInit,
+          )
   let discovered: Promise<oidc.Configuration> | undefined
   // Discovered once and kept; a failure is forgotten, so the next sign-in asks again.
   const client = () => {
@@ -98,6 +119,8 @@ export function createAuth({ config, sessions, now = () => new Date(), allowHttp
           oidc.enableNonRepudiationChecks,
           ...(insecure ? [oidc.allowInsecureRequests] : []),
         ],
+        // Kept by the configuration, so the token and key requests after discovery go there too.
+        ...(reach === undefined ? {} : { [oidc.customFetch]: reach }),
       })
       .catch((error: unknown) => {
         discovered = undefined

@@ -17,6 +17,8 @@ export interface IssuerOptions {
   readonly person: Record<string, unknown>
   /** A fixed port, for a browser test that names it in configuration; any free one when absent. */
   readonly port?: number
+  /** The address it calls itself, as one behind a proxy does; where it listens when absent. */
+  readonly publicUrl?: string
 }
 
 const base64url = (data: Buffer | string) => Buffer.from(data).toString("base64url")
@@ -47,7 +49,7 @@ export async function startIssuer(options: IssuerOptions) {
   }
 
   const server: Server = createServer((request, response) => {
-    const at = new URL(request.url ?? "/", url)
+    const at = new URL(request.url ?? "/", "http://issuer")
     const json = (status: number, body: unknown) => {
       response.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(body))
     }
@@ -125,9 +127,12 @@ export async function startIssuer(options: IssuerOptions) {
     json(404, { error: "not_found" })
   })
   await new Promise<void>((done) => server.listen(options.port ?? 0, "127.0.0.1", done))
-  url = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
+  const listening = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
+  url = options.publicUrl ?? listening
   return {
     url,
+    /** Where it listens, which differs from url when a public address is given. */
+    listening,
     /** Answer wrongly in this one way from now on; undefined answers rightly again. */
     misbehave: (next: Fault | undefined) => (fault = next),
     signInAs: (next: Record<string, unknown>) => (person = next),

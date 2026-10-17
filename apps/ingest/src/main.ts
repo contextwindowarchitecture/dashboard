@@ -4,8 +4,9 @@
 // INGEST_TOKEN, to sign compliance bundles, SIGNING_KEY (an Ed25519 PKCS #8 PEM), and, to keep
 // redacted bodies (ADR-0009), a vault (DATABASE_URL's database, or VAULT_DIR) with VAULT_TOKEN, the
 // operator's, to read them, and, to sign readers in (ADR-0010), OIDC_ISSUER, OIDC_CLIENT_ID,
-// OIDC_CLIENT_SECRET and OIDC_REDIRECT_URI (OIDC_SCOPES, OIDC_ALLOW_HTTP for an issuer on plain
-// HTTP), from the environment.
+// OIDC_CLIENT_SECRET and OIDC_REDIRECT_URI (OIDC_SCOPES; OIDC_ISSUER_INTERNAL, where the service
+// reaches an issuer served behind the site's proxy; OIDC_ALLOW_HTTP for an issuer on plain HTTP),
+// from the environment.
 
 import { createWorkerRunner } from "./runner.ts"
 import { createIngestServer } from "./server.ts"

@@ -258,3 +258,63 @@ describe("authConfigFrom", () => {
     )
   })
 })
+
+describe("an issuer reached at an internal address", () => {
+  it("signs in through it while the tokens and the reader name the public one", async () => {
+    // The issuer calls itself by the address a browser reaches it at, which this process cannot.
+    const PUBLIC = "http://login.example.invalid/dex"
+    const issuer = await startIssuer({ ...CLIENT, person: ADA, publicUrl: PUBLIC })
+    const db = new PGlite()
+    const store = await createPostgresStore(db)
+    const port = await freePort()
+    const base = `http://127.0.0.1:${port}`
+    const server = createIngestServer({
+      runner: idle,
+      maxBodyBytes: 1024 * 1024,
+      maxQueue: 8,
+      store,
+      auth: createAuth({
+        config: {
+          issuer: PUBLIC,
+          internal: issuer.listening,
+          ...CLIENT,
+          redirectUri: `${base}/auth/callback`,
+        },
+        sessions: store.sessions,
+        // Its public address is plain HTTP and not this machine's, as in the compose stack.
+        allowHttp: true,
+      }),
+    })
+    await new Promise<void>((done) => server.listen(port, "127.0.0.1", done))
+    cleanups.push(async () => {
+      await new Promise((done) => server.close(() => done(undefined)))
+      await db.close()
+      await issuer.close()
+    })
+    const login = await fetch(`${base}/auth/login`, { redirect: "manual" })
+    const to = login.headers.get("location")!
+    // The reader is sent to the public address...
+    expect(to.startsWith(`${PUBLIC}/authorize?`)).toBe(true)
+    // ...which a browser would reach through the proxy; here, the issuer itself.
+    const authorize = await fetch(to.replace(PUBLIC, issuer.listening), { redirect: "manual" })
+    const callback = await fetch(authorize.headers.get("location")!, {
+      redirect: "manual",
+      headers: { cookie: `cwa_login=${setCookie(login, "cwa_login")!.value}` },
+    })
+    expect(callback.status).toBe(302)
+    expect(setCookie(callback, "cwa_session")).toBeDefined()
+  })
+
+  it("reads the internal address from the environment, only beside the others", () => {
+    const ALL = {
+      OIDC_ISSUER: "https://dashboard.example/dex",
+      OIDC_CLIENT_ID: "c",
+      OIDC_CLIENT_SECRET: "s",
+      OIDC_REDIRECT_URI: "https://dashboard.example/api/auth/callback",
+    }
+    expect(
+      authConfigFrom({ ...ALL, OIDC_ISSUER_INTERNAL: "http://dashboard-dex:5556/dex" })?.internal,
+    ).toBe("http://dashboard-dex:5556/dex")
+    expect(authConfigFrom(ALL)?.internal).toBeUndefined()
+  })
+})
