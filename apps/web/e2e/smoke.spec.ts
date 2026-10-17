@@ -251,6 +251,23 @@ test("the conflicts page draws an event's forest, and reads in both themes and a
   await expectAccessible(page)
 })
 
+test("the FinOps page says money is not available without prices, in both themes and at 400px", async ({
+  page,
+}) => {
+  await page.goto("/finops")
+  await expect(page.getByRole("table", { name: "Routes" })).toContainText("support-chat")
+  await expect(page.getByRole("region", { name: "Prices" })).toContainText(
+    "per_million_input_tokens",
+  )
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/finops")
+  await expect(page.getByRole("table", { name: "Routes" })).toContainText("support-chat")
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})
+
 test("a session opens from the list, selects a turn, and reads in both themes and at 400px", async ({
   page,
 }) => {

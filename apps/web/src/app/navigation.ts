@@ -7,6 +7,7 @@ import {
   Info,
   RadioTower,
   Boxes,
+  Coins,
   Inbox,
   FlaskConical,
   GitMerge,
@@ -56,6 +57,7 @@ export const NAVIGATION: readonly NavGroup[] = [
         patterns: ["/sessions", "/sessions/:sessionId"],
       },
       { id: "sources", label: "Sources", to: "/sources", icon: Inbox, patterns: ["/sources"] },
+      { id: "finops", label: "FinOps", to: "/finops", icon: Coins, patterns: ["/finops"] },
       {
         id: "conflicts",
         label: "Conflicts",

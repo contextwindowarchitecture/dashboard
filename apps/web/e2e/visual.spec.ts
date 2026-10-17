@@ -37,6 +37,7 @@ const PAGES = [
   "/sessions/refund-7",
   "/sources",
   "/conflicts",
+  "/finops",
   "/conflicts?event=01M4YZXVT0N9BECJFQPP1EDDVP",
   "/guardrails",
   "/guardrails/05",
