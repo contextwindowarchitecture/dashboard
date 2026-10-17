@@ -201,6 +201,26 @@ export interface Lock {
 /** https://contextwindowarchitecture.io/schema/dashboard/compliance-bundle.v1.schema.json */
 export type ComplianceBundleV1 = CWADashboardComplianceBundle
 
+/**
+ * A named, frozen list of events for shadow regression (ADR-0008): each event's id and, when it was assembled or refused, the digest of the snapshot it froze, so a later run replays the same snapshots. Never overwritten.
+ */
+export interface CWADashboardCorpus {
+  $schema: "cwa-dashboard/corpus/v1"
+  name: string
+  created_at: string
+  /**
+   * @minItems 1
+   * @maxItems 200
+   */
+  events: {
+    event_id: string
+    snapshot_digest?: string
+  }[]
+}
+
+/** https://contextwindowarchitecture.io/schema/dashboard/corpus.v1.schema.json */
+export type CorpusV1 = CWADashboardCorpus
+
 export type Row = {
   event_id: string
   recorded_at: string

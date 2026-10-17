@@ -27,6 +27,7 @@ import {
 } from "@cwa-dashboard/telemetry/derive"
 import type {
   AssemblyEventV1,
+  CorpusV1,
   EventsIndexV1,
   FleetReportV1,
   SessionV1,
@@ -35,6 +36,8 @@ import type {
 import { validateAssemblyEventV1 } from "@cwa-dashboard/telemetry/validators"
 
 import {
+  CORPUS_NAME,
+  type CorpusSummary,
   DAY,
   describeProblems,
   EVENT_ID,
@@ -70,8 +73,10 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
   const debounceMs = options.debounceMs ?? 200
   const events = join(root, "events")
   const sessions = join(root, "sessions")
+  const corpora = join(root, "corpora")
   await mkdir(join(events, "index"), { recursive: true })
   await mkdir(sessions, { recursive: true })
+  await mkdir(corpora, { recursive: true })
 
   const existing = await readJson<EventsIndexV1>(join(events, "index.json"))
   let rows: IndexRow[] = [...(existing?.events ?? [])]
@@ -233,6 +238,39 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
         (await readJson<SourcesReportV1>(join(root, "sources.json"))) ??
         sourcesOf(new Date().toISOString())
       )
+    },
+    async saveCorpus(corpus: CorpusV1) {
+      const path = join(corpora, `${corpus.name}.json`)
+      const tmp = `${path}.${randomBytes(6).toString("hex")}.tmp`
+      await writeFile(tmp, text(corpus))
+      try {
+        // As for an event: a hard link fails when the name is taken.
+        await link(tmp, path)
+        return "saved" as const
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "EEXIST") return "exists" as const
+        throw error
+      } finally {
+        await unlink(tmp)
+      }
+    },
+    corpus: (name) =>
+      CORPUS_NAME.test(name)
+        ? readJson<CorpusV1>(join(corpora, `${name}.json`))
+        : Promise.resolve(undefined),
+    async corpora() {
+      const names = (await readdir(corpora)).filter((n) => n.endsWith(".json")).sort()
+      const list: CorpusSummary[] = []
+      for (const name of names) {
+        const corpus = await readJson<CorpusV1>(join(corpora, name))
+        if (corpus)
+          list.push({
+            name: corpus.name,
+            created_at: corpus.created_at,
+            events: corpus.events.length,
+          })
+      }
+      return list
     },
     /** Rebuilds the index now if a rebuild is waiting, and waits for it. */
     async flush() {

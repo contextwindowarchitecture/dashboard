@@ -19,10 +19,11 @@ import {
   sourcesFromFacts,
   windowRows,
 } from "@cwa-dashboard/telemetry/derive"
-import type { AssemblyEventV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
+import type { AssemblyEventV1, CorpusV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
 import { validateAssemblyEventV1 } from "@cwa-dashboard/telemetry/validators"
 
 import {
+  CORPUS_NAME,
   DAY,
   describeProblems,
   EVENT_ID,
@@ -77,6 +78,12 @@ const MIGRATIONS: (string | ((db: Queryable) => Promise<void>))[] = [
       ])
     }
   },
+  // 4: the corpora shadow regression replays (ADR-0008), each frozen under its name.
+  `create table cwa_corpora (
+     name text primary key,
+     created_at timestamptz not null,
+     corpus text not null
+   )`,
 ]
 
 async function migrate(db: Queryable) {
@@ -235,6 +242,33 @@ export async function createPostgresStore(
         ).rows,
       )
       return sourcesFromFacts(facts, new Date().toISOString())
+    },
+
+    async saveCorpus(corpus) {
+      const { rows } = await db.query<{ name: string }>(
+        `insert into cwa_corpora (name, created_at, corpus) values ($1, $2, $3)
+         on conflict (name) do nothing returning name`,
+        [corpus.name, corpus.created_at, JSON.stringify(corpus)],
+      )
+      return rows.length === 0 ? "exists" : "saved"
+    },
+    async corpus(name) {
+      if (!CORPUS_NAME.test(name)) return undefined
+      const { rows } = await db.query<{ value: string }>(
+        "select corpus as value from cwa_corpora where name = $1",
+        [name],
+      )
+      return parse<CorpusV1>(rows)[0]
+    },
+    async corpora() {
+      const { rows } = await db.query<{ value: string }>(
+        "select corpus as value from cwa_corpora order by name",
+      )
+      return parse<CorpusV1>(rows).map((c) => ({
+        name: c.name,
+        created_at: c.created_at,
+        events: c.events.length,
+      }))
     },
 
     // Every document is derived when it is read, so there is nothing to bring up to date.

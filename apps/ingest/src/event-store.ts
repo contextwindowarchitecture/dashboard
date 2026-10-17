@@ -14,6 +14,7 @@ import {
 import type { FleetInputs } from "@cwa-dashboard/telemetry/derive"
 import type {
   AssemblyEventV1,
+  CorpusV1,
   EventsIndexV1,
   FleetReportV1,
   SessionV1,
@@ -37,6 +38,11 @@ export interface EventStore {
   fleet(): Promise<FleetReportV1>
   /** What each producer sent in the current window, and what became of it. */
   sources(): Promise<SourcesReportV1>
+  /** Freezes a corpus under its name (ADR-0008); a name already taken is never overwritten. */
+  saveCorpus(corpus: CorpusV1): Promise<"saved" | "exists">
+  corpus(name: string): Promise<CorpusV1 | undefined>
+  /** Every corpus, by name, with when it was frozen and how many events it holds. */
+  corpora(): Promise<CorpusSummary[]>
   /** Brings every document up to date with the events written so far. */
   flush(): Promise<void>
   close(): Promise<void>
@@ -49,6 +55,13 @@ export const WINDOW = { hours: 24, max: 20_000 } as const
 export const EVENT_ID = /^[0-9A-HJKMNP-TV-Z]{26}$/
 export const SESSION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/
 export const DAY = /^\d{4}-\d{2}-\d{2}$/
+export const CORPUS_NAME = /^[a-z0-9][a-z0-9._-]{0,63}$/
+
+export interface CorpusSummary {
+  readonly name: string
+  readonly created_at: string
+  readonly events: number
+}
 
 /** The problems a validator found, in words: where, then what. */
 export function describeProblems(errors: typeof validateAssemblyEventV1.errors): string[] {

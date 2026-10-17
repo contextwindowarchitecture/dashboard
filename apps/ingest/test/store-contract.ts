@@ -128,5 +128,27 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
         await done()
       }
     })
+
+    it("keeps a corpus under its name, never overwriting it, and lists it", async () => {
+      const { store, done } = await open()
+      try {
+        const corpus = {
+          $schema: "cwa-dashboard/corpus/v1" as const,
+          name: "chat-baseline",
+          created_at: "2026-10-17T12:00:00.000Z",
+          events: [{ event_id: DEMO_EVENTS[0]!.event_id }],
+        }
+        expect(await store.saveCorpus(corpus)).toBe("saved")
+        expect(await store.saveCorpus({ ...corpus, events: [] })).toBe("exists")
+        expect(await store.corpus("chat-baseline")).toEqual(corpus)
+        expect(await store.corpora()).toEqual([
+          { name: "chat-baseline", created_at: corpus.created_at, events: 1 },
+        ])
+        expect(await store.corpus("nothing-here")).toBeUndefined()
+        expect(await store.corpus("../events/index")).toBeUndefined()
+      } finally {
+        await done()
+      }
+    })
   })
 }
