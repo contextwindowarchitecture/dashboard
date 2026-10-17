@@ -29,7 +29,7 @@ curl -X POST http://localhost:8090/events \
   --data @event.json
 ```
 
-An event appears in the stream once the service has rebuilt the index, a moment after the write. `podman compose down -v` removes the volume, and the next `up` seeds it again.
+An event appears in the stream, and its service in the fleet report, once the service has rebuilt the index and `fleet.json`, a moment after the write. `podman compose down -v` removes the volume, and the next `up` seeds it again.
 
 The web image runs on its own too, with no sandbox, since it has no service to proxy to:
 

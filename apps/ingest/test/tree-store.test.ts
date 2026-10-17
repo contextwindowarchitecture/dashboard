@@ -1,0 +1,47 @@
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+
+import { describe, expect, it } from "vitest"
+
+import { createStore } from "../src/store.ts"
+import { storeContract } from "./store-contract.ts"
+
+const FIRST = readdirSync(
+  join(import.meta.dirname, "../../../packages/demo-traffic/fixtures/events"),
+).find((name) => name.endsWith(".json") && name !== "index.json")!
+
+storeContract("the tree store", async () => {
+  const root = mkdtempSync(join(tmpdir(), "cwa-tree-store-"))
+  const store = await createStore(root, { debounceMs: 1 })
+  return {
+    store,
+    done: async () => {
+      await store.close()
+      rmSync(root, { recursive: true, force: true })
+    },
+  }
+})
+
+describe("the tree store's files", () => {
+  it("keeps fleet.json current, so a posted event's service reaches the fleet page", async () => {
+    const root = mkdtempSync(join(tmpdir(), "cwa-tree-store-"))
+    const store = await createStore(root, { debounceMs: 1 })
+    try {
+      const event = JSON.parse(
+        readFileSync(
+          join(import.meta.dirname, "../../../packages/demo-traffic/fixtures/events", FIRST),
+          "utf8",
+        ),
+      )
+      await store.write({ ...event, service: { name: "posted-service", environment: "demo" } })
+      await store.flush()
+      const onDisk = JSON.parse(readFileSync(join(root, "fleet.json"), "utf8"))
+      expect(onDisk.services.map((s: { name: string }) => s.name)).toEqual(["posted-service"])
+      expect(onDisk).toEqual(await store.fleet())
+    } finally {
+      await store.close()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})

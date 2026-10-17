@@ -253,12 +253,29 @@ function compareFiles(lockSha256: string, contract: ContractFiles | undefined) {
   }
 }
 
+/** What the fleet report reads of an event: enough to keep for every event a store holds. */
+export type FleetFacts = Pick<
+  AssemblyEventV1,
+  "service" | "recorded_at" | "assembler" | "contract" | "timings_ms"
+> & { readonly snapshot?: { readonly route_policy: { readonly route: string } } }
+
+/** An event's fleet facts and nothing else. */
+export function fleetFacts(event: AssemblyEventV1): FleetFacts {
+  return {
+    service: event.service,
+    recorded_at: event.recorded_at,
+    assembler: event.assembler,
+    contract: event.contract,
+    timings_ms: event.timings_ms,
+    ...(event.snapshot
+      ? { snapshot: { route_policy: { route: event.snapshot.route_policy.route } } }
+      : {}),
+  }
+}
+
 /** Each service seen in the events: its assembler, contract lock, routes and measured latency. */
-export function serviceRows(
-  events: readonly AssemblyEventV1[],
-  contract?: ContractFiles,
-): ServiceRow[] {
-  const byService = new Map<string, AssemblyEventV1[]>()
+export function serviceRows(events: readonly FleetFacts[], contract?: ContractFiles): ServiceRow[] {
+  const byService = new Map<string, FleetFacts[]>()
   for (const event of events) {
     const list = byService.get(event.service.name) ?? []
     list.push(event)
@@ -317,10 +334,7 @@ export interface FleetInputs {
  * and every service the events name, from the events. The generator, the tree store and the
  * PostgreSQL store build it here, one way.
  */
-export function fleetReport(
-  events: readonly AssemblyEventV1[],
-  inputs: FleetInputs,
-): FleetReportV1 {
+export function fleetReport(events: readonly FleetFacts[], inputs: FleetInputs): FleetReportV1 {
   return {
     $schema: "cwa-dashboard/fleet-report/v1",
     generated_at: inputs.generatedAt,
