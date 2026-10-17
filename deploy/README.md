@@ -88,7 +88,7 @@ The host must resolve to the cluster's router before cert-manager can answer Let
 
 ## Not here yet
 
-Phase 2's query API, collector and database (`dashboard-plan.md` 12) are not part of this stack. Nothing here sends real traffic: the deployment shows demo traffic only (D11).
+The vault (Phase 2's content-addressed bodies) is not part of this stack yet. Nothing here sends real traffic: the deployment shows demo traffic only (D11).
 
 ## Events in PostgreSQL
 
@@ -146,3 +146,34 @@ node deploy/verify-bundle.mjs <event id>.json signing-key.pem
 
 **Rotating the key**: create a new secret value and restart the service. Every bundle names its key's id (the SHA-256 of the public key), so a bundle signed before the rotation still verifies against the old public key: keep each retired public key where readers can find it, beside the date it was retired.
 
+
+## Shadow regression
+
+A shadow run replays a frozen corpus of stored events twice through the pinned assembler, as recorded and with a candidate route policy, profile or both, and reports every assembly that changes (`docs/adr/0008-shadow-regression.md`). Only events recorded in `full` replay; the rest are counted as skipped, with why.
+
+A corpus is frozen with the ingest token, from event ids or from the stream's index filtered by `route`, `outcome` or `profile` (at most 200 events, `limit` fewer). It lives in the store (`corpora/` in the tree, `cwa_corpora` in PostgreSQL) and is never overwritten: freezing a name again answers 409.
+
+```sh
+curl -s -X POST https://dashboard.contextwindowarchitecture.io/api/corpora \
+  -H "authorization: Bearer $INGEST_TOKEN" -H 'content-type: application/json' \
+  -d '{"name": "support-chat-baseline", "from": {"route": "support-chat", "outcome": "assembled", "limit": 100}}'
+curl -s https://dashboard.contextwindowarchitecture.io/api/corpora.json
+```
+
+`POST /api/shadow` with `{ "corpus": <name>, "candidate": { "route_policy": …, "profile": … } }` runs one: it takes no token, since it writes nothing, and runs one at a time, answering 503 while another is under way. The shadow page asks for it, and a pull request in a policy repository can, with the script or the Action around it:
+
+```sh
+node deploy/shadow-check.mjs --api https://dashboard.contextwindowarchitecture.io/api \
+  --corpus support-chat-baseline --profile profiles/cache-first-chat.json \
+  --max-refusals-added 0 --max-shedding-increase 0 --max-candidate-rejected 0 --report shadow.json
+```
+
+```yaml
+- uses: contextwindowarchitecture/dashboard/.github/actions/shadow-regression@<commit>
+  with:
+    api: https://dashboard.example/api
+    corpus: support-chat-baseline
+    profile: profiles/cache-first-chat.json
+```
+
+The script exits 0 within every limit, 1 over one, and 2 when it could not run (a usage error, a corpus the service does not hold, a service that does not answer). Every limit is 0 unless given. A baseline that does not reproduce its recorded hash is reported, not failed on: it is a difference between the recording implementation and this one, not the candidate's.
