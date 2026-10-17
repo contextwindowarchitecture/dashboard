@@ -6,8 +6,8 @@
 #   deploy/publish.sh packages/demo-traffic/fixtures
 #
 # NAMESPACE (default cwa-dashboard) is read from the environment. Needs oc logged in to the cluster, and tar here and
-# in the ingest image. The tree is copied into the ingest pod's mount of the volume: the events, the sessions and the
-# fleet report first, the closed windows next, and events/index.json last, so the index never names an event that is
+# in the ingest image. The tree is copied into the ingest pod's mount of the volume: the events, the sessions, the
+# fleet and the sources reports first, the closed windows next, and events/index.json last, so the index never names an event that is
 # not there yet. The ingest service keeps the index's rows in memory, so it is restarted to read the published index.
 #
 # The published index replaces the volume's. An event posted to the service before the publish keeps its file but
@@ -37,7 +37,7 @@ copy() {
 }
 
 entries=()
-for entry in events sessions fleet.json; do
+for entry in events sessions fleet.json sources.json; do
   if [ -e "$tree/$entry" ]; then entries+=("$entry"); fi
 done
 

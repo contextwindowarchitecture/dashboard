@@ -24,7 +24,7 @@ storeContract("the tree store", async () => {
 })
 
 describe("the tree store's files", () => {
-  it("keeps fleet.json current, so a posted event's service reaches the fleet page", async () => {
+  it("keeps fleet.json and sources.json current, so a posted event reaches both pages", async () => {
     const root = mkdtempSync(join(tmpdir(), "cwa-tree-store-"))
     const store = await createStore(root, { debounceMs: 1 })
     try {
@@ -39,6 +39,9 @@ describe("the tree store's files", () => {
       const onDisk = JSON.parse(readFileSync(join(root, "fleet.json"), "utf8"))
       expect(onDisk.services.map((s: { name: string }) => s.name)).toEqual(["posted-service"])
       expect(onDisk).toEqual(await store.fleet())
+      const sources = JSON.parse(readFileSync(join(root, "sources.json"), "utf8"))
+      expect(sources.producers.length).toBeGreaterThan(0)
+      expect(sources).toEqual(await store.sources())
     } finally {
       await store.close()
       rmSync(root, { recursive: true, force: true })

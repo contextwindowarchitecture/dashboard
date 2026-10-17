@@ -14,6 +14,9 @@ import {
   indexFromRows,
   indexRow,
   type IndexRow,
+  type SourceFacts,
+  sourceFacts,
+  sourcesFromFacts,
   windowRows,
 } from "@cwa-dashboard/telemetry/derive"
 import type { AssemblyEventV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
@@ -33,8 +36,11 @@ export interface Queryable {
   query<Row>(text: string, params?: unknown[]): Promise<{ rows: Row[] }>
 }
 
-/** The schema, one migration per entry, applied in order and recorded in cwa_schema. */
-const MIGRATIONS = [
+/**
+ * The schema, one migration per entry, applied in order and recorded in cwa_schema: SQL statements,
+ * or a function for a step SQL cannot take (deriving a column from the events with the derivations).
+ */
+const MIGRATIONS: (string | ((db: Queryable) => Promise<void>))[] = [
   `create table cwa_events (
      event_id text primary key,
      recorded_at timestamptz not null,
@@ -46,6 +52,19 @@ const MIGRATIONS = [
    );
    create index cwa_events_order on cwa_events (recorded_at desc, event_id desc);
    create index cwa_events_session on cwa_events (session_id, turn_index)`,
+  // 2: each event's source facts, for the sources report, derived for the events already held.
+  async (db) => {
+    await db.query("alter table cwa_events add column source_facts text")
+    const { rows } = await db.query<{ event_id: string; event: string }>(
+      "select event_id, event from cwa_events",
+    )
+    for (const row of rows) {
+      await db.query("update cwa_events set source_facts = $1 where event_id = $2", [
+        JSON.stringify(sourceFacts(JSON.parse(row.event) as AssemblyEventV1)),
+        row.event_id,
+      ])
+    }
+  },
 ]
 
 async function migrate(db: Queryable) {
@@ -54,7 +73,9 @@ async function migrate(db: Queryable) {
     "select coalesce(max(version), 0) as version from cwa_schema",
   )
   for (let version = Number(rows[0]!.version) + 1; version <= MIGRATIONS.length; version += 1) {
-    for (const statement of MIGRATIONS[version - 1]!.split(";")) await db.query(statement)
+    const migration = MIGRATIONS[version - 1]!
+    if (typeof migration === "function") await migration(db)
+    else for (const statement of migration.split(";")) await db.query(statement)
     await db.query("insert into cwa_schema (version) values ($1)", [version])
   }
 }
@@ -109,8 +130,9 @@ export async function createPostgresStore(
       }
       const event = candidate as AssemblyEventV1
       const { rows } = await db.query<{ event_id: string }>(
-        `insert into cwa_events (event_id, recorded_at, session_id, turn_index, event, index_row, facts)
-         values ($1, $2, $3, $4, $5, $6, $7)
+        `insert into cwa_events
+           (event_id, recorded_at, session_id, turn_index, event, index_row, facts, source_facts)
+         values ($1, $2, $3, $4, $5, $6, $7, $8)
          on conflict (event_id) do nothing returning event_id`,
         [
           event.event_id,
@@ -120,6 +142,7 @@ export async function createPostgresStore(
           JSON.stringify(event),
           JSON.stringify(indexRow(event)),
           JSON.stringify(fleetFacts(event)),
+          JSON.stringify(sourceFacts(event)),
         ],
       )
       if (rows.length === 0) {
@@ -187,6 +210,19 @@ export async function createPostgresStore(
     async fleet() {
       const { rows } = await db.query<{ value: string }>("select facts as value from cwa_events")
       return fleetReport(parse<FleetFacts>(rows), fleetInputs(new Date().toISOString()))
+    },
+
+    async sources() {
+      const { rows } = await current()
+      const facts = parse<SourceFacts>(
+        (
+          await db.query<{ value: string }>(
+            "select source_facts as value from cwa_events where event_id = any($1)",
+            [rows.map((row) => row.event_id)],
+          )
+        ).rows,
+      )
+      return sourcesFromFacts(facts, new Date().toISOString())
     },
 
     // Every document is derived when it is read, so there is nothing to bring up to date.

@@ -17,6 +17,7 @@
 //   events/<event id>.json   one assembly event v1 each
 //   sessions/<id>.json       one session v1 per conversation
 //   fleet.json               the fleet report v1
+//   sources.json             the sources report v1, over the current window
 //
 // Timings are measured, so they differ from run to run: the committed tree keeps the measurements,
 // --check compares everything else, and a regeneration that changes only measurements writes
@@ -44,6 +45,7 @@ import {
   buildSessions,
   fleetReport,
   indexFromRows,
+  sourcesReport,
   indexRow,
   windowRows,
 } from "@cwa-dashboard/telemetry/derive"
@@ -212,6 +214,16 @@ export function generateTree(options: Options = {}): Map<string, string> {
   for (const session of buildSessions(events))
     files.set(`sessions/${session.session_id}.json`, text(session))
   files.set("fleet.json", text(fleet(events, generatedAt)))
+  const inWindow = new Set(current.map((row) => row.event_id))
+  files.set(
+    "sources.json",
+    text(
+      sourcesReport(
+        events.filter((event) => inWindow.has(event.event_id)),
+        generatedAt,
+      ),
+    ),
+  )
   return files
 }
 

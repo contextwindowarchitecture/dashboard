@@ -178,6 +178,7 @@ export function createIngestServer(options: IngestOptions): Server {
     let headers = NO_CACHE
     if (path === "/data/events/index.json") document = await store.index()
     else if (path === "/data/fleet.json") document = await store.fleet()
+    else if (path === "/data/sources.json") document = await store.sources()
     else if (id(/^\/data\/events\/index\/([^/]+)\.json$/) !== undefined) {
       document = await store.window(id(/^\/data\/events\/index\/([^/]+)\.json$/)!)
     } else if (id(/^\/data\/events\/([^/]+)\.json$/) !== undefined) {

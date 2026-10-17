@@ -20,6 +20,9 @@ import {
   indexFromRows,
   indexRow,
   type IndexRow,
+  type SourceFacts,
+  sourceFacts,
+  sourcesFromFacts,
   windowRows,
 } from "@cwa-dashboard/telemetry/derive"
 import type {
@@ -27,6 +30,7 @@ import type {
   EventsIndexV1,
   FleetReportV1,
   SessionV1,
+  SourcesReportV1,
 } from "@cwa-dashboard/telemetry/types"
 import { validateAssemblyEventV1 } from "@cwa-dashboard/telemetry/validators"
 
@@ -72,13 +76,25 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
   const existing = await readJson<EventsIndexV1>(join(events, "index.json"))
   let rows: IndexRow[] = [...(existing?.events ?? [])]
   const windows = new Map((existing?.windows ?? []).map((w) => [w.day, w]))
-  // The fleet report reads a few facts of every event; they are read from the tree once.
+  // The fleet and sources reports read a few facts of every event; they are read from the tree once.
   const facts: FleetFacts[] = []
+  const sourceFactsById = new Map<string, SourceFacts>()
   for (const name of await readdir(events)) {
     if (!name.endsWith(".json") || name === "index.json") continue
     const event = await readJson<AssemblyEventV1>(join(events, name))
-    if (event !== undefined) facts.push(fleetFacts(event))
+    if (event === undefined) continue
+    facts.push(fleetFacts(event))
+    sourceFactsById.set(event.event_id, sourceFacts(event))
   }
+  // The sources report covers the current window's events, as the index does.
+  const sourcesOf = (generatedAt: string) =>
+    sourcesFromFacts(
+      rows.flatMap((row) => {
+        const fact = sourceFactsById.get(row.event_id)
+        return fact === undefined ? [] : [fact]
+      }),
+      generatedAt,
+    )
 
   // One write at a time: the tree has one writer.
   let lock: Promise<unknown> = Promise.resolve()
@@ -106,6 +122,7 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
       listed.length > 0 ? { ...index, windows: listed } : index,
     )
     await replace(join(root, "fleet.json"), fleetReport(facts, fleetInputs(generatedAt)))
+    await replace(join(root, "sources.json"), sourcesOf(generatedAt))
   }
 
   // The rebuild waiting for its debounce, and what to tell whoever waits on it.
@@ -172,6 +189,7 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
         }
         rows.push(indexRow(event))
         facts.push(fleetFacts(event))
+        sourceFactsById.set(event.event_id, sourceFacts(event))
         if (event.session !== undefined) await updateSession(event)
         schedule()
         return { ok: true, eventId: event.event_id } as const
@@ -199,6 +217,12 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
       return (
         (await readJson<FleetReportV1>(join(root, "fleet.json"))) ??
         fleetReport(facts, fleetInputs(new Date().toISOString()))
+      )
+    },
+    async sources() {
+      return (
+        (await readJson<SourcesReportV1>(join(root, "sources.json"))) ??
+        sourcesOf(new Date().toISOString())
       )
     },
     /** Rebuilds the index now if a rebuild is waiting, and waits for it. */

@@ -73,6 +73,7 @@ describe("the read routes", () => {
     for (const path of [
       "/data/events/index.json",
       "/data/fleet.json",
+      "/data/sources.json",
       `/data/sessions/${SESSIONS[0]}.json`,
     ]) {
       expect(await answer(path), path).toEqual({ status: 200, cache: "no-cache" })

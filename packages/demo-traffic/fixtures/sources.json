@@ -1,0 +1,558 @@
+{
+  "$schema": "cwa-dashboard/sources-report/v1",
+  "generated_at": "2026-10-15T17:21:00.500Z",
+  "window": {
+    "from": "2026-10-15T05:00:00.000Z",
+    "to": "2026-10-15T17:21:00.500Z",
+    "events": 112
+  },
+  "producers": [
+    {
+      "id": "billing-mcp",
+      "kind": "mcp",
+      "events": 1,
+      "submitted": 1,
+      "admitted": 1,
+      "compressed": 0,
+      "tokens_admitted": 5,
+      "excluded": [],
+      "rejected_events": 0
+    },
+    {
+      "id": "cap-policy",
+      "kind": "capability_policy",
+      "events": 2,
+      "submitted": 3,
+      "admitted": 2,
+      "compressed": 0,
+      "tokens_admitted": 10,
+      "excluded": [
+        {
+          "reason": "capability_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 4
+    },
+    {
+      "id": "capability-policy",
+      "kind": "capability_policy",
+      "events": 8,
+      "submitted": 18,
+      "admitted": 15,
+      "compressed": 0,
+      "tokens_admitted": 255,
+      "excluded": [
+        {
+          "reason": "capability_not_allowed",
+          "stage": "assembler",
+          "items": 3
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "clause-index",
+      "kind": "retrieval",
+      "events": 1,
+      "submitted": 4,
+      "admitted": 0,
+      "compressed": 0,
+      "tokens_admitted": 0,
+      "excluded": [],
+      "rejected_events": 0
+    },
+    {
+      "id": "conversation",
+      "kind": "interaction",
+      "events": 84,
+      "submitted": 163,
+      "admitted": 120,
+      "compressed": 0,
+      "tokens_admitted": 1458,
+      "excluded": [
+        {
+          "reason": "authority_not_allowed",
+          "stage": "assembler",
+          "items": 3
+        },
+        {
+          "reason": "conflict_deferred",
+          "stage": "assembler",
+          "items": 2
+        },
+        {
+          "reason": "over_budget",
+          "stage": "assembler",
+          "items": 8
+        }
+      ],
+      "rejected_events": 25
+    },
+    {
+      "id": "crm-mcp",
+      "kind": "mcp",
+      "events": 18,
+      "submitted": 43,
+      "admitted": 26,
+      "compressed": 0,
+      "tokens_admitted": 143,
+      "excluded": [
+        {
+          "reason": "producer_slot_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "capability_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "untrusted_content_unmarked",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "conflict_lost",
+          "stage": "assembler",
+          "items": 3
+        },
+        {
+          "reason": "superseded",
+          "stage": "assembler",
+          "items": 6
+        },
+        {
+          "reason": "duplicate_content",
+          "stage": "assembler",
+          "items": 2
+        },
+        {
+          "reason": "over_budget",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "docs-mcp",
+      "kind": "mcp",
+      "events": 5,
+      "submitted": 8,
+      "admitted": 4,
+      "compressed": 0,
+      "tokens_admitted": 40,
+      "excluded": [
+        {
+          "reason": "producer_slot_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "capability_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "superseded",
+          "stage": "assembler",
+          "items": 2
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "document-index",
+      "kind": "retrieval",
+      "events": 7,
+      "submitted": 19,
+      "admitted": 16,
+      "compressed": 8,
+      "tokens_admitted": 550,
+      "excluded": [
+        {
+          "reason": "authority_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "out_of_scope",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "legacy-search",
+      "kind": "mcp",
+      "events": 1,
+      "submitted": 1,
+      "admitted": 0,
+      "compressed": 0,
+      "tokens_admitted": 0,
+      "excluded": [
+        {
+          "reason": "producer_not_authenticated",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "memory-svc",
+      "kind": "memory",
+      "events": 11,
+      "submitted": 17,
+      "admitted": 9,
+      "compressed": 0,
+      "tokens_admitted": 97,
+      "excluded": [
+        {
+          "reason": "missing_field:expires",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "producer_slot_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "revoked",
+          "stage": "producer",
+          "items": 1
+        },
+        {
+          "reason": "revoked",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "expired",
+          "stage": "producer",
+          "items": 1
+        },
+        {
+          "reason": "expired",
+          "stage": "assembler",
+          "items": 3
+        },
+        {
+          "reason": "source_invalid",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "slot_unplaced",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 21
+    },
+    {
+      "id": "policy-corpus",
+      "kind": "retrieval",
+      "events": 70,
+      "submitted": 198,
+      "admitted": 85,
+      "compressed": 11,
+      "tokens_admitted": 1056,
+      "excluded": [
+        {
+          "reason": "producer_not_authenticated",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "missing_field:body",
+          "stage": "assembler",
+          "items": 2
+        },
+        {
+          "reason": "missing_field:relevance",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "missing_field:slot",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "missing_field:id",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "unknown_slot",
+          "stage": "assembler",
+          "items": 4
+        },
+        {
+          "reason": "unknown_authority",
+          "stage": "assembler",
+          "items": 3
+        },
+        {
+          "reason": "invalid_structure",
+          "stage": "assembler",
+          "items": 8
+        },
+        {
+          "reason": "duplicate_item_id",
+          "stage": "assembler",
+          "items": 5
+        },
+        {
+          "reason": "producer_slot_not_allowed",
+          "stage": "assembler",
+          "items": 3
+        },
+        {
+          "reason": "authority_not_allowed",
+          "stage": "assembler",
+          "items": 2
+        },
+        {
+          "reason": "untrusted_content_unmarked",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "tier_upgrade_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "duplicate_variant_id",
+          "stage": "assembler",
+          "items": 2
+        },
+        {
+          "reason": "revoked",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "expired",
+          "stage": "producer",
+          "items": 1
+        },
+        {
+          "reason": "expired",
+          "stage": "assembler",
+          "items": 2
+        },
+        {
+          "reason": "future_freshness",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "out_of_scope",
+          "stage": "assembler",
+          "items": 4
+        },
+        {
+          "reason": "below_threshold",
+          "stage": "assembler",
+          "items": 13
+        },
+        {
+          "reason": "not_eligible",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "conflict_lost",
+          "stage": "assembler",
+          "items": 3
+        },
+        {
+          "reason": "duplicate_content",
+          "stage": "assembler",
+          "items": 10
+        },
+        {
+          "reason": "source_diversity_cap",
+          "stage": "assembler",
+          "items": 8
+        },
+        {
+          "reason": "over_budget",
+          "stage": "assembler",
+          "items": 17
+        }
+      ],
+      "rejected_events": 26
+    },
+    {
+      "id": "policy-registry",
+      "kind": "policy",
+      "events": 86,
+      "submitted": 163,
+      "admitted": 107,
+      "compressed": 3,
+      "tokens_admitted": 1737,
+      "excluded": [
+        {
+          "reason": "producer_slot_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "untrusted_in_governance",
+          "stage": "assembler",
+          "items": 6
+        },
+        {
+          "reason": "slot_unplaced",
+          "stage": "assembler",
+          "items": 2
+        },
+        {
+          "reason": "conflict_deferred",
+          "stage": "assembler",
+          "items": 3
+        },
+        {
+          "reason": "over_budget",
+          "stage": "assembler",
+          "items": 10
+        }
+      ],
+      "rejected_events": 26
+    },
+    {
+      "id": "rogue-producer",
+      "kind": "retrieval",
+      "events": 1,
+      "submitted": 1,
+      "admitted": 0,
+      "compressed": 0,
+      "tokens_admitted": 0,
+      "excluded": [
+        {
+          "reason": "below_threshold",
+          "stage": "producer",
+          "items": 1
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "state-svc",
+      "kind": "state",
+      "events": 31,
+      "submitted": 48,
+      "admitted": 27,
+      "compressed": 0,
+      "tokens_admitted": 165,
+      "excluded": [
+        {
+          "reason": "authority_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "protected_tier_changed",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "stale_state",
+          "stage": "assembler",
+          "items": 3
+        },
+        {
+          "reason": "out_of_scope",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "slot_unplaced",
+          "stage": "assembler",
+          "items": 1
+        },
+        {
+          "reason": "over_budget",
+          "stage": "assembler",
+          "items": 7
+        }
+      ],
+      "rejected_events": 4
+    },
+    {
+      "id": "tool-registry",
+      "kind": "policy",
+      "events": 1,
+      "submitted": 1,
+      "admitted": 0,
+      "compressed": 0,
+      "tokens_admitted": 0,
+      "excluded": [
+        {
+          "reason": "capability_not_allowed",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "tools-mcp",
+      "kind": "mcp",
+      "events": 2,
+      "submitted": 7,
+      "admitted": 4,
+      "compressed": 0,
+      "tokens_admitted": 206,
+      "excluded": [
+        {
+          "reason": "producer_slot_not_allowed",
+          "stage": "assembler",
+          "items": 2
+        },
+        {
+          "reason": "superseded",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "wiki-corpus",
+      "kind": "retrieval",
+      "events": 8,
+      "submitted": 12,
+      "admitted": 6,
+      "compressed": 0,
+      "tokens_admitted": 33,
+      "excluded": [
+        {
+          "reason": "conflict_lost",
+          "stage": "assembler",
+          "items": 4
+        },
+        {
+          "reason": "duplicate_content",
+          "stage": "producer",
+          "items": 1
+        },
+        {
+          "reason": "duplicate_content",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 0
+    }
+  ]
+}

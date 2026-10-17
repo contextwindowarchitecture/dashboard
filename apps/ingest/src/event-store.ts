@@ -1,5 +1,6 @@
 // The store behind POST /events and the read routes (ADR-0007): it takes events and serves the
-// documents the static tree holds, at the tree's own places. The tree store (store.ts) and the
+// documents the static tree holds, at the tree's own places: the index, the closed days, each event and
+// session, the fleet report and the sources report. The tree store (store.ts) and the
 // PostgreSQL store (postgres-store.ts) implement it, and one contract suite holds both to it.
 
 import { readFileSync } from "node:fs"
@@ -16,6 +17,7 @@ import type {
   EventsIndexV1,
   FleetReportV1,
   SessionV1,
+  SourcesReportV1,
 } from "@cwa-dashboard/telemetry/types"
 import { validateAssemblyEventV1 } from "@cwa-dashboard/telemetry/validators"
 
@@ -33,6 +35,8 @@ export interface EventStore {
   event(eventId: string): Promise<AssemblyEventV1 | undefined>
   session(sessionId: string): Promise<SessionV1 | undefined>
   fleet(): Promise<FleetReportV1>
+  /** What each producer sent in the current window, and what became of it. */
+  sources(): Promise<SourcesReportV1>
   /** Brings every document up to date with the events written so far. */
   flush(): Promise<void>
   close(): Promise<void>

@@ -11,6 +11,7 @@ import type {
   EventsIndexV1,
   FleetReportV1,
   SessionV1,
+  SourcesReportV1,
 } from "@cwa-dashboard/telemetry/types"
 import { describe, expect, it } from "vitest"
 
@@ -56,6 +57,9 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
         expect(generatedAside(await store.fleet())).toEqual(
           generatedAside(read<FleetReportV1>("fleet.json")),
         )
+        expect(generatedAside(await store.sources())).toEqual(
+          generatedAside(read<SourcesReportV1>("sources.json")),
+        )
       } finally {
         await done()
       }
@@ -76,6 +80,12 @@ export function storeContract(name: string, open: () => Promise<StoreFixture>) {
         expect(index.windows).toEqual([
           { day: "2026-10-15", path: "index/2026-10-15.json", events: DEMO_EVENTS.length },
         ])
+        // The sources report covers the current window, as the index does: the one later event.
+        expect((await store.sources()).window).toEqual({
+          from: later.recorded_at,
+          to: later.recorded_at,
+          events: 1,
+        })
         const day = await store.window("2026-10-15")
         expect(day?.events.map((row) => row.event_id).sort()).toEqual(
           read<EventsIndexV1>("events/index.json")
