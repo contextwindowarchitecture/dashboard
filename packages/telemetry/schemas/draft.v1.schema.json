@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contextwindowarchitecture.io/schema/dashboard/draft.v1.schema.json",
   "title": "CWA dashboard draft",
-  "description": "A route policy or a profile in the making (ADR-0013), kept per author by the API: its kind, the registry entry it started from or none, the route it is for, the document as last saved, valid or not, and when.",
+  "description": "A route policy or a profile in the making (ADR-0013), kept per author by the API: its kind, the registry entry it started from or none, the route it is for, its tenant, the document as last saved, valid or not, and when.",
   "type": "object",
   "additionalProperties": false,
   "required": ["$schema", "id", "kind", "started_from", "route", "document", "updated_at"],
@@ -46,6 +46,11 @@
           }
         }
       ]
+    },
+    "tenant": {
+      "description": "The tenant the draft is kept in (ADR-0012); absent for the default tenant's, as on an event.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
     },
     "route": { "type": "string", "pattern": "\\S" },
     "document": {},

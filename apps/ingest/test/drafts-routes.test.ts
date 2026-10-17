@@ -114,6 +114,31 @@ describe("drafts", () => {
     await as("ada", "DELETE", `/drafts/${ID}.json`)
   })
 
+  it("are their tenant's: another tenant neither lists, reads, changes nor removes them", async () => {
+    const saved = await as("ada", "PUT", `/drafts/${ID}.json?tenant=northwind`, draft(PROFILE))
+    expect(saved.status).toBe(200)
+    expect(await saved.json()).toMatchObject({ id: ID, tenant: "northwind" })
+    expect((await as("ada", "GET", `/drafts/${ID}.json?tenant=northwind`)).status).toBe(200)
+    expect(
+      (
+        (await (await as("ada", "GET", "/drafts.json?tenant=northwind")).json()) as {
+          drafts: { id: string }[]
+        }
+      ).drafts.map((d) => d.id),
+    ).toEqual([ID])
+    expect((await as("ada", "GET", `/drafts/${ID}.json`)).status).toBe(404)
+    expect(
+      ((await (await as("ada", "GET", "/drafts.json")).json()) as { drafts: unknown[] }).drafts,
+    ).toEqual([])
+    expect((await as("ada", "PUT", `/drafts/${ID}.json`, draft(PROFILE))).status).toBe(404)
+    expect((await as("ada", "DELETE", `/drafts/${ID}.json`)).status).toBe(404)
+    // A default tenant's draft names no tenant, as an event does not.
+    expect((await as("ada", "DELETE", `/drafts/${ID}.json?tenant=northwind`)).status).toBe(204)
+    const plain = await as("ada", "PUT", `/drafts/${ID}.json`, draft(PROFILE))
+    expect(await plain.json()).not.toHaveProperty("tenant")
+    await as("ada", "DELETE", `/drafts/${ID}.json`)
+  })
+
   it("need a session", async () => {
     expect((await as(undefined, "GET", "/drafts.json")).status).toBe(401)
     expect((await as(undefined, "PUT", `/drafts/${ID}.json`, draft(PROFILE))).status).toBe(401)

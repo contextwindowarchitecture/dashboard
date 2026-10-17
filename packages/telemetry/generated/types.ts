@@ -230,7 +230,7 @@ export interface CWADashboardCorpus {
 export type CorpusV1 = CWADashboardCorpus
 
 /**
- * A route policy or a profile in the making (ADR-0013), kept per author by the API: its kind, the registry entry it started from or none, the route it is for, the document as last saved, valid or not, and when.
+ * A route policy or a profile in the making (ADR-0013), kept per author by the API: its kind, the registry entry it started from or none, the route it is for, its tenant, the document as last saved, valid or not, and when.
  */
 export interface CWADashboardDraft {
   $schema: "cwa-dashboard/draft/v1"
@@ -250,6 +250,10 @@ export interface CWADashboardDraft {
           version: string
         }
       }
+  /**
+   * The tenant the draft is kept in (ADR-0012); absent for the default tenant's, as on an event.
+   */
+  tenant?: string
   route: string
   document: unknown
   updated_at: string

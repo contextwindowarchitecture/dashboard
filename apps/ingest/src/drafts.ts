@@ -1,5 +1,6 @@
 // Drafts of route policies and profiles (ADR-0013), kept per author: the PostgreSQL store keeps them
-// (migration 8), found by author and id, so one author never reaches another's.
+// (migrations 8 and 9), found by author, tenant and id, so one author never reaches another's and a
+// draft is found only in its own tenant (ADR-0012).
 
 import type { DraftV1 } from "@cwa-dashboard/telemetry/types"
 
@@ -14,11 +15,11 @@ export interface DraftSummary {
 }
 
 export interface DraftStore {
-  /** The author's drafts, the latest first. */
-  list(author: string): Promise<DraftSummary[]>
-  get(author: string, id: string): Promise<DraftV1 | undefined>
-  /** Keeps the draft; "taken" when the id is another author's. */
-  put(author: string, draft: DraftV1): Promise<"saved" | "taken">
-  /** Removes the author's draft; false when they have none of that id. */
-  delete(author: string, id: string): Promise<boolean>
+  /** The author's drafts in the tenant, the latest first. */
+  list(author: string, tenant: string): Promise<DraftSummary[]>
+  get(author: string, tenant: string, id: string): Promise<DraftV1 | undefined>
+  /** Keeps the draft; "taken" when the id is another author's, or the author's in another tenant. */
+  put(author: string, tenant: string, draft: DraftV1): Promise<"saved" | "taken">
+  /** Removes the author's draft in the tenant; false when they have none of that id there. */
+  delete(author: string, tenant: string, id: string): Promise<boolean>
 }

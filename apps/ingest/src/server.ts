@@ -616,13 +616,13 @@ export function createIngestServer(options: IngestOptions): Server {
     }
     const author = reader.session.subject
     const PRIVATE = { "cache-control": "private, no-store" }
-    if (listing) return send(response, 200, { drafts: await drafts.list(author) }, PRIVATE)
+    if (listing) return send(response, 200, { drafts: await drafts.list(author, tenant) }, PRIVATE)
     const id = one?.[1]
     if (id === undefined || !DRAFT_ID.test(id)) {
       return fail(response, 404, "not-found", [`No draft at ${path}.`])
     }
     if (request.method === "GET") {
-      const draft = await drafts.get(author, id)
+      const draft = await drafts.get(author, tenant, id)
       if (draft === undefined) return fail(response, 404, "not-found", [`No draft ${id}.`])
       return send(response, 200, draft, PRIVATE)
     }
@@ -631,7 +631,7 @@ export function createIngestServer(options: IngestOptions): Server {
       return fail(response, 403, "forbidden", ["A draft is written from this site only."])
     }
     if (request.method === "DELETE") {
-      if (!(await drafts.delete(author, id))) {
+      if (!(await drafts.delete(author, tenant, id))) {
         return fail(response, 404, "not-found", [`No draft ${id}.`])
       }
       response.writeHead(204, { "cache-control": "no-store" })
@@ -658,6 +658,7 @@ export function createIngestServer(options: IngestOptions): Server {
       kind: given.kind,
       started_from: given.started_from ?? null,
       route,
+      ...(tenant === DEFAULT_TENANT ? {} : { tenant }),
       document: given.document,
       updated_at: new Date().toISOString(),
     }
@@ -671,7 +672,7 @@ export function createIngestServer(options: IngestOptions): Server {
         ),
       )
     }
-    if ((await drafts.put(author, draft)) === "taken") {
+    if ((await drafts.put(author, tenant, draft)) === "taken") {
       return fail(response, 404, "not-found", [`No draft ${id}.`])
     }
     return send(response, 200, draft, PRIVATE)

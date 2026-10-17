@@ -135,6 +135,10 @@ const MIGRATIONS: (string | ((db: Queryable) => Promise<void>))[] = [
      draft text not null
    );
    create index cwa_drafts_author on cwa_drafts (author, updated_at desc)`,
+  // 9: a draft is its tenant's (ADR-0012); those kept before are the default tenant's.
+  `alter table cwa_drafts add column tenant text not null default 'default';
+   drop index if exists cwa_drafts_author;
+   create index cwa_drafts_author_tenant on cwa_drafts (author, tenant, updated_at desc)`,
 ]
 
 async function migrate(db: Queryable) {
@@ -451,10 +455,10 @@ export async function createPostgresStore(
   }
 
   const drafts: DraftStore = {
-    async list(author) {
+    async list(author, tenant) {
       const { rows } = await db.query<{ value: string }>(
-        "select draft as value from cwa_drafts where author = $1 order by updated_at desc, id",
-        [author],
+        "select draft as value from cwa_drafts where author = $1 and tenant = $2 order by updated_at desc, id",
+        [author, tenant],
       )
       return parse<DraftV1>(rows).map((d): DraftSummary => ({
         id: d.id,
@@ -464,28 +468,29 @@ export async function createPostgresStore(
         updated_at: d.updated_at,
       }))
     },
-    async get(author, id) {
+    async get(author, tenant, id) {
       const { rows } = await db.query<{ value: string }>(
-        "select draft as value from cwa_drafts where id = $1 and author = $2",
-        [id, author],
+        "select draft as value from cwa_drafts where id = $1 and author = $2 and tenant = $3",
+        [id, author, tenant],
       )
       return parse<DraftV1>(rows)[0]
     },
-    async put(author, draft) {
-      // A new id is the author's; an id already another author's is left alone.
+    async put(author, tenant, draft) {
+      // A new id is the author's, in the tenant; an id already another author's, or theirs in
+      // another tenant, is left alone.
       const { rows } = await db.query<{ id: string }>(
-        `insert into cwa_drafts (id, author, updated_at, draft) values ($1, $2, $3, $4)
+        `insert into cwa_drafts (id, author, tenant, updated_at, draft) values ($1, $2, $3, $4, $5)
          on conflict (id) do update set updated_at = excluded.updated_at, draft = excluded.draft
-         where cwa_drafts.author = excluded.author
+         where cwa_drafts.author = excluded.author and cwa_drafts.tenant = excluded.tenant
          returning id`,
-        [draft.id, author, draft.updated_at, JSON.stringify(draft)],
+        [draft.id, author, tenant, draft.updated_at, JSON.stringify(draft)],
       )
       return rows.length === 1 ? "saved" : "taken"
     },
-    async delete(author, id) {
+    async delete(author, tenant, id) {
       const { rows } = await db.query<{ id: string }>(
-        "delete from cwa_drafts where id = $1 and author = $2 returning id",
-        [id, author],
+        "delete from cwa_drafts where id = $1 and author = $2 and tenant = $3 returning id",
+        [id, author, tenant],
       )
       return rows.length === 1
     },

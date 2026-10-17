@@ -132,3 +132,28 @@ describe("migration 7", () => {
     await db.close()
   })
 })
+
+describe("migration 9", () => {
+  it("keeps the drafts a version 8 database holds, in the default tenant", async () => {
+    const db = new PGlite()
+    const store = await createPostgresStore(db)
+    const draft = {
+      $schema: "cwa-dashboard/draft/v1" as const,
+      id: "a1b2c3d4-0000-4000-8000-000000000001",
+      kind: "profile" as const,
+      started_from: null,
+      route: "support-chat",
+      document: {},
+      updated_at: "2026-10-17T12:00:00.000Z",
+    }
+    await store.drafts.put("ada", "default", draft)
+    // As version 8 left it: drafts by author alone.
+    await db.query("drop index if exists cwa_drafts_author_tenant")
+    await db.query("alter table cwa_drafts drop column tenant")
+    await db.query("delete from cwa_schema where version > 8")
+    const reopened = await createPostgresStore(db)
+    expect(await reopened.drafts.get("ada", "default", draft.id)).toEqual(draft)
+    expect(await reopened.drafts.get("ada", "northwind", draft.id)).toBeUndefined()
+    await db.close()
+  })
+})
