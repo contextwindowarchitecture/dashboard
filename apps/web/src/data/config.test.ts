@@ -25,7 +25,9 @@ describe("parseConfig", () => {
       /absolute path or an http/,
     )
     expect(() => parseConfig({ dataRoot: "/data", source: "s3" })).toThrow(/source/)
-    expect(() => parseConfig({ dataRoot: "/data", source: "http" })).toThrow(/Phase 2/)
+    expect(() => parseConfig({ dataRoot: "/data", source: "http" })).toThrow(
+      /dataRoot.*\/api\/data/,
+    )
     expect(() => parseConfig({ dataRoot: "/data", source: "file", apiBase: 3 })).toThrow(/apiBase/)
   })
 })

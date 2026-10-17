@@ -5,7 +5,7 @@
 export interface AppConfig {
   /** Where the tree (events/, sessions/, fleet.json) is served, without a trailing slash. */
   readonly dataRoot: string
-  /** How the tree is read: files in Phase 1; the query API arrives in Phase 2. */
+  /** How the documents are read: as files at dataRoot, whether a tree or the query API serves them. */
   readonly source: "file"
   /** The Node service's base (POST /replay); absent, the sandbox says it is not configured. */
   readonly apiBase?: string
@@ -35,7 +35,7 @@ export function parseConfig(json: unknown): AppConfig {
   const source = value["source"]
   if (source === "http") {
     throw new ConfigError(
-      '"source": "http" reads the query API, which arrives in Phase 2; use "file"',
+      'There is no "source": "http": the query API serves the tree\'s documents at the tree\'s paths (ADR-0007), so keep "source": "file" and set "dataRoot" to its data path, /api/data',
     )
   }
   if (source !== "file") throw new ConfigError('config.json\'s "source" must be "file"')
