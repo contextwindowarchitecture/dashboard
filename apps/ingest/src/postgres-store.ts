@@ -32,6 +32,14 @@ import {
   SESSION_ID,
   WINDOW,
 } from "./event-store.ts"
+import {
+  IDLE_MS,
+  type Identity,
+  type Login,
+  LOGIN_MS,
+  MAX_MS,
+  type SessionStore,
+} from "./sessions.ts"
 import type { BodyVault, MediaType } from "./vault.ts"
 
 export interface Queryable {
@@ -92,6 +100,19 @@ const MIGRATIONS: (string | ((db: Queryable) => Promise<void>))[] = [
      body bytea not null,
      stored_at timestamptz not null default now()
    )`,
+  // 6: sign-in (ADR-0010): logins in flight and sessions, each by the SHA-256 of its cookie's id.
+  `create table cwa_logins (
+     id_hash text primary key,
+     login text not null,
+     expires_at timestamptz not null
+   );
+   create table cwa_sessions (
+     id_hash text primary key,
+     identity text not null,
+     created_at timestamptz not null,
+     last_seen timestamptz not null,
+     expires_at timestamptz not null
+   )`,
 ]
 
 async function migrate(db: Queryable) {
@@ -116,8 +137,11 @@ export interface PostgresStoreOptions {
   readonly end?: () => Promise<void>
 }
 
-/** The store, and the vault it keeps in the same database. */
-export type PostgresStore = EventStore & { readonly vault: BodyVault }
+/** The store, and the vault and the sessions it keeps in the same database. */
+export type PostgresStore = EventStore & {
+  readonly vault: BodyVault
+  readonly sessions: SessionStore
+}
 
 export async function createPostgresStore(
   db: Queryable,
@@ -314,5 +338,59 @@ export async function createPostgresStore(
     },
   }
 
-  return { ...store, vault }
+  const sessions: SessionStore = {
+    async saveLogin(idHash, login, now) {
+      await db.query("insert into cwa_logins (id_hash, login, expires_at) values ($1, $2, $3)", [
+        idHash,
+        JSON.stringify(login),
+        new Date(now.getTime() + LOGIN_MS).toISOString(),
+      ])
+    },
+    async takeLogin(idHash, now) {
+      const { rows } = await db.query<{ login: string; expires_at: Date }>(
+        "delete from cwa_logins where id_hash = $1 returning login, expires_at",
+        [idHash],
+      )
+      const row = rows[0]
+      if (row === undefined || new Date(row.expires_at).getTime() < now.getTime()) return undefined
+      return JSON.parse(row.login) as Login
+    },
+    async createSession(idHash, identity, now) {
+      await db.query(
+        `insert into cwa_sessions (id_hash, identity, created_at, last_seen, expires_at)
+         values ($1, $2, $3, $3, $4)`,
+        [
+          idHash,
+          JSON.stringify(identity),
+          now.toISOString(),
+          new Date(now.getTime() + MAX_MS).toISOString(),
+        ],
+      )
+    },
+    async session(idHash, now) {
+      // Used now, so its idle time starts again; only a session neither expired nor idle too long.
+      const { rows } = await db.query<{ identity: string; created_at: Date; expires_at: Date }>(
+        `update cwa_sessions set last_seen = $2
+         where id_hash = $1 and expires_at > $2 and last_seen > $3
+         returning identity, created_at, expires_at`,
+        [idHash, now.toISOString(), new Date(now.getTime() - IDLE_MS).toISOString()],
+      )
+      const row = rows[0]
+      if (row === undefined) return undefined
+      return {
+        ...(JSON.parse(row.identity) as Identity),
+        createdAt: new Date(row.created_at),
+        expiresAt: new Date(row.expires_at),
+      }
+    },
+    async endSession(idHash) {
+      const { rows } = await db.query<{ id_hash: string }>(
+        "delete from cwa_sessions where id_hash = $1 returning id_hash",
+        [idHash],
+      )
+      return rows.length === 1
+    },
+  }
+
+  return { ...store, vault, sessions }
 }
