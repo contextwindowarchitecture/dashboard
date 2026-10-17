@@ -86,9 +86,9 @@ It copies the events and sessions first and `events/index.json` last, so the ind
 
 The host must resolve to the cluster's router before cert-manager can answer Let's Encrypt's HTTP-01 challenge. The Route names the secret cert-manager keeps (`dashboard-tls`); the API refuses a Route naming a secret that does not exist yet, so the first apply leaves the Route as it was until the Certificate is Ready, and the next apply takes it.
 
-## Not here yet
+## Demo traffic only
 
-The vault (Phase 2's content-addressed bodies) is not part of this stack yet. Nothing here sends real traffic: the deployment shows demo traffic only (D11).
+Nothing here sends real traffic: the deployment shows demo traffic only (D11), and its vault holds only the demo's bodies, the review agent's route's.
 
 ## Events in PostgreSQL
 
