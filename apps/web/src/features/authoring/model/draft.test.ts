@@ -11,7 +11,7 @@ import type { AssemblyEventV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/ty
 import { describe, expect, it } from "vitest"
 
 import { FIXTURES_DIR } from "../../../test/fixture-fetch"
-import { changes, fieldText, setField, withDraft } from "./draft"
+import { changes, fieldText, setField, startFrom, startingDocument, withDraft } from "./draft"
 
 const PROFILE = REGISTRY.profiles[0]!
 const POLICY = REGISTRY.route_policies[0]!
@@ -101,5 +101,34 @@ describe("withDraft", () => {
       ...event.snapshot,
       route_policy: POLICY,
     })
+  })
+})
+
+describe("starting a draft", () => {
+  it("starts from a registry profile or route policy, naming where it started", () => {
+    expect(startFrom(`profile:${PROFILE.id}@${PROFILE.version}`)).toEqual({
+      kind: "profile",
+      started_from: { profile: { id: PROFILE.id, version: PROFILE.version } },
+      document: PROFILE,
+    })
+    expect(startFrom(`route_policy:${POLICY.route}@${POLICY.version}`)).toEqual({
+      kind: "route_policy",
+      started_from: { route_policy: { route: POLICY.route, version: POLICY.version } },
+      document: POLICY,
+    })
+    expect(startFrom("profile:nothing@1")).toBeUndefined()
+  })
+
+  it("finds the document a draft started from, to compare it with", () => {
+    expect(startingDocument({ profile: { id: PROFILE.id, version: PROFILE.version } })).toEqual(
+      PROFILE,
+    )
+    expect(
+      startingDocument({ route_policy: { route: POLICY.route, version: POLICY.version } }),
+    ).toEqual(POLICY)
+    expect(
+      startingDocument({ profile: { id: PROFILE.id, version: PROFILE.version + 99 } }),
+    ).toBeUndefined()
+    expect(startingDocument(null)).toBeUndefined()
   })
 })

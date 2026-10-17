@@ -3,6 +3,8 @@
 // None of this decides what the assembler would do; the preview's replay does.
 
 import type { Field } from "@cwa-dashboard/contract/data"
+import { REGISTRY } from "@cwa-dashboard/contract/registry"
+import type { DraftV1 } from "@cwa-dashboard/telemetry/types"
 
 export type DraftKind = "route_policy" | "profile"
 type Json = unknown
@@ -94,4 +96,44 @@ export function setField(document: Json, field: Field, text: string): SetField {
 /** The snapshot with the draft in place of its profile or route policy, and nothing else changed. */
 export function withDraft<S extends object>(snapshot: S, kind: DraftKind, document: Json): S {
   return { ...snapshot, [kind]: document }
+}
+
+export interface Start {
+  readonly kind: DraftKind
+  readonly started_from: DraftV1["started_from"]
+  readonly document: Json
+}
+
+/** A new draft from a registry choice ("profile:<id>@<version>" or "route_policy:<route>@<version>"). */
+export function startFrom(value: string): Start | undefined {
+  const profile = REGISTRY.profiles.find((p) => value === `profile:${p.id}@${p.version}`)
+  if (profile) {
+    return {
+      kind: "profile",
+      started_from: { profile: { id: profile.id, version: profile.version } },
+      document: profile,
+    }
+  }
+  const policy = REGISTRY.route_policies.find(
+    (p) => value === `route_policy:${p.route}@${p.version}`,
+  )
+  if (policy) {
+    return {
+      kind: "route_policy",
+      started_from: { route_policy: { route: policy.route, version: policy.version } },
+      document: policy,
+    }
+  }
+  return undefined
+}
+
+/** The registry entry a draft started from, or undefined when it started from nothing the registry holds. */
+export function startingDocument(started: DraftV1["started_from"]): Json {
+  if (started === null) return undefined
+  if ("profile" in started) {
+    const { id, version } = started.profile
+    return REGISTRY.profiles.find((p) => p.id === id && p.version === version)
+  }
+  const { route, version } = started.route_policy
+  return REGISTRY.route_policies.find((p) => p.route === route && p.version === version)
 }
