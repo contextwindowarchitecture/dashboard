@@ -101,6 +101,21 @@ describe("the read routes", () => {
     expect(await head.text()).toBe("")
   })
 
+  it("answer a store's failure with a 500 that names nothing of the database", async () => {
+    const broken = {
+      ...(await demoStore()),
+      index: async () => {
+        throw new Error('relation "cwa_events" does not exist')
+      },
+    }
+    const base = await serve(broken)
+    const response = await fetch(`${base}/data/events/index.json`)
+    expect(response.status).toBe(500)
+    const body = await response.text()
+    expect(body).not.toMatch(/cwa_events|relation/)
+    expect(JSON.parse(body)).toMatchObject({ ok: false, kind: "internal" })
+  })
+
   it("say the store is not configured when there is none", async () => {
     const base = await serve()
     const response = await fetch(`${base}/data/events/index.json`)

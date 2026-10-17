@@ -220,7 +220,11 @@ export function createIngestServer(options: IngestOptions): Server {
     }
     route().catch((error: unknown) => {
       if (!response.headersSent) {
-        fail(response, 500, "internal", [error instanceof Error ? error.message : String(error)])
+        // The detail stays in the service's log: it can name the store's internals.
+        process.stderr.write(
+          `ingest: ${request.method} ${path} failed: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`,
+        )
+        fail(response, 500, "internal", ["The service failed; its log has the detail."])
       }
     })
   })
