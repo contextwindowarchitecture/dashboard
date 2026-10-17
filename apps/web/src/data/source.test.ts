@@ -65,4 +65,15 @@ describe("createFileSource", () => {
     // The index lives beside the events; an event id is a ULID, so "index" names no event.
     expect((await failure(files.event("index"))).kind).toBe("not-found")
   })
+
+  it("reads a closed day's index beside the current one, and nothing for a day that names no file", async () => {
+    const requests: string[] = []
+    const source = createFileSource("/data", async (input) => {
+      requests.push(String(input))
+      return new Response("{}", { status: 200 })
+    })
+    await source.window("2026-10-15")
+    await expect(source.window("../index")).rejects.toMatchObject({ kind: "not-found" })
+    expect(requests).toEqual(["/data/events/index/2026-10-15.json"])
+  })
 })

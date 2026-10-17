@@ -1,14 +1,15 @@
 // The trace stream (dashboard-plan.md 7.2): the index's events, filtered by the URL, newest first,
-// each row linking to its inspector. The filter bar offers what the index counted; the status
-// region says how many rows show, from where, and when a refresh is running.
+// each row linking to its inspector. The filter bar offers what the index counted, and the window:
+// the current one or a closed day the index lists (ADR-0007), `?window=<day>`. The status region
+// says how many rows show, of which window, from where, and when a refresh is running.
 
 import type { EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
 import { useWindowVirtualizer } from "@tanstack/react-virtual"
-import { useCallback, useState, type ComponentProps } from "react"
+import { useCallback, useState, type ComponentProps, type ReactNode } from "react"
 import { Link, useSearchParams } from "react-router"
 
 import { useData } from "../../../data/data-context"
-import { useIndex } from "../../../data/queries"
+import { useIndex, useWindow } from "../../../data/queries"
 import { regionOf } from "../../../data/region"
 import { formatCount, formatInstant, formatMs, NOT_AVAILABLE } from "../../../lib/format"
 import { DataRegion } from "../../../components/dashboard/data-region"
@@ -43,6 +44,7 @@ import {
 } from "../model/stream"
 
 const ALL = "__all"
+const CURRENT = "__current"
 const SHOWN_REASONS = 3
 
 type FacetKey = "outcome" | "language" | "route" | "reason" | "service"
@@ -54,20 +56,62 @@ const FACETS: { key: FacetKey; label: string; all: string }[] = [
   { key: "service", label: "Service", all: "All services" },
 ]
 
+/** The window select: the current window, then each closed day the current index lists. */
+function WindowField({
+  current,
+  day,
+  onWindow,
+}: {
+  readonly current: EventsIndexV1 | undefined
+  readonly day: string | undefined
+  readonly onWindow: (day: string | undefined) => void
+}) {
+  const windows = current?.windows ?? (day === undefined ? [] : [{ day, events: undefined }])
+  return (
+    <div data-slot="field">
+      <label id="filter-window" data-label="">
+        Window
+      </label>
+      <Select
+        value={day ?? CURRENT}
+        onValueChange={(value) => onWindow(value === CURRENT ? undefined : value)}
+      >
+        <SelectTrigger aria-labelledby="filter-window">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={CURRENT}>
+            Current window{current ? ` · ${formatCount(current.events.length)}` : ""}
+          </SelectItem>
+          {windows.map((window) => (
+            <SelectItem key={window.day} value={window.day}>
+              {window.day}
+              {window.events === undefined ? "" : ` · ${formatCount(window.events)}`}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
 function FilterBar({
   index,
   filters,
   onChange,
   canClear,
+  window,
 }: {
   readonly index: EventsIndexV1
   readonly filters: StreamFilters
   readonly onChange: (filters: StreamFilters) => void
   /** Whether the bar offers Clear filters; the no-results panel offers it instead. */
   readonly canClear: boolean
+  readonly window: ReactNode
 }) {
   return (
     <div data-slot="filter-bar" role="group" aria-label="Filters">
+      {window}
       {FACETS.map(({ key, label, all }) => {
         const options = facetOptions(index.facets[key])
         const id = `filter-${key}`
@@ -263,16 +307,30 @@ function StreamTable({ rows }: { readonly rows: readonly IndexRow[] }) {
   )
 }
 
+const DAY = /^\d{4}-\d{2}-\d{2}$/
+
 export function TraceStream() {
   const [search, setSearch] = useSearchParams()
   const filters = parseFilters(search)
-  const query = useIndex()
+  const asked = search.get("window") ?? undefined
+  const day = asked !== undefined && DAY.test(asked) ? asked : undefined
+  const currentQuery = useIndex()
+  const dayQuery = useWindow(day)
+  const query = day === undefined ? currentQuery : dayQuery
   const { source } = useData()
   const region = regionOf(query, {
-    what: "The index",
+    what: day === undefined ? "The index" : `The closed day ${day}`,
     isEmpty: (index) => index.events.length === 0,
   })
-  const setFilters = (next: StreamFilters) => setSearch(toSearch(next))
+  const current = currentQuery.data?.result.ok ? currentQuery.data.result.document : undefined
+  // A filter keeps the window, and a window keeps the filters.
+  const withWindow = (params: URLSearchParams, next: string | undefined) => {
+    if (next !== undefined) params.set("window", next)
+    return params
+  }
+  const setFilters = (next: StreamFilters) => setSearch(withWindow(toSearch(next), day))
+  const setWindow = (next: string | undefined) => setSearch(withWindow(toSearch(filters), next))
+  const indexPath = day === undefined ? "events/index.json" : `events/index/${day}.json`
 
   return (
     <DataRegion
@@ -297,6 +355,7 @@ export function TraceStream() {
               filters={filters}
               onChange={setFilters}
               canClear={rows.length > 0}
+              window={<WindowField current={current} day={day} onWindow={setWindow} />}
             />
             <div
               role="status"
@@ -307,6 +366,7 @@ export function TraceStream() {
               <span>
                 {formatCount(rows.length)} of {formatCount(index.events.length)} events
               </span>
+              <span>· {day === undefined ? "current window" : `closed day ${day}`}</span>
               <span>· source {source.url("").replace(/\/$/, "")}</span>
               <span>· generated {formatInstant(index.generated_at)}</span>
               {updating ? <span>· updating</span> : null}
@@ -317,8 +377,8 @@ export function TraceStream() {
               </button>
               <a
                 data-slot="ghost-button"
-                href={source.url("events/index.json")}
-                download="index.json"
+                href={source.url(indexPath)}
+                download={day === undefined ? "index.json" : `index-${day}.json`}
               >
                 Download index
               </a>

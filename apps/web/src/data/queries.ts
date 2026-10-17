@@ -71,6 +71,20 @@ export const useIndex = () =>
     true,
   )
 
+/** A closed day's index; nothing is fetched without a day. */
+export const useWindow = (day: string | undefined) =>
+  useQuery({
+    ...documentOptions(
+      useData(),
+      "events-index",
+      ["window", day ?? ""],
+      (s) => s.url(`events/index/${day}.json`),
+      (s, signal) => s.window(day!, signal),
+      true,
+    ),
+    enabled: day !== undefined,
+  })
+
 export const useEvent = (eventId: string) =>
   useDocument(
     "assembly-event",

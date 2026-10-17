@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest"
 
 import { FIXTURES_DIR } from "../../../test/fixture-fetch"
 import { renderApp } from "../../../test/render-app"
+import { windowedTree } from "../../../test/windowed-tree"
 
 const index = JSON.parse(
   readFileSync(join(FIXTURES_DIR, "events/index.json"), "utf8"),
@@ -100,5 +101,65 @@ describe("the trace stream", () => {
     renderApp("/traces", { overrides: { "/data/events/index.json": { status: 503 } } })
     expect(await screen.findByRole("alert")).toHaveTextContent("503")
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument()
+  })
+
+  describe("past the window", () => {
+    const tree = windowedTree(6)
+    const [day] = tree.windows
+
+    it("offers the closed days and shows one, naming it, and its events and download", async () => {
+      expect(tree.windows.length).toBeGreaterThan(0)
+      const { router } = renderApp("/traces", { dir: tree.dir })
+      expect(await rowsOf()).toHaveLength(tree.current.length)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole("combobox", { name: "Window" }))
+      await user.click(await screen.findByRole("option", { name: new RegExp(`^${day!.day}`) }))
+      await waitFor(() => expect(router.state.location.search).toBe(`?window=${day!.day}`))
+      await waitFor(async () => expect(await rowsOf()).toHaveLength(day!.events))
+      const status = screen.getByRole("status", { name: "Stream status" })
+      expect(status).toHaveTextContent(`${day!.events} of ${day!.events} events`)
+      expect(status).toHaveTextContent(`closed day ${day!.day}`)
+      expect(screen.getByRole("link", { name: "Download index" })).toHaveAttribute(
+        "href",
+        `/data/events/index/${day!.day}.json`,
+      )
+    })
+
+    it("filters within a closed day, from the URL", async () => {
+      const rows = tree.closed.get(day!.day)!
+      const outcome = rows[0]!.outcome
+      renderApp(`/traces?window=${day!.day}&outcome=${outcome}`, { dir: tree.dir })
+      await waitFor(async () =>
+        expect(await rowsOf()).toHaveLength(rows.filter((r) => r.outcome === outcome).length),
+      )
+    })
+
+    it("keeps the closed day when a filter is chosen", async () => {
+      const { router } = renderApp(`/traces?window=${day!.day}`, { dir: tree.dir })
+      await waitFor(async () => expect(await rowsOf()).toHaveLength(day!.events))
+      const outcome = tree.closed.get(day!.day)![0]!.outcome
+      const user = userEvent.setup()
+      await user.click(screen.getByRole("combobox", { name: "Outcome" }))
+      await user.click(await screen.findByRole("option", { name: new RegExp(`^${outcome}`) }))
+      await waitFor(() =>
+        expect(new URLSearchParams(router.state.location.search).get("window")).toBe(day!.day),
+      )
+    })
+
+    it("says a day it does not hold is not found", async () => {
+      renderApp("/traces?window=2020-01-01", { dir: tree.dir })
+      expect(await screen.findByText(/2020-01-01/)).toBeInTheDocument()
+      expect(screen.queryByRole("table", { name: /Trace stream/ })).not.toBeInTheDocument()
+    })
+
+    it("goes back to the current window", async () => {
+      const { router } = renderApp(`/traces?window=${day!.day}`, { dir: tree.dir })
+      await waitFor(async () => expect(await rowsOf()).toHaveLength(day!.events))
+      const user = userEvent.setup()
+      await user.click(screen.getByRole("combobox", { name: "Window" }))
+      await user.click(await screen.findByRole("option", { name: /^Current window/ }))
+      await waitFor(() => expect(router.state.location.search).toBe(""))
+      await waitFor(async () => expect(await rowsOf()).toHaveLength(tree.current.length))
+    })
   })
 })

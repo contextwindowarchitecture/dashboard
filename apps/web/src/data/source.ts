@@ -24,8 +24,10 @@ export class SourceError extends Error {
 }
 
 export interface EventSource {
-  /** The current window's index: the only document that changes. */
+  /** The current window's index. */
   index(signal?: AbortSignal): Promise<unknown>
+  /** A closed day's index, `YYYY-MM-DD` in UTC, as the current index lists it under `windows`. */
+  window(day: string, signal?: AbortSignal): Promise<unknown>
   event(eventId: string, signal?: AbortSignal): Promise<unknown>
   session(sessionId: string, signal?: AbortSignal): Promise<unknown>
   fleet(signal?: AbortSignal): Promise<unknown>
@@ -37,6 +39,7 @@ export interface EventSource {
 // the index beside the events, names no document.
 const EVENT_ID = /^[0-9A-HJKMNP-TV-Z]{26}$/
 const SESSION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/
+const DAY = /^\d{4}-\d{2}-\d{2}$/
 
 /** The tree served under `root`; `fetchFn` is injectable so tests read the fixtures from disk. */
 export function createFileSource(root: string, fetchFn: typeof fetch = fetch): EventSource {
@@ -77,6 +80,7 @@ export function createFileSource(root: string, fetchFn: typeof fetch = fetch): E
 
   return {
     index: (signal) => json(url("events/index.json"), signal),
+    window: (day, signal) => byId("events/index", DAY, day, signal),
     event: (eventId, signal) => byId("events", EVENT_ID, eventId, signal),
     session: (sessionId, signal) => byId("sessions", SESSION_ID, sessionId, signal),
     fleet: (signal) => json(url("fleet.json"), signal),
