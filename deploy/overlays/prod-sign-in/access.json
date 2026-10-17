@@ -1,0 +1,5 @@
+{
+  "anonymous": ["viewer", "owner:*"],
+  "signed_in": ["viewer", "owner:*", "auditor"],
+  "groups": {}
+}

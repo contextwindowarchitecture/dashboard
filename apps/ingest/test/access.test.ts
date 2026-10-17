@@ -131,3 +131,22 @@ describe("withholdBodies", () => {
     expect(JSON.stringify(event)).toBe(before)
   })
 })
+
+describe("the repository's access files", () => {
+  // A typo here would stop the service at start; better to stop the tests.
+  const ROOT = join(import.meta.dirname, "../../..")
+  for (const path of ["deploy/overlays/prod-sign-in/access.json", "apps/web/e2e/access.json"]) {
+    it(`${path} is one the service reads`, () => {
+      expect(() => accessFrom(JSON.parse(readFileSync(join(ROOT, path), "utf8")))).not.toThrow()
+    })
+  }
+
+  it("keeps the public demo open to anonymous readers, bodies and all (P3-D5)", () => {
+    const live = accessFrom(
+      JSON.parse(readFileSync(join(ROOT, "deploy/overlays/prod-sign-in/access.json"), "utf8")),
+    )
+    const anonymous = rolesOf(live, undefined)
+    expect(mayRead(anonymous)).toBe(true)
+    expect(mayOwn(anonymous, "support-chat")).toBe(true)
+  })
+})

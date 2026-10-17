@@ -1,7 +1,8 @@
 # dashboard.contextwindowarchitecture.io with sign-in (ADR-0010): the PostgreSQL overlay plus the sign-in component,
 # Dex at https://dashboard.contextwindowarchitecture.io/dex signing in members of the contextwindowarchitecture
 # GitHub organisation. Apply it once the secrets exist (deploy/README.md, Sign-in); applying prod-postgres again
-# takes sign-in away.
+# takes sign-in away. access.json is who may read what (ADR-0011): the demo stays open to anonymous readers, as D11
+# and P3-D5 have it, and a signed-in member is also an auditor; teams are added under "groups".
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -14,6 +15,9 @@ components:
   - ../../components/sign-in
 
 configMapGenerator:
+  - name: dashboard-access
+    files:
+      - access.json
   - name: dashboard-sign-in
     literals:
       - issuer=https://dashboard.contextwindowarchitecture.io/dex

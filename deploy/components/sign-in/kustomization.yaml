@@ -1,8 +1,9 @@
 # Sign-in (ADR-0010): Dex served at /dex behind the web pods' nginx, and the ingest service's OIDC settings. Needs the
 # PostgreSQL component, where sessions live, and three things the overlay or the operator supplies: the ConfigMap
 # dashboard-sign-in (issuer, redirect-uri, github-org), the secret dashboard-oidc (client-secret, shared by Dex's
-# client and the ingest service) and the secret dashboard-dex-github (the GitHub OAuth app's client-id and
-# client-secret). deploy/README.md says how.
+# client and the ingest service), the secret dashboard-dex-github (the GitHub OAuth app's client-id and
+# client-secret), and the ConfigMap dashboard-access holding access.json, who may read what (ADR-0011).
+# deploy/README.md says how.
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
@@ -48,3 +49,20 @@ patches:
         value:
           name: OIDC_CLIENT_SECRET
           valueFrom: { secretKeyRef: { name: dashboard-oidc, key: client-secret } }
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ACCESS_FILE
+          value: /etc/dashboard/access.json
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: access
+          mountPath: /etc/dashboard
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: access
+          configMap:
+            name: dashboard-access

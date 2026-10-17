@@ -194,6 +194,8 @@ With `ACCESS_FILE`, a JSON file, the service grants roles and refuses what they 
 
 `viewer` reads every event's metadata and every document derived from them; `owner:<route>` (or `owner:*`) also reads that route's bodies and its compliance bundles; `auditor` reads every bundle; `operator` reads what a viewer does. A body a reader's roles do not cover is served withheld, with its digest, and the inspector says so. An unknown key or role stops the service at start. A reader with no role is told to sign in (401), or that their roles do not reach (403).
 
+On the cluster, `deploy/overlays/prod-sign-in/access.json` is the file, mounted from the ConfigMap `dashboard-access`: the public demo stays open to anonymous readers, bodies and all (D11, P3-D5), and every signed-in member of the organisation is also an auditor. Add a team under `groups` as `"contextwindowarchitecture:<team>": [...]`, then `oc apply -k deploy/overlays/prod-sign-in`; the ConfigMap's new name rolls the ingest service.
+
 ## The vault
 
 A route under `pii_scrubbed` or `digest_only` may keep its original bodies in the vault (`docs/adr/0009-body-vault.md`): its wrapper deposits each body with the ingest token at `PUT /api/bodies/<sha256>`, and the operator resolves one in the inspector with the operator token, `VAULT_TOKEN`, which must differ from the ingest token (the service refuses to start otherwise). The inspector shows a body only when its bytes hash to the digest the event holds.
