@@ -67,6 +67,9 @@ const RESOLVING_RULES: Readonly<Record<string, PipelineStage>> = {
   "R-24": "dedupe",
   "R-26": "diversity",
 }
+/** The resolving stage a requirement defines (R-11 conflict, R-25 supersession, ...), if any. */
+export const ruleStage = (rule: string): PipelineStage | undefined => RESOLVING_RULES[rule]
+
 const STAGE_BY_CODE: ReadonlyMap<string, PipelineStage> = (() => {
   const stages = new Map<string, PipelineStage>()
   let current: PipelineStage = "admission"
