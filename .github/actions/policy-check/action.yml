@@ -1,0 +1,39 @@
+# A policy repository's check (ADR-0014): every route policy and profile where the layout puts it,
+# holding what its path names; published versions never edited or removed; each changed route
+# shadowed over its corpus in shadow.json, within its limits. A policy repository uses it at a pinned
+# commit, on a checkout with the base branch's history:
+#
+#   - uses: actions/checkout@v4
+#     with:
+#       fetch-depth: 0
+#   - uses: contextwindowarchitecture/dashboard/.github/actions/policy-check@<commit>
+#     with:
+#       base: ${{ github.event.pull_request.base.sha }}
+name: CWA policy check
+description: Checks a policy repository's layout and shadows every route a pull request changes
+inputs:
+  base:
+    description: The commit the pull request is compared with, its base
+    required: true
+  config:
+    description: The shadow configuration, in the calling repository
+    required: false
+    default: shadow.json
+  report-dir:
+    description: Where to write each route's shadow report, for an artifact
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+    - shell: bash
+      env:
+        BASE: ${{ inputs.base }}
+        CONFIG: ${{ inputs.config }}
+        REPORT_DIR: ${{ inputs.report-dir }}
+      run: |
+        node "$GITHUB_ACTION_PATH/../../../deploy/policy-check.mjs" \
+          --base "$BASE" --config "$CONFIG" --report-dir "${REPORT_DIR:-$RUNNER_TEMP}"

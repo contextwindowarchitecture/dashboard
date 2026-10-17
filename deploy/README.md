@@ -255,3 +255,18 @@ node deploy/shadow-check.mjs --api https://dashboard.contextwindowarchitecture.i
 ```
 
 The script exits 0 within every limit, 1 over one, and 2 when it could not run (a usage error, a corpus the service does not hold, a service that does not answer). Every limit is 0 unless given. A baseline that does not reproduce its recorded hash is reported, not failed on: it is a difference between the recording implementation and this one, not the candidate's.
+
+A policy repository (`docs/adr/0014-publish.md`) runs the whole of it on every pull request with `deploy/policy-check.mjs`, or the `policy-check` Action around it. It reads the repository's `shadow.json` (the dashboard's `api`, the `tenant`, a corpus per route under `corpora`, and the `limits`, each 0 unless given), checks that every file under `route-policies/` and `profiles/` is where the layout puts it and holds what its path names, fails an edit to or a removal of a published version, and shadows each route the pull request changes, its new route policy and profile together. A route with no corpus fails, so nothing merges unshadowed; it exits 0 when all holds, 1 when something does not and 2 when it cannot run, and a check that cannot run never passes.
+
+```sh
+node deploy/policy-check.mjs --base origin/main --root <checkout of the policy repository>
+```
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+- uses: contextwindowarchitecture/dashboard/.github/actions/policy-check@<commit>
+  with:
+    base: ${{ github.event.pull_request.base.sha }}
+```
