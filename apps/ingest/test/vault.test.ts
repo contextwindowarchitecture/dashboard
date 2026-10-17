@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest"
 
 import { createPostgresStore } from "../src/postgres-store.ts"
 import { checkDeposit, directoryVault, JSON_TYPE, TEXT_TYPE } from "../src/vault.ts"
+import { emptyServerDatabase, SERVER } from "./server-database.ts"
 import { DEMO_DEPOSITS, vaultContract } from "./vault-contract.ts"
 
 const sha = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex")
@@ -25,6 +26,14 @@ vaultContract("the PostgreSQL store's vault (PGlite)", async () => {
   const store = await createPostgresStore(db, { end: () => db.close() })
   return { vault: store.vault, done: () => store.close() }
 })
+
+if (SERVER !== undefined) {
+  vaultContract("the PostgreSQL store's vault (a server)", async () => {
+    const pool = await emptyServerDatabase()
+    const store = await createPostgresStore(pool, { end: () => pool.end() })
+    return { vault: store.vault, done: () => store.close() }
+  })
+}
 
 describe("the directory vault", () => {
   it("names no file for anything but a digest, whoever asks", async () => {
