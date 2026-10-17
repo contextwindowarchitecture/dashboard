@@ -133,6 +133,74 @@ export type Sha256 = string
 /** https://contextwindowarchitecture.io/schema/dashboard/assembly-event.v1.schema.json */
 export type AssemblyEventV1 = CWADashboardAssemblyEvent
 
+/**
+ * What a dashboard can show about one assemble() call, signed so it can be checked without the dashboard: the event as stored, the contract it ran against beside the one the dashboard's lock pins, the implementation's published conformance report, and a replay of its snapshot through the dashboard's pinned assembler with what that replay does and does not prove. The signature is Ed25519 over the RFC 8785 serialization of the bundle without its signature.
+ */
+export interface CWADashboardComplianceBundle {
+  $schema: "cwa-dashboard/compliance-bundle/v1"
+  generated_at: string
+  /**
+   * The assembly event, as the store holds it.
+   */
+  event: AssemblyEventV1
+  /**
+   * The contract the event's assembler ran against, and the one the dashboard's lock pins.
+   */
+  contract: {
+    event: Lock
+    dashboard: Lock
+    same_commit: boolean
+    /**
+     * Whether the two lock files are byte for byte the same (their SHA-256).
+     */
+    same_lock: boolean
+  }
+  /**
+   * The published conformance report of the event's assembler language, as the specification's implementations/ holds it, or null when it publishes none.
+   */
+  implementation: {
+    language: string
+    report: ConformanceReport | null
+  }
+  /**
+   * The event's snapshot run again through the dashboard's pinned assembler, and what that proves.
+   */
+  replay: {
+    assembler: {
+      language: string
+      name: string
+      version: string
+    }
+    /**
+     * match: the replay decided as the event records (the same payload hash, or the same refusal); differ: it did not, so one of the two assemblers is non-conformant, not which; not-replayed: the snapshot cannot prove it (a redacted body, or a rejection before assembly).
+     */
+    status: "match" | "differ" | "not-replayed"
+    outcome?: "assembled" | "refused" | "rejected"
+    payload_hash?: string | null
+    recorded_hash?: string | null
+    note: string
+  }
+  signature: {
+    algorithm: "Ed25519"
+    /**
+     * The SHA-256 of the public key's SubjectPublicKeyInfo DER, lowercase hex.
+     */
+    key_id: string
+    /**
+     * The signature, base64.
+     */
+    value: string
+  }
+}
+export interface Lock {
+  repository: string
+  commit: string
+  lock_sha256: string
+}
+
+/** https://contextwindowarchitecture.io/schema/dashboard/compliance-bundle.v1.schema.json */
+export type ComplianceBundleV1 = CWADashboardComplianceBundle
+
 export type Row = {
   event_id: string
   recorded_at: string

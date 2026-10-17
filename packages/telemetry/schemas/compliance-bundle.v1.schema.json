@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contextwindowarchitecture.io/schema/dashboard/compliance-bundle.v1.schema.json",
+  "title": "CWA dashboard compliance bundle",
+  "description": "What a dashboard can show about one assemble() call, signed so it can be checked without the dashboard: the event as stored, the contract it ran against beside the one the dashboard's lock pins, the implementation's published conformance report, and a replay of its snapshot through the dashboard's pinned assembler with what that replay does and does not prove. The signature is Ed25519 over the RFC 8785 serialization of the bundle without its signature.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "generated_at",
+    "event",
+    "contract",
+    "implementation",
+    "replay",
+    "signature"
+  ],
+  "properties": {
+    "$schema": { "const": "cwa-dashboard/compliance-bundle/v1" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "event": {
+      "description": "The assembly event, as the store holds it.",
+      "$ref": "https://contextwindowarchitecture.io/schema/dashboard/assembly-event.v1.schema.json"
+    },
+    "contract": {
+      "description": "The contract the event's assembler ran against, and the one the dashboard's lock pins.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "dashboard", "same_commit", "same_lock"],
+      "properties": {
+        "event": { "$ref": "#/$defs/lock" },
+        "dashboard": { "$ref": "#/$defs/lock" },
+        "same_commit": { "type": "boolean" },
+        "same_lock": {
+          "description": "Whether the two lock files are byte for byte the same (their SHA-256).",
+          "type": "boolean"
+        }
+      }
+    },
+    "implementation": {
+      "description": "The published conformance report of the event's assembler language, as the specification's implementations/ holds it, or null when it publishes none.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "report"],
+      "properties": {
+        "language": { "$ref": "#/$defs/nonblank" },
+        "report": {
+          "anyOf": [
+            {
+              "$ref": "https://contextwindowarchitecture.io/schema/conformance_report.schema.json"
+            },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "replay": {
+      "description": "The event's snapshot run again through the dashboard's pinned assembler, and what that proves.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assembler", "status", "note"],
+      "properties": {
+        "assembler": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["language", "name", "version"],
+          "properties": {
+            "language": { "$ref": "#/$defs/nonblank" },
+            "name": { "$ref": "#/$defs/nonblank" },
+            "version": { "$ref": "#/$defs/nonblank" }
+          }
+        },
+        "status": {
+          "description": "match: the replay decided as the event records (the same payload hash, or the same refusal); differ: it did not, so one of the two assemblers is non-conformant, not which; not-replayed: the snapshot cannot prove it (a redacted body, or a rejection before assembly).",
+          "enum": ["match", "differ", "not-replayed"]
+        },
+        "outcome": { "enum": ["assembled", "refused", "rejected"] },
+        "payload_hash": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+        "recorded_hash": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+        "note": { "$ref": "#/$defs/nonblank" }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "key_id", "value"],
+      "properties": {
+        "algorithm": { "const": "Ed25519" },
+        "key_id": {
+          "description": "The SHA-256 of the public key's SubjectPublicKeyInfo DER, lowercase hex.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "value": { "description": "The signature, base64.", "$ref": "#/$defs/nonblank" }
+      }
+    }
+  },
+  "$defs": {
+    "nonblank": { "type": "string", "pattern": "\\S" },
+    "lock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "lock_sha256"],
+      "properties": {
+        "repository": { "$ref": "#/$defs/nonblank" },
+        "commit": { "$ref": "#/$defs/nonblank" },
+        "lock_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

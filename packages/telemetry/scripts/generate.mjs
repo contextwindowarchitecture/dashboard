@@ -70,6 +70,14 @@ function withContractTypes(node, used) {
     const rest = Object.fromEntries(Object.entries(node).filter(([key]) => key !== "$ref"))
     return { ...rest, tsType: "string" }
   }
+  // One of this package's own schemas (…/schema/dashboard/<kind>.v<n>.schema.json): its own type.
+  if (typeof ref === "string" && ref.startsWith(`${CONTRACT_BASE}dashboard/`)) {
+    const file = ref.slice(`${CONTRACT_BASE}dashboard/`.length).split("#")[0]
+    const own = schemas.find((schema) => schema.file === file)
+    if (own === undefined || ref.includes("#")) throw new Error(`cannot type the reference ${ref}`)
+    const rest = Object.fromEntries(Object.entries(node).filter(([key]) => key !== "$ref"))
+    return { ...rest, tsType: own.name }
+  }
   if (typeof ref === "string" && ref.startsWith(CONTRACT_BASE)) {
     const [file, pointer = ""] = ref.slice(CONTRACT_BASE.length).split("#")
     const type = contractType(file)
