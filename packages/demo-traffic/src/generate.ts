@@ -21,7 +21,8 @@
 //
 // Timings are measured, so they differ from run to run: the committed tree keeps the measurements,
 // --check compares everything else, and a regeneration that changes only measurements writes
-// nothing.
+// nothing. A regeneration keeps the measurements of every event whose content did not change, so
+// changing a few events rewrites those events and the documents derived from them, not every file.
 
 import {
   existsSync,
@@ -74,6 +75,8 @@ export interface Options {
   /** A 400-row trace and a 60-turn session, for performance and visual checks (src/long.ts). */
   readonly long?: boolean
   readonly seed?: number
+  /** A tree generated before: an event it holds that differs only in measurements keeps them. */
+  readonly previous?: string
 }
 
 /** A small, seeded generator of values in [0, 1) (mulberry32), so a seed gives one tree. */
@@ -193,6 +196,28 @@ export function generateTree(options: Options = {}): Map<string, string> {
       traceId: `trace-${eventId.toLowerCase()}`,
     })
   })
+  if (options.previous !== undefined) {
+    for (const [i, event] of events.entries()) {
+      const path = join(options.previous, "events", `${event.event_id}.json`)
+      if (!existsSync(path)) continue
+      const before = readFileSync(path, "utf8")
+      const now = text(event)
+      if (
+        withoutMeasurements(`events/${event.event_id}.json`, before) !==
+        withoutMeasurements(`events/${event.event_id}.json`, now)
+      )
+        continue
+      const kept = JSON.parse(before) as AssemblyEventV1
+      const timings = (kept.trace as { timings?: unknown } | undefined)?.timings
+      events[i] = {
+        ...event,
+        timings_ms: kept.timings_ms,
+        ...(event.trace === undefined
+          ? {}
+          : { trace: { ...event.trace, ...(timings === undefined ? {} : { timings }) } }),
+      } as AssemblyEventV1
+    }
+  }
   // Generated as of the newest event, so the tree does not depend on when it was generated.
   const generatedAt = events
     .map((event) => event.recorded_at)
@@ -309,7 +334,9 @@ function main(argv: string[]) {
     )
     process.exit(2)
   }
-  const files = generateTree({ events, seed, long })
+  // The committed tree's measurements are kept wherever an event did not change, so a change to a
+  // few events changes those events' files and the documents that depend on them, not every file.
+  const files = generateTree({ events, seed, long, ...(existsSync(out) ? { previous: out } : {}) })
   if (argv.includes("--check")) {
     const problems = differences(files, out)
     if (problems.length > 0) {

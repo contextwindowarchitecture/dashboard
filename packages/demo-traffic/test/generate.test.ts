@@ -208,6 +208,43 @@ describe("the demo tree", () => {
     }
   })
 
+  it("keeps the measurements of every event the previous tree holds unchanged, and so its documents", () => {
+    const dir = mkdtempSync(join(tmpdir(), "cwa-demo-tree-"))
+    try {
+      writeTree(tree, dir)
+      const again = generateTree({ previous: dir })
+      for (const [path, content] of again) expect(content, path).toBe(tree.get(path))
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it("measures again an event whose content changed", () => {
+    const dir = mkdtempSync(join(tmpdir(), "cwa-demo-tree-"))
+    try {
+      writeTree(tree, dir)
+      const [kept, changed] = events.filter((e) => e.outcome === "assembled")
+      const mark = (event: AssemblyEventV1, edit: (e: Record<string, unknown>) => void) => {
+        const copy = structuredClone(event) as unknown as Record<string, unknown>
+        copy["timings_ms"] = { total: 987654 }
+        edit(copy)
+        writeFileSync(join(dir, `events/${event.event_id}.json`), JSON.stringify(copy))
+      }
+      mark(kept!, () => {})
+      mark(changed!, (copy) => {
+        copy["redaction_mode"] = "digest_only"
+      })
+      const again = generateTree({ previous: dir })
+      const total = (event: AssemblyEventV1) =>
+        (JSON.parse(again.get(`events/${event.event_id}.json`)!) as AssemblyEventV1).timings_ms
+          .total
+      expect(total(kept!)).toBe(987654)
+      expect(total(changed!)).not.toBe(987654)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   it("is committed as generated (CI fails on a difference)", () => {
     expect(differences(tree, FIXTURES)).toEqual([])
   })
