@@ -8,6 +8,7 @@ import { isAbsolute, relative, resolve, sep } from "node:path"
 import type { EventStore } from "./event-store.ts"
 import { createPostgresStore } from "./postgres-store.ts"
 import { createStore } from "./store.ts"
+import type { SessionStore } from "./sessions.ts"
 import { type BodyVault, directoryVault } from "./vault.ts"
 
 export interface OpenedStore {
@@ -15,6 +16,8 @@ export interface OpenedStore {
   readonly store: EventStore
   /** The PostgreSQL store's own vault (ADR-0009); a tree has none. */
   readonly vault?: BodyVault
+  /** The PostgreSQL store's sign-in sessions (ADR-0010); a tree has none. */
+  readonly sessions?: SessionStore
 }
 
 export async function openStore(
@@ -27,13 +30,13 @@ export async function openStore(
       const location = url.slice("pglite:".length)
       const db = location === "memory" ? new PGlite() : new PGlite(location)
       const store = await createPostgresStore(db, { end: () => db.close() })
-      return { kind: "postgres", store, vault: store.vault }
+      return { kind: "postgres", store, vault: store.vault, sessions: store.sessions }
     }
     if (/^postgres(ql)?:\/\//.test(url)) {
       const { default: pg } = await import("pg")
       const pool = new pg.Pool({ connectionString: url })
       const store = await createPostgresStore(pool, { end: () => pool.end() })
-      return { kind: "postgres", store, vault: store.vault }
+      return { kind: "postgres", store, vault: store.vault, sessions: store.sessions }
     }
     throw new Error("DATABASE_URL must be postgres://…, pglite:memory or pglite:<directory>")
   }

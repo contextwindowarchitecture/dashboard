@@ -11,6 +11,7 @@ describe("openStore", () => {
   it("opens PostgreSQL in memory for pglite:memory, and a tree for EVENTS_DIR without one", async () => {
     const pg = await openStore({ DATABASE_URL: "pglite:memory" })
     expect(pg?.kind).toBe("postgres")
+    expect(pg?.sessions).toBeDefined()
     expect((await pg!.store.index()).events).toEqual([])
     await pg!.store.close()
 
@@ -18,6 +19,7 @@ describe("openStore", () => {
     try {
       const tree = await openStore({ EVENTS_DIR: root })
       expect(tree?.kind).toBe("tree")
+      expect(tree?.sessions).toBeUndefined()
       await tree!.store.close()
     } finally {
       rmSync(root, { recursive: true, force: true })

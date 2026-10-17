@@ -12,6 +12,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { RENDERERS, TOKENIZERS } from "@cwa-dashboard/assembler"
 import { COMPONENTS } from "@cwa-dashboard/contract/data"
 
+import type { Auth } from "./auth.ts"
 import { ReplayTimeoutError, type Runner } from "./runner.ts"
 import { buildBundle, type SigningKey } from "./bundle.ts"
 import { CORPUS_NAME, type EventStore as Store } from "./event-store.ts"
@@ -34,6 +35,8 @@ export interface IngestOptions {
   readonly vault?: BodyVault
   /** The operator token GET and DELETE /bodies require; never the ingest token. */
   readonly vaultToken?: string
+  /** Sign-in (ADR-0010); without it /auth answers 503 and every reader is anonymous. */
+  readonly auth?: Auth
 }
 
 /** A corpus's most events (ADR-0008): a shadow run is two replays an event. */
@@ -503,6 +506,33 @@ export function createIngestServer(options: IngestOptions): Server {
       if (path.startsWith("/bundles/")) {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
         return bundleRoute(path, response)
+      }
+      if (path === "/me") {
+        if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
+        if (options.auth === undefined) {
+          return send(response, 200, { sign_in: "not-configured", signed_in: false })
+        }
+        return options.auth.me(request, response)
+      }
+      if (path.startsWith("/auth/")) {
+        const auth = options.auth
+        if (auth === undefined) {
+          return fail(response, 503, "not-configured", [
+            "Sign-in is not configured: set OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET and OIDC_REDIRECT_URI, with DATABASE_URL.",
+          ])
+        }
+        const url = new URL(request.url ?? "/", "http://localhost")
+        const routes: Record<string, [string, () => Promise<void>]> = {
+          "/auth/login": ["GET", () => auth.login(response, url)],
+          "/auth/callback": ["GET", () => auth.callback(request, response, url)],
+          "/auth/logout": ["POST", () => auth.logout(request, response)],
+        }
+        const found = routes[path]
+        if (found === undefined) return fail(response, 404, "not-found", [`No route ${path}.`])
+        if (request.method !== found[0]) {
+          return send(response, 405, { ok: false }, { allow: found[0] })
+        }
+        return found[1]()
       }
       if (path.startsWith("/bodies/")) {
         if (!["GET", "PUT", "DELETE"].includes(request.method ?? "")) {

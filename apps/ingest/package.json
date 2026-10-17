@@ -17,6 +17,7 @@
     "@cwa-dashboard/contract": "workspace:*",
     "@cwa-dashboard/telemetry": "workspace:*",
     "@electric-sql/pglite": "0.5.8",
+    "openid-client": "6.8.8",
     "pg": "8.23.1"
   },
   "devDependencies": {
