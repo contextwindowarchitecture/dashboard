@@ -1,10 +1,14 @@
-# TLS ends at the router's edge and plain HTTP redirects. The overlay sets the host and the certificate.
+# TLS ends at the router's edge and plain HTTP redirects. The overlay sets the host and the certificate. The router
+# sets no sticky-session cookie: one web replica needs none, and the cookie adds Cache-Control: private to every
+# response, an immutable event included.
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: dashboard
   labels:
     app.kubernetes.io/name: dashboard
+  annotations:
+    haproxy.router.openshift.io/disable_cookies: "true"
 spec:
   to:
     kind: Service

@@ -54,3 +54,14 @@ describe("the deployment's nginx", () => {
     expect(conf).toMatch(/autoindex off;/)
   })
 })
+
+describe("the deployment's route", () => {
+  it("sets no sticky-session cookie, which adds Cache-Control: private to every response", () => {
+    // One web replica needs no stickiness, and the router's cookie would mark an immutable event private.
+    const route = readFileSync(
+      resolve(import.meta.dirname, "../../../deploy/base/route.yaml"),
+      "utf8",
+    )
+    expect(route).toMatch(/^\s+haproxy\.router\.openshift\.io\/disable_cookies: "true"$/m)
+  })
+})
