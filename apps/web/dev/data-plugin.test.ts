@@ -16,6 +16,10 @@ describe("resolveDataRequest", () => {
 
   it("serves the configuration and the tree's JSON files", () => {
     expect(resolveDataRequest("/config.json", dir)).toEqual({ kind: "config", body: DEMO_CONFIG })
+    // A deployment over the query API (ADR-0007): the documents at the API's data path.
+    expect(
+      resolveDataRequest("/config.json", dir, { apiBase: "/api", dataRoot: "/api/data" }),
+    ).toEqual({ kind: "config", body: { ...DEMO_CONFIG, dataRoot: "/api/data", apiBase: "/api" } })
     expect(resolveDataRequest("/data/events/index.json", dir)).toEqual({
       kind: "file",
       path: resolve(dir, "events/index.json"),

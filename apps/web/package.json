@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "test:e2e": "playwright test",
     "test:perf": "playwright test -c playwright.perf.config.ts",
-    "budgets": "node scripts/check-budgets.mjs"
+    "budgets": "node scripts/check-budgets.mjs",
+    "test:e2e:api": "playwright test -c playwright.api.config.ts"
   },
   "dependencies": {
     "@cwa-dashboard/contract": "workspace:*",

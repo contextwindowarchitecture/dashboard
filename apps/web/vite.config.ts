@@ -47,7 +47,11 @@ export default defineConfig(({ command }) => {
       react(),
       tailwindcss(),
       contentSecurityPolicyPlugin(nonce),
-      dataPlugin(dataDir, apiTarget === undefined ? {} : { apiBase: "/api" }),
+      dataPlugin(dataDir, {
+        ...(apiTarget === undefined ? {} : { apiBase: "/api" }),
+        // VITE_DATA_ROOT=/api/data reads the documents from the query API (ADR-0007), not the tree.
+        ...(process.env["VITE_DATA_ROOT"] ? { dataRoot: process.env["VITE_DATA_ROOT"] } : {}),
+      }),
     ],
     ...(proxy === undefined ? {} : { server: { proxy }, preview: { proxy } }),
     html: nonce === undefined ? {} : { cspNonce: nonce },

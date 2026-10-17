@@ -1,6 +1,7 @@
 // Serves the app's data in development and preview (dashboard-plan.md 9), as nginx does in a
 // deployment: /config.json with the demo's configuration (naming the replay service's base when the
-// server proxies one, as vite.config.ts does with VITE_API_TARGET), and /data/ from the committed demo tree
+// server proxies one, as vite.config.ts does with VITE_API_TARGET, and the documents' root when
+// VITE_DATA_ROOT moves it to the query API's /api/data), and /data/ from the committed demo tree
 // (packages/demo-traffic/fixtures) or $VITE_DATA_DIR. JSON files only, 404 on a miss, no listing,
 // nothing outside the tree.
 
@@ -21,6 +22,8 @@ export type DataRequest =
 export interface DataOptions {
   /** The replay service's base, when the server proxies one. */
   readonly apiBase?: string
+  /** Where config.json says the documents are: /data (this plugin's tree) or the API's /api/data. */
+  readonly dataRoot?: string
 }
 
 export function resolveDataRequest(
@@ -32,8 +35,11 @@ export function resolveDataRequest(
   if (pathname === "/config.json") {
     return {
       kind: "config",
-      body:
-        options.apiBase === undefined ? DEMO_CONFIG : { ...DEMO_CONFIG, apiBase: options.apiBase },
+      body: {
+        ...DEMO_CONFIG,
+        ...(options.dataRoot === undefined ? {} : { dataRoot: options.dataRoot }),
+        ...(options.apiBase === undefined ? {} : { apiBase: options.apiBase }),
+      },
     }
   }
   if (!pathname.startsWith(PREFIX) && pathname !== "/data") return { kind: "pass" }

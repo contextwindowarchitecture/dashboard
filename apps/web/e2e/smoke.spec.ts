@@ -345,10 +345,11 @@ test("the guardrails and a guardrail's page read in both themes and at a phone's
 test("the sandbox says when the replay service is not configured, and reads in both themes", async ({
   page,
 }) => {
-  // A deployment whose config.json names no apiBase.
-  await page.route("**/config.json", (route) =>
-    route.fulfill({ json: { dataRoot: "/data", source: "file" } }),
-  )
+  // The deployment's own config.json without its apiBase, wherever its documents are.
+  await page.route("**/config.json", async (route) => {
+    const { apiBase: _apiBase, ...config } = await (await route.fetch()).json()
+    await route.fulfill({ json: config })
+  })
   await page.goto("/traces?outcome=assembled")
   await page
     .getByRole("table", { name: "Trace stream" })
