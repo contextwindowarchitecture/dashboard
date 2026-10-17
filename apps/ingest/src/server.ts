@@ -262,7 +262,7 @@ export function createIngestServer(options: IngestOptions): Server {
     } = (body.value ?? {}) as {
       name?: unknown
       event_ids?: unknown
-      from?: { route?: unknown; outcome?: unknown; limit?: unknown }
+      from?: { route?: unknown; outcome?: unknown; profile?: unknown; limit?: unknown }
     }
     if (typeof name !== "string" || !CORPUS_NAME.test(name)) {
       return fail(response, 400, "invalid", [
@@ -276,6 +276,7 @@ export function createIngestServer(options: IngestOptions): Server {
       ids = (await store.index()).events
         .filter((row) => from?.route === undefined || row.route === from.route)
         .filter((row) => from?.outcome === undefined || row.outcome === from.outcome)
+        .filter((row) => from?.profile === undefined || row.profile?.id === from.profile)
         .slice(0, limit)
         .map((row) => row.event_id)
     }

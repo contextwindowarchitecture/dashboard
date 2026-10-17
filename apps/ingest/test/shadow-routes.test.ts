@@ -84,6 +84,14 @@ describe("the corpus routes", () => {
     expect(
       (await post("/corpora", { name: "chat", event_ids: [ALL[0]!.event_id] }, TOKEN)).status,
     ).toBe(409)
+    // A profile's events: what a check of a change to that profile replays.
+    await post("/corpora", { name: "cache", from: { profile: "cache-first-chat" } }, TOKEN)
+    const cache = (await (await fetch(`${base}/corpora/cache.json`)).json()) as CorpusV1
+    expect(cache.events.map((e) => e.event_id).sort()).toEqual(
+      ALL.filter((e) => e.snapshot?.profile.id === "cache-first-chat")
+        .map((e) => e.event_id)
+        .sort(),
+    )
   })
 
   it("refuse a corpus that names no event, an event the store lacks, or too many", async () => {

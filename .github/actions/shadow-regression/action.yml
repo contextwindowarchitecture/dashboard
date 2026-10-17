@@ -1,0 +1,66 @@
+# Shadow regression as a pull request check (ADR-0008): runs a candidate route policy or profile
+# against a corpus on a dashboard and fails over the thresholds. A policy repository uses it at a
+# pinned commit:
+#
+#   - uses: contextwindowarchitecture/dashboard/.github/actions/shadow-regression@<commit>
+#     with:
+#       api: https://dashboard.example/api
+#       corpus: support-chat-baseline
+#       profile: profiles/cache-first-chat.json
+name: CWA shadow regression
+description: Replays a frozen corpus with a candidate route policy or profile and fails over its thresholds
+inputs:
+  api:
+    description: The dashboard's API base, where POST /shadow answers
+    required: true
+  corpus:
+    description: The frozen corpus to replay
+    required: true
+  route-policy:
+    description: A candidate route policy, a JSON file in the calling repository
+    required: false
+    default: ""
+  profile:
+    description: A candidate profile, a JSON file in the calling repository
+    required: false
+    default: ""
+  max-refusals-added:
+    description: Events the candidate may newly refuse
+    required: false
+    default: "0"
+  max-shedding-increase:
+    description: Further over_budget exclusions the candidate may cause
+    required: false
+    default: "0"
+  max-candidate-rejected:
+    description: Events whose snapshot the assembler may reject with the candidate in it
+    required: false
+    default: "0"
+  report:
+    description: Where to write the shadow report, for an artifact
+    required: false
+    default: shadow-report.json
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+    - shell: bash
+      env:
+        API: ${{ inputs.api }}
+        CORPUS: ${{ inputs.corpus }}
+        ROUTE_POLICY: ${{ inputs.route-policy }}
+        PROFILE: ${{ inputs.profile }}
+        MAX_REFUSALS_ADDED: ${{ inputs.max-refusals-added }}
+        MAX_SHEDDING_INCREASE: ${{ inputs.max-shedding-increase }}
+        MAX_CANDIDATE_REJECTED: ${{ inputs.max-candidate-rejected }}
+        REPORT: ${{ inputs.report }}
+      run: |
+        args=(--api "$API" --corpus "$CORPUS" --report "$REPORT"
+          --max-refusals-added "$MAX_REFUSALS_ADDED"
+          --max-shedding-increase "$MAX_SHEDDING_INCREASE"
+          --max-candidate-rejected "$MAX_CANDIDATE_REJECTED")
+        if [ -n "$ROUTE_POLICY" ]; then args+=(--route-policy "$ROUTE_POLICY"); fi
+        if [ -n "$PROFILE" ]; then args+=(--profile "$PROFILE"); fi
+        node "$GITHUB_ACTION_PATH/../../../deploy/shadow-check.mjs" "${args[@]}"
