@@ -8,6 +8,7 @@ import { join, resolve } from "node:path"
 
 import type { Page } from "@playwright/test"
 
+import { E2E_CORPUS } from "./env"
 import { expect, expectAccessible, expectNoSidewaysScroll, test } from "./support"
 
 // The demo tree's event count, from its index, so the tests follow the tree when it grows.
@@ -309,6 +310,41 @@ test("a compliance bundle shows what it proves, and verifies offline with the se
   await page.setViewportSize({ width: 400, height: 800 })
   await page.goto(`/compliance?event=${id}`)
   await expect(bundle).toContainText("match")
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})
+
+test("a shadow run shows what a candidate profile changes, in both themes and at 400px", async ({
+  page,
+}) => {
+  test.skip(!!process.env["PLAYWRIGHT_BASE_URL"], "needs the corpus e2e/corpus.setup.ts freezes")
+  await page.goto("/shadow")
+  await page.getByRole("table", { name: "Corpora" }).getByRole("link", { name: E2E_CORPUS }).click()
+  await expect(page).toHaveURL(new RegExp(`[?&]corpus=${E2E_CORPUS}$`))
+  await page.getByRole("combobox", { name: "Start from" }).click()
+  await page.getByRole("option", { name: /^Profile policy-first-chat v1/ }).click()
+  await page.getByRole("button", { name: "Shadow" }).click()
+  const report = page.getByRole("region", { name: "Shadow report" })
+  await expect(report.getByRole("status", { name: "Shadow status" })).toContainText(
+    "candidate profile policy-first-chat v1",
+  )
+  await expect(report.getByRole("table", { name: "Events" })).toContainText(
+    "the same items, in another order",
+  )
+  await expect(report).toContainText("Every baseline replay reproduces what was recorded.")
+  await expect(
+    report
+      .getByRole("listitem", { name: "Placement changed" })
+      .locator('[data-slot="metric-value"]'),
+  ).not.toHaveText("0")
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.reload()
+  await page.getByRole("combobox", { name: "Start from" }).click()
+  await page.getByRole("option", { name: /^Profile policy-first-chat v1/ }).click()
+  await page.getByRole("button", { name: "Shadow" }).click()
+  await expect(report.getByRole("table", { name: "Events" })).toContainText("changed")
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
 })

@@ -30,7 +30,13 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: /ingest\.spec\.ts/ },
+    { name: "corpus", testMatch: /corpus\.setup\.ts/ },
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+      testIgnore: /ingest\.spec\.ts/,
+      dependencies: ["corpus"],
+    },
     // After the others, since it adds an event to the tree they count.
     {
       name: "ingest",

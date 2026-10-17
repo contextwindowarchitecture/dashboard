@@ -1,7 +1,7 @@
 // The browser tests over the query API (ADR-0007): the same smoke, accessibility and visual specs,
 // with config.json's dataRoot at /api/data, so every document comes from the ingest service's
 // PostgreSQL store (PGlite, in memory) and none from a tree: the preview's own /data/ serves an
-// empty directory. A setup project posts the demo tree's events first. `pnpm test:e2e:api`.
+// empty directory. Setup projects post the demo tree's events, then freeze the shadow corpus. `pnpm test:e2e:api`.
 
 import { mkdtempSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -23,11 +23,13 @@ export default defineConfig({
   use: { baseURL: `http://localhost:${port}`, trace: "retain-on-failure" },
   projects: [
     { name: "seed", testMatch: /seed\.setup\.ts/ },
+    // The corpus is frozen from the store's events, so after the seed.
+    { name: "corpus", testMatch: /corpus\.setup\.ts/, dependencies: ["seed"] },
     {
       name: "chromium-api",
       use: { ...devices["Desktop Chrome"] },
       testIgnore: [/ingest\.spec\.ts/, /seed\.setup\.ts/],
-      dependencies: ["seed"],
+      dependencies: ["corpus"],
     },
   ],
   webServer: [

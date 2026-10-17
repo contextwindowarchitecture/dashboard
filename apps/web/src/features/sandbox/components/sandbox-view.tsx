@@ -562,11 +562,14 @@ export function SandboxView() {
           </p>
           <PastedReplay client={client} />
           <section aria-label="Shadow regression" data-slot="panel" data-padded="">
-            <p data-label="">Shadow regression · Phase 2</p>
+            <p data-label="">Shadow regression</p>
             <p>
-              Replaying a whole corpus of recorded events against a changed route policy or profile,
-              and reporting every assembly that changes, arrives in Phase 2 with the query API.
-              Here, one event or one snapshot replays at a time.
+              Here, one event or one snapshot replays at a time. To replay a frozen corpus of
+              recorded events against a changed route policy or profile, and read every assembly
+              that changes, use shadow regression.
+            </p>
+            <p>
+              <Link to="/shadow">Open shadow regression →</Link>
             </p>
           </section>
         </div>

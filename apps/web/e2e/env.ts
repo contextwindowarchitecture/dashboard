@@ -19,3 +19,6 @@ export const API_INGEST_PORT = 8093
 export const SIGNING_KEY = generateKeyPairSync("ed25519")
   .privateKey.export({ type: "pkcs8", format: "pem" })
   .toString()
+
+/** The corpus the shadow page's tests replay, frozen by e2e/corpus.setup.ts. */
+export const E2E_CORPUS = "e2e-chat"

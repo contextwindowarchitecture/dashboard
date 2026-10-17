@@ -98,10 +98,13 @@ describe("the sandbox", () => {
     expect(result).toHaveTextContent("did not answer")
   })
 
-  it("says that replaying a corpus against a change is not here yet", async () => {
+  it("sends a corpus replayed against a change to the shadow page", async () => {
     renderApp("/sandbox", {}, { replay: fakeReplay(() => recordedAnswer(full)).client })
     const card = await screen.findByRole("region", { name: "Shadow regression" })
-    expect(card).toHaveTextContent("Phase 2")
+    expect(within(card).getByRole("link", { name: "Open shadow regression →" })).toHaveAttribute(
+      "href",
+      "/shadow",
+    )
   })
 
   it("is linked from the inspector and the navigation", async () => {

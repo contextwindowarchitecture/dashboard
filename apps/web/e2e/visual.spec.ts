@@ -7,6 +7,7 @@
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 
+import { E2E_CORPUS } from "./env"
 import { expect, expectNoSidewaysScroll, test } from "./support"
 
 interface Row {
@@ -39,6 +40,8 @@ const PAGES = [
   "/conflicts",
   "/finops",
   "/compliance",
+  "/shadow",
+  `/shadow?corpus=${E2E_CORPUS}`,
   "/conflicts?event=01M4YZXVT0N9BECJFQPP1EDDVP",
   "/guardrails",
   "/guardrails/05",
