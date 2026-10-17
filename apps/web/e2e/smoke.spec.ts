@@ -816,6 +816,8 @@ test("an owner drafts a profile, saves it, finds it again, previews and publishe
   await page.getByRole("option", { name: /^Profile policy-first-chat v1/ }).click()
   await page.getByRole("button", { name: "Start a draft" }).click()
   await expect(page).toHaveURL(/\/authoring\?draft=[0-9a-f-]{36}$/)
+  // The pressed button is gone; focus lands on the page's title, not the document.
+  await expect(page.getByRole("heading", { level: 1, name: "Authoring" })).toBeFocused()
   const version = page.getByLabel("version", { exact: true })
   await version.fill("9")
   await expect(page.getByRole("table", { name: "Changes" })).toContainText("/version")
@@ -865,6 +867,7 @@ test("an owner drafts a profile, saves it, finds it again, previews and publishe
   await expectAccessible(page)
   await page.goBack()
   await page.getByRole("button", { name: "Delete", exact: true }).click()
+  await expect(page.getByRole("button", { name: "Delete the draft for good" })).toBeFocused()
   await page.getByRole("button", { name: "Delete the draft for good" }).click()
   await expect(page).toHaveURL(/\/authoring$/)
 })
