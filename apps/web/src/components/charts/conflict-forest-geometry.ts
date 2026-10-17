@@ -7,9 +7,9 @@ import { stratify, type HierarchyNode } from "d3-hierarchy"
 
 import type { ForestEdge, ForestNode } from "../../features/conflicts/model/conflicts"
 
-/** A row's height and a column's width, in px. */
+/** A row's height and a column's width, in px: a node's box and, between columns, room for a code. */
 export const ROW = 36
-export const COLUMN = 260
+export const COLUMN = 340
 
 const ROOT = "\u0000root"
 

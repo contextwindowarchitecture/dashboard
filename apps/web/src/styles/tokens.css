@@ -1618,3 +1618,44 @@ ul[data-slot="key-values"] {
   list-style: none;
   padding: 0;
 }
+
+/* The conflict forest (STYLE.md 6, Charts): kept items outlined in ink, excluded ones dashed in the
+   accent (an exclusion), a group with no winner on the surface, links in the line colour, each code
+   in muted mono beside the item it labels. */
+[data-slot="forest"] {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+[data-slot="forest-node"] {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 1;
+}
+[data-status="excluded"] [data-slot="forest-node"] {
+  stroke: var(--accent);
+  stroke-dasharray: 4 3;
+}
+[data-status="group"] [data-slot="forest-node"] {
+  fill: var(--surface);
+  stroke: var(--line);
+}
+[data-status="not in the trace"] [data-slot="forest-node"] {
+  stroke: var(--line);
+  stroke-dasharray: 2 3;
+}
+[data-slot="forest-label"] {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--fg);
+}
+[data-slot="forest-link"] {
+  fill: none;
+  stroke: var(--line);
+}
+[data-slot="forest-code"] {
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  fill: var(--muted);
+}
+

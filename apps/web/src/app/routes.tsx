@@ -9,6 +9,7 @@ import { GuardrailView } from "../features/guardrails/components/guardrails-view
 import { PolicyView } from "../features/registry/components/policy-view"
 import { ProfileView } from "../features/registry/components/profile-view"
 import { FleetPage } from "./pages/fleet"
+import { ConflictsPage } from "./pages/conflicts"
 import { SourcesPage } from "./pages/sources"
 import { GuardrailsPage } from "./pages/guardrails"
 import { InspectorPage } from "./pages/inspector"
@@ -105,6 +106,11 @@ export const ROUTES: RouteObject[] = [
             ],
           },
         ],
+      },
+      {
+        path: "conflicts",
+        element: <ConflictsPage />,
+        handle: handle("Conflicts", () => "Conflicts"),
       },
       {
         path: "sources",

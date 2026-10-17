@@ -234,6 +234,23 @@ test("the sources page reads in both themes and at a phone's width, and links to
   await expectAccessible(page)
 })
 
+test("the conflicts page draws an event's forest, and reads in both themes and at 400px", async ({
+  page,
+}) => {
+  await page.goto("/conflicts")
+  const events = page.getByRole("table", { name: "Events" })
+  await events.getByRole("link", { name: "01M4YZXVT0N9BECJFQPP1EDDVP" }).click()
+  await expect(page.getByRole("img", { name: /Conflict forest/ })).toBeVisible()
+  await expect(page.getByRole("table", { name: "Links" })).toContainText("conflict_lost")
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto("/conflicts?event=01M4YZXVT0N9BECJFQPP1EDDVP")
+  await expect(page.getByRole("img", { name: /Conflict forest/ })).toBeVisible()
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})
+
 test("a session opens from the list, selects a turn, and reads in both themes and at 400px", async ({
   page,
 }) => {

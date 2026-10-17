@@ -9,6 +9,7 @@ import {
   Boxes,
   Inbox,
   FlaskConical,
+  GitMerge,
   Layers,
   LayoutDashboard,
   ListTree,
@@ -55,6 +56,13 @@ export const NAVIGATION: readonly NavGroup[] = [
         patterns: ["/sessions", "/sessions/:sessionId"],
       },
       { id: "sources", label: "Sources", to: "/sources", icon: Inbox, patterns: ["/sources"] },
+      {
+        id: "conflicts",
+        label: "Conflicts",
+        to: "/conflicts",
+        icon: GitMerge,
+        patterns: ["/conflicts"],
+      },
       {
         id: "guardrails",
         label: "Guardrails",
