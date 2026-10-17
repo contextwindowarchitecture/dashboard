@@ -197,6 +197,10 @@ With `ACCESS_FILE`, a JSON file, the service grants roles and refuses what they 
 
 On the cluster, `deploy/overlays/prod-sign-in/access.json` is the file, mounted from the ConfigMap `dashboard-access`: the default tenant stays open to anonymous readers, bodies and all (D11, P3-D5); the demo's second tenant, northwind, is for signed-in members of the organisation alone, who are also auditors (`docs/adr/0012-tenants.md`). Add a team under `groups` as `"contextwindowarchitecture:<team>": [...]`, then `oc apply -k deploy/overlays/prod-sign-in`; the ConfigMap's new name rolls the ingest service.
 
+## Drafts
+
+A signed-in owner of a route keeps drafts of its route policy and profiles in the API (`docs/adr/0013-authoring.md`): `GET /api/drafts.json` lists the reader's own, `GET`, `PUT` and `DELETE /api/drafts/<id>.json` read, keep and remove one. They live in PostgreSQL (migration 8), each its author's: another author's drafts answer 404, a draft for a route the author does not own is refused, and a write from another site is refused. A draft is kept as it was saved, valid or not; nothing of it is kept in the browser's storage.
+
 ## The vault
 
 A route under `pii_scrubbed` or `digest_only` may keep its original bodies in the vault (`docs/adr/0009-body-vault.md`): its wrapper deposits each body with the ingest token at `PUT /api/bodies/<sha256>`, and the operator resolves one in the inspector with the operator token, `VAULT_TOKEN`, which must differ from the ingest token (the service refuses to start otherwise). The inspector shows a body only when its bytes hash to the digest the event holds.

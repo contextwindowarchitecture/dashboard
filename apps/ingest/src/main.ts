@@ -59,6 +59,7 @@ const server = createIngestServer({
   ...(vaultToken === undefined || vaultToken === "" ? {} : { vaultToken }),
   ...(auth === undefined ? {} : { auth }),
   ...(access === undefined ? {} : { access }),
+  ...(opened?.drafts === undefined ? {} : { drafts: opened.drafts }),
   maxBodyBytes: number("MAX_BODY_BYTES", 4 * 1024 * 1024),
   maxQueue: number("MAX_QUEUE", 8),
 })

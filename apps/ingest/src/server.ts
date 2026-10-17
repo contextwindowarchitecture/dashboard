@@ -28,6 +28,8 @@ import { ReplayTimeoutError, type Runner } from "./runner.ts"
 import { buildBundle, type SigningKey } from "./bundle.ts"
 import { CORPUS_NAME, DEFAULT_TENANT, type EventStore as Store, TENANT } from "./event-store.ts"
 import { shadowReport, type Candidate } from "./shadow.ts"
+import { validateDraftV1 } from "@cwa-dashboard/telemetry/validators"
+import { DRAFT_ID, type DraftStore } from "./drafts.ts"
 import { type BodyVault, checkDeposit, type Deposit, SHA256 } from "./vault.ts"
 
 export interface IngestOptions {
@@ -50,6 +52,8 @@ export interface IngestOptions {
   readonly auth?: Auth
   /** Who may read what (ADR-0011); without it every reader reads everything. */
   readonly access?: Access
+  /** Drafts of route policies and profiles, per author (ADR-0013); PostgreSQL's. */
+  readonly drafts?: DraftStore
 }
 
 /** Who asks: their session, and with an access file, the roles it gives them. */
@@ -587,6 +591,92 @@ export function createIngestServer(options: IngestOptions): Server {
     }
   }
 
+  // Drafts (ADR-0013): a signed-in author's own, for routes they own in the page's tenant.
+  async function draftsRoute(
+    request: IncomingMessage,
+    response: ServerResponse,
+    path: string,
+    tenant: string,
+  ) {
+    const { drafts } = options
+    const listing = path === "/drafts.json"
+    const one = /^\/drafts\/([^/]+)\.json$/.exec(path)
+    const allowed = listing ? ["GET"] : ["GET", "PUT", "DELETE"]
+    if (!allowed.includes(request.method ?? "")) {
+      return send(response, 405, { ok: false }, { allow: allowed.join(", ") })
+    }
+    if (drafts === undefined) {
+      return fail(response, 503, "not-configured", [
+        "Drafts are kept in PostgreSQL, with sign-in: set DATABASE_URL and OIDC_*.",
+      ])
+    }
+    const reader = await readerOf(request)
+    if (reader.session === undefined) {
+      return fail(response, 401, "sign-in", ["Sign in to keep drafts."])
+    }
+    const author = reader.session.subject
+    const PRIVATE = { "cache-control": "private, no-store" }
+    if (listing) return send(response, 200, { drafts: await drafts.list(author) }, PRIVATE)
+    const id = one?.[1]
+    if (id === undefined || !DRAFT_ID.test(id)) {
+      return fail(response, 404, "not-found", [`No draft at ${path}.`])
+    }
+    if (request.method === "GET") {
+      const draft = await drafts.get(author, id)
+      if (draft === undefined) return fail(response, 404, "not-found", [`No draft ${id}.`])
+      return send(response, 200, draft, PRIVATE)
+    }
+    // A write carries the session's cookie: one from another site is refused (ADR-0010).
+    if (options.auth?.fromOtherSite(request)) {
+      return fail(response, 403, "forbidden", ["A draft is written from this site only."])
+    }
+    if (request.method === "DELETE") {
+      if (!(await drafts.delete(author, id))) {
+        return fail(response, 404, "not-found", [`No draft ${id}.`])
+      }
+      response.writeHead(204, { "cache-control": "no-store" })
+      return void response.end()
+    }
+    const body = await readJsonBody(request, response, options.maxBodyBytes, "draft")
+    if (!body.ok) return
+    const given = (body.value ?? {}) as {
+      kind?: unknown
+      started_from?: unknown
+      document?: unknown
+    }
+    const route = (given.document as { route?: unknown } | null | undefined)?.route
+    if (typeof route !== "string" || route.trim() === "") {
+      return fail(response, 400, "invalid", ["A draft's document names its route."])
+    }
+    // Authoring is the route's owner's (ADR-0013).
+    if (reader.held !== undefined && !mayOwn(reader.held, route, tenant)) {
+      return refuse(response, reader)
+    }
+    const draft = {
+      $schema: "cwa-dashboard/draft/v1" as const,
+      id,
+      kind: given.kind,
+      started_from: given.started_from ?? null,
+      route,
+      document: given.document,
+      updated_at: new Date().toISOString(),
+    }
+    if (!validateDraftV1(draft)) {
+      return fail(
+        response,
+        400,
+        "invalid",
+        (validateDraftV1.errors ?? []).map(
+          (e) => `${e.instancePath || "the draft"} ${e.message ?? "is invalid"}`,
+        ),
+      )
+    }
+    if ((await drafts.put(author, draft)) === "taken") {
+      return fail(response, 404, "not-found", [`No draft ${id}.`])
+    }
+    return send(response, 200, draft, PRIVATE)
+  }
+
   // The tenants a reader may read, with their events (ADR-0012).
   async function tenantsRoute(request: IncomingMessage, response: ServerResponse) {
     if (options.store === undefined) {
@@ -720,6 +810,10 @@ export function createIngestServer(options: IngestOptions): Server {
           return send(response, 405, { ok: false }, { allow: found[0] })
         }
         return found[1]()
+      }
+      if (path === "/drafts.json" || path.startsWith("/drafts/")) {
+        if (!TENANT.test(tenant)) return fail(response, 404, "not-found", [`No tenant ${tenant}.`])
+        return draftsRoute(request, response, path, tenant)
       }
       if (path.startsWith("/bodies/")) {
         if (!["GET", "PUT", "DELETE"].includes(request.method ?? "")) {

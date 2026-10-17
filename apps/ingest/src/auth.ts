@@ -270,5 +270,9 @@ export function createAuth({ config, sessions, now = () => new Date(), allowHttp
     response.end()
   }
 
-  return { identify, login, callback, logout }
+  /** A cookie-carrying write from another site (ADR-0010): refused, as logout is. */
+  const fromOtherSite = (request: IncomingMessage) =>
+    request.headers.origin !== undefined && request.headers.origin !== site
+
+  return { identify, login, callback, logout, fromOtherSite }
 }

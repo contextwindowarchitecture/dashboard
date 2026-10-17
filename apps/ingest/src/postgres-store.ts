@@ -19,7 +19,12 @@ import {
   sourcesFromFacts,
   windowRows,
 } from "@cwa-dashboard/telemetry/derive"
-import type { AssemblyEventV1, CorpusV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
+import type {
+  AssemblyEventV1,
+  CorpusV1,
+  DraftV1,
+  EventsIndexV1,
+} from "@cwa-dashboard/telemetry/types"
 import { validateAssemblyEventV1 } from "@cwa-dashboard/telemetry/validators"
 
 import {
@@ -42,6 +47,7 @@ import {
   MAX_MS,
   type SessionStore,
 } from "./sessions.ts"
+import type { DraftStore, DraftSummary } from "./drafts.ts"
 import type { BodyVault, MediaType } from "./vault.ts"
 
 export interface Queryable {
@@ -121,6 +127,14 @@ const MIGRATIONS: (string | ((db: Queryable) => Promise<void>))[] = [
    alter table cwa_corpora add column tenant text not null default 'default';
    alter table cwa_corpora drop constraint cwa_corpora_pkey;
    alter table cwa_corpora add primary key (tenant, name)`,
+  // 8: drafts of route policies and profiles (ADR-0013), each its author's.
+  `create table cwa_drafts (
+     id text primary key,
+     author text not null,
+     updated_at timestamptz not null,
+     draft text not null
+   );
+   create index cwa_drafts_author on cwa_drafts (author, updated_at desc)`,
 ]
 
 async function migrate(db: Queryable) {
@@ -145,10 +159,11 @@ export interface PostgresStoreOptions {
   readonly end?: () => Promise<void>
 }
 
-/** The store, and the vault and the sessions it keeps in the same database. */
+/** The store, and the vault, the sessions and the drafts it keeps in the same database. */
 export type PostgresStore = EventStore & {
   readonly vault: BodyVault
   readonly sessions: SessionStore
+  readonly drafts: DraftStore
 }
 
 export async function createPostgresStore(
@@ -435,5 +450,46 @@ export async function createPostgresStore(
     },
   }
 
-  return { ...store, vault, sessions }
+  const drafts: DraftStore = {
+    async list(author) {
+      const { rows } = await db.query<{ value: string }>(
+        "select draft as value from cwa_drafts where author = $1 order by updated_at desc, id",
+        [author],
+      )
+      return parse<DraftV1>(rows).map((d): DraftSummary => ({
+        id: d.id,
+        kind: d.kind,
+        route: d.route,
+        started_from: d.started_from,
+        updated_at: d.updated_at,
+      }))
+    },
+    async get(author, id) {
+      const { rows } = await db.query<{ value: string }>(
+        "select draft as value from cwa_drafts where id = $1 and author = $2",
+        [id, author],
+      )
+      return parse<DraftV1>(rows)[0]
+    },
+    async put(author, draft) {
+      // A new id is the author's; an id already another author's is left alone.
+      const { rows } = await db.query<{ id: string }>(
+        `insert into cwa_drafts (id, author, updated_at, draft) values ($1, $2, $3, $4)
+         on conflict (id) do update set updated_at = excluded.updated_at, draft = excluded.draft
+         where cwa_drafts.author = excluded.author
+         returning id`,
+        [draft.id, author, draft.updated_at, JSON.stringify(draft)],
+      )
+      return rows.length === 1 ? "saved" : "taken"
+    },
+    async delete(author, id) {
+      const { rows } = await db.query<{ id: string }>(
+        "delete from cwa_drafts where id = $1 and author = $2 returning id",
+        [id, author],
+      )
+      return rows.length === 1
+    },
+  }
+
+  return { ...store, vault, sessions, drafts }
 }
