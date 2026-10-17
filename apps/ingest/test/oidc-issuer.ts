@@ -15,6 +15,8 @@ export interface IssuerOptions {
   readonly clientSecret: string
   /** The claims of the person who signs in. */
   readonly person: Record<string, unknown>
+  /** A fixed port, for a browser test that names it in configuration; any free one when absent. */
+  readonly port?: number
 }
 
 const base64url = (data: Buffer | string) => Buffer.from(data).toString("base64url")
@@ -122,7 +124,7 @@ export async function startIssuer(options: IssuerOptions) {
     }
     json(404, { error: "not_found" })
   })
-  await new Promise<void>((done) => server.listen(0, "127.0.0.1", done))
+  await new Promise<void>((done) => server.listen(options.port ?? 0, "127.0.0.1", done))
   url = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
   return {
     url,

@@ -25,3 +25,10 @@ export const E2E_CORPUS = "e2e-chat"
 
 /** The operator token the ingest service resolves vaulted bodies with in the browser tests. */
 export const VAULT_TOKEN = "e2e-vault-token"
+
+/** The test issuer the browser tests over the query API sign in through (ADR-0010). */
+export const OIDC_TEST = {
+  port: 8094,
+  clientId: "cwa-dashboard-e2e",
+  clientSecret: "e2e-client-secret",
+} as const

@@ -281,8 +281,12 @@ a:hover {
   color: var(--muted);
   min-width: 0;
 }
+/* A crumb is a target of its own (WCAG 2.2, 2.5.8): 24px tall, whatever sits beside it. */
 [data-slot="breadcrumbs"] a {
   color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 [data-slot="breadcrumbs"] a:hover,
 [data-slot="breadcrumbs"] [aria-current="page"] {
@@ -656,11 +660,15 @@ a:hover {
   min-width: 0;
   overflow-wrap: anywhere;
 }
-[data-slot="select-content"] {
+[data-slot="select-content"],
+[data-slot="dropdown-menu-content"] {
   border: 1px solid var(--line);
   border-radius: 0;
   background: var(--bg);
   --tw-shadow: 0 0 transparent;
+}
+[data-slot="dropdown-menu-item"] {
+  border-radius: 0;
 }
 [data-slot="select-item"] {
   font-family: var(--mono);
@@ -771,6 +779,18 @@ a:hover {
 }
 [data-slot="cell-note"] {
   color: var(--muted);
+}
+/* The account menu's label: the site's text colours, not the generated label's muted one. */
+[data-slot="account-label"] {
+  color: var(--fg);
+}
+[data-slot="account-name"] {
+  display: inline-block;
+  max-width: 16ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
 }
 [data-slot="chip-row"] {
   display: flex;

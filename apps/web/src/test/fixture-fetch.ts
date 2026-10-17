@@ -21,8 +21,8 @@ export interface FixtureFetchOptions {
   readonly config?: unknown
   /** URLs answered otherwise, for failure states. */
   readonly overrides?: Record<string, Override>
-  /** Called with every request, for assertions on what a page fetched. */
-  readonly onRequest?: (url: string) => void
+  /** Called with every request and its options, for assertions on what a page fetched. */
+  readonly onRequest?: (url: string, init?: RequestInit) => void
   /** Holds a request until the promise it returns settles, for states seen mid-request. */
   readonly hold?: (url: string) => Promise<void> | undefined
 }
@@ -33,7 +33,7 @@ export function fixtureFetch(options: FixtureFetchOptions = {}): typeof fetch {
   const config = options.config ?? { dataRoot: root, source: "file" }
   return async (input, init) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
-    options.onRequest?.(url)
+    options.onRequest?.(url, init)
     await options.hold?.(url)
     if (init?.signal?.aborted) throw new DOMException("aborted", "AbortError")
     const override = options.overrides?.[url]

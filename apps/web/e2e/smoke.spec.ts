@@ -399,6 +399,42 @@ test("an operator resolves a vaulted body with the token, in both themes and at 
   await expectAccessible(page)
 })
 
+test("a reader signs in through the issuer and out again, in both themes and at 400px", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "chromium-api",
+    "sign-in runs over the query API, with an issuer",
+  )
+  await page.goto("/traces?outcome=refused")
+  await page.getByRole("banner").getByRole("link", { name: "sign in" }).click()
+  // The issuer signs the test person straight in and sends the reader back where they were.
+  await expect(page).toHaveURL(/\/traces\?outcome=refused$/)
+  const account = page.getByRole("banner").getByRole("button", { name: "Account: Ada Lovelace" })
+  await expect(account).toBeVisible()
+  await expectAccessible(page)
+  const cookies = await page.context().cookies()
+  const session = cookies.find((c) => c.name === "cwa_session")!
+  expect(session).toMatchObject({ httpOnly: true, secure: true, sameSite: "Strict" })
+  // The page itself cannot read it.
+  expect(await page.evaluate(() => document.cookie)).not.toContain("cwa_session")
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.reload()
+  await expect(account).toBeVisible()
+  await expectNoSidewaysScroll(page)
+  await account.click()
+  // The generated menu fades in; axe reads colours, so it waits for the fade to end.
+  await page
+    .getByRole("menu")
+    .evaluate((menu) => Promise.all(menu.getAnimations().map((a) => a.finished)))
+  await expectAccessible(page)
+  await page.getByRole("menuitem", { name: "Sign out" }).click()
+  const signIn = page.getByRole("banner").getByRole("link", { name: "sign in" })
+  await expect(signIn).toBeFocused()
+  expect((await page.context().cookies()).some((c) => c.name === "cwa_session")).toBe(false)
+})
+
 test("a session opens from the list, selects a turn, and reads in both themes and at 400px", async ({
   page,
 }) => {

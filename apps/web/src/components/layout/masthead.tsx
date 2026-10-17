@@ -1,9 +1,10 @@
-// The masthead (STYLE.md 6): the menu, the plane mark and wordmark, the breadcrumbs, then the theme
-// and the repository on the right.
+// The masthead (STYLE.md 6): the menu, the plane mark and wordmark, the breadcrumbs, then the
+// account, the theme and the repository on the right.
 
 import { useEffect, useRef } from "react"
 import { Link } from "react-router"
 
+import { Account } from "../../features/account/components/account"
 import { LINKS } from "../../lib/links"
 import { useTheme } from "../../lib/theme"
 import { useSidebar } from "../ui/sidebar"
@@ -59,6 +60,7 @@ export function Masthead() {
       </Link>
       <Breadcrumbs />
       <div data-slot="masthead-actions">
+        <Account />
         <button type="button" data-slot="ghost-button" onClick={toggleTheme}>
           {theme === "dark" ? "light" : "dark"}
         </button>

@@ -9,7 +9,7 @@ import { join } from "node:path"
 
 import { defineConfig, devices } from "@playwright/test"
 
-import { API_INGEST_PORT, INGEST_TOKEN, SIGNING_KEY, VAULT_TOKEN } from "./e2e/env.ts"
+import { API_INGEST_PORT, INGEST_TOKEN, OIDC_TEST, SIGNING_KEY, VAULT_TOKEN } from "./e2e/env.ts"
 
 const port = 4176
 const empty = mkdtempSync(join(tmpdir(), "cwa-e2e-empty-"))
@@ -34,6 +34,18 @@ export default defineConfig({
     },
   ],
   webServer: [
+    // The test issuer (apps/ingest/test/oidc-issuer.ts), so sign-in runs end to end.
+    {
+      command: "node ../ingest/test/oidc-issuer-main.ts",
+      url: `http://127.0.0.1:${OIDC_TEST.port}/.well-known/openid-configuration`,
+      env: {
+        OIDC_TEST_PORT: String(OIDC_TEST.port),
+        OIDC_TEST_CLIENT_ID: OIDC_TEST.clientId,
+        OIDC_TEST_CLIENT_SECRET: OIDC_TEST.clientSecret,
+      },
+      reuseExistingServer: false,
+      timeout: 30_000,
+    },
     {
       command: "pnpm --dir ../ingest start",
       url: `http://127.0.0.1:${API_INGEST_PORT}/healthz`,
@@ -43,6 +55,10 @@ export default defineConfig({
         INGEST_TOKEN,
         SIGNING_KEY,
         VAULT_TOKEN,
+        OIDC_ISSUER: `http://127.0.0.1:${OIDC_TEST.port}`,
+        OIDC_CLIENT_ID: OIDC_TEST.clientId,
+        OIDC_CLIENT_SECRET: OIDC_TEST.clientSecret,
+        OIDC_REDIRECT_URI: `http://localhost:${port}/api/auth/callback`,
       },
       reuseExistingServer: false,
       timeout: 60_000,
