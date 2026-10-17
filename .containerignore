@@ -1,10 +1,23 @@
 # What the image builds never need: installs and builds made on this machine, test output, the local plan and the
-# prototype (AGENTS.md: never committed), and the repository's own history.
+# prototype (AGENTS.md: never committed), a developer's local tool settings and .env files, and the repository's own
+# history. Everything .gitignore names is here (apps/ingest/test/image-context.test.ts): the ingest image copies the
+# context whole.
 **/node_modules
 **/dist
 **/.build
 **/test-results
 **/playwright-report
+**/build
+**/*.tsbuildinfo
+**/coverage
+**/playwright/.cache
+.claude
+.codex
+.mcp.json
+.serena
+.taskmaster
+**/.env.local
+**/.env.*.local
 docs/plans
 prototype.md
 prototype.tsx
