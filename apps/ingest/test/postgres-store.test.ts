@@ -96,6 +96,7 @@ describe("migration 3", () => {
     }
     // What later migrations added does not exist at version 2.
     await db.query("drop table if exists cwa_corpora")
+    await db.query("drop table if exists cwa_bodies")
     await db.query("delete from cwa_schema where version > 2")
     const reopened = await createPostgresStore(db)
     const index = await reopened.index()

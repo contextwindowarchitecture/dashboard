@@ -32,6 +32,7 @@ import {
   SESSION_ID,
   WINDOW,
 } from "./event-store.ts"
+import type { BodyVault, MediaType } from "./vault.ts"
 
 export interface Queryable {
   query<Row>(text: string, params?: unknown[]): Promise<{ rows: Row[] }>
@@ -84,6 +85,13 @@ const MIGRATIONS: (string | ((db: Queryable) => Promise<void>))[] = [
      created_at timestamptz not null,
      corpus text not null
    )`,
+  // 5: the bodies routes opted into the vault keep out of their events (ADR-0009), by digest.
+  `create table cwa_bodies (
+     sha256 text primary key,
+     media_type text not null,
+     body bytea not null,
+     stored_at timestamptz not null default now()
+   )`,
 ]
 
 async function migrate(db: Queryable) {
@@ -108,10 +116,13 @@ export interface PostgresStoreOptions {
   readonly end?: () => Promise<void>
 }
 
+/** The store, and the vault it keeps in the same database. */
+export type PostgresStore = EventStore & { readonly vault: BodyVault }
+
 export async function createPostgresStore(
   db: Queryable,
   options: PostgresStoreOptions = {},
-): Promise<EventStore> {
+): Promise<PostgresStore> {
   const window = options.window ?? WINDOW
   await migrate(db)
 
@@ -275,5 +286,33 @@ export async function createPostgresStore(
     flush: async () => undefined,
     close: async () => options.end?.(),
   }
-  return store
+  const vault: BodyVault = {
+    async put(sha256, deposit) {
+      const { rows } = await db.query<{ sha256: string }>(
+        `insert into cwa_bodies (sha256, media_type, body) values ($1, $2, $3)
+         on conflict (sha256) do nothing returning sha256`,
+        [sha256, deposit.mediaType, Buffer.from(deposit.bytes)],
+      )
+      return rows.length === 1 ? "stored" : "held"
+    },
+    async get(sha256) {
+      const { rows } = await db.query<{ media_type: MediaType; body: Uint8Array }>(
+        "select media_type, body from cwa_bodies where sha256 = $1",
+        [sha256],
+      )
+      const row = rows[0]
+      return row === undefined
+        ? undefined
+        : { bytes: new Uint8Array(row.body), mediaType: row.media_type }
+    },
+    async delete(sha256) {
+      const { rows } = await db.query<{ sha256: string }>(
+        "delete from cwa_bodies where sha256 = $1 returning sha256",
+        [sha256],
+      )
+      return rows.length === 1
+    },
+  }
+
+  return { ...store, vault }
 }
