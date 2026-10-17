@@ -1,5 +1,6 @@
 // What the browser tests and the servers Playwright starts agree on.
 
+import { generateKeyPairSync } from "node:crypto"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -13,3 +14,8 @@ export const PERF_TREE = join(tmpdir(), "cwa-dashboard-perf-tree")
 
 /** The port the ingest service listens on in the browser tests over the query API. */
 export const API_INGEST_PORT = 8093
+
+/** The key the ingest service signs compliance bundles with in the browser tests: fresh each run. */
+export const SIGNING_KEY = generateKeyPairSync("ed25519")
+  .privateKey.export({ type: "pkcs8", format: "pem" })
+  .toString()

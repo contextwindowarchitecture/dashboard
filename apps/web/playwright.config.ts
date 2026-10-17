@@ -8,7 +8,7 @@ import { join, resolve } from "node:path"
 
 import { defineConfig, devices } from "@playwright/test"
 
-import { INGEST_PORT, INGEST_TOKEN } from "./e2e/env.ts"
+import { INGEST_PORT, INGEST_TOKEN, SIGNING_KEY } from "./e2e/env.ts"
 
 const port = 4173
 // The tree the preview serves and the service writes into: a copy of the committed demo tree, so a
@@ -47,7 +47,7 @@ export default defineConfig({
         {
           command: "pnpm --dir ../ingest start",
           url: `http://127.0.0.1:${INGEST_PORT}/healthz`,
-          env: { PORT: String(INGEST_PORT), EVENTS_DIR: tree, INGEST_TOKEN },
+          env: { PORT: String(INGEST_PORT), EVENTS_DIR: tree, INGEST_TOKEN, SIGNING_KEY },
           reuseExistingServer: !process.env["CI"],
           timeout: 60_000,
         },

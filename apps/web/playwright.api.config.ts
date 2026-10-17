@@ -9,7 +9,7 @@ import { join } from "node:path"
 
 import { defineConfig, devices } from "@playwright/test"
 
-import { API_INGEST_PORT, INGEST_TOKEN } from "./e2e/env.ts"
+import { API_INGEST_PORT, INGEST_TOKEN, SIGNING_KEY } from "./e2e/env.ts"
 
 const port = 4176
 const empty = mkdtempSync(join(tmpdir(), "cwa-e2e-empty-"))
@@ -34,7 +34,12 @@ export default defineConfig({
     {
       command: "pnpm --dir ../ingest start",
       url: `http://127.0.0.1:${API_INGEST_PORT}/healthz`,
-      env: { PORT: String(API_INGEST_PORT), DATABASE_URL: "pglite:memory", INGEST_TOKEN },
+      env: {
+        PORT: String(API_INGEST_PORT),
+        DATABASE_URL: "pglite:memory",
+        INGEST_TOKEN,
+        SIGNING_KEY,
+      },
       reuseExistingServer: false,
       timeout: 60_000,
     },

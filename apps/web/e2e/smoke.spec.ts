@@ -1,8 +1,10 @@
 // The smoke test: the built app loads under the production Content Security Policy in both themes,
 // axe finds nothing, and nothing scrolls sideways at a phone's width. It grows with every page.
 
-import { readFileSync } from "node:fs"
-import { resolve } from "node:path"
+import { spawnSync } from "node:child_process"
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join, resolve } from "node:path"
 
 import type { Page } from "@playwright/test"
 
@@ -264,6 +266,49 @@ test("the FinOps page says money is not available without prices, in both themes
   await page.setViewportSize({ width: 400, height: 800 })
   await page.goto("/finops")
   await expect(page.getByRole("table", { name: "Routes" })).toContainText("support-chat")
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})
+
+test("a compliance bundle shows what it proves, and verifies offline with the served key", async ({
+  page,
+  request,
+}) => {
+  const id = (
+    JSON.parse(
+      readFileSync(
+        resolve(import.meta.dirname, "../../../packages/demo-traffic/fixtures/events/index.json"),
+        "utf8",
+      ),
+    ) as { events: { event_id: string; outcome: string; redaction_mode: string }[] }
+  ).events.find((row) => row.outcome === "assembled" && row.redaction_mode === "full")!.event_id
+  await page.goto(`/compliance?event=${id}`)
+  const bundle = page.getByRole("region", { name: "Bundle" })
+  await expect(bundle).toContainText("match")
+  await expect(bundle).toContainText("Ed25519")
+  await expectAccessible(page)
+  // Offline: the bundle and the key as a reader would download them, and the repository's script.
+  const dir = mkdtempSync(join(tmpdir(), "cwa-e2e-bundle-"))
+  writeFileSync(
+    join(dir, "bundle.json"),
+    await (await request.get(`/api/bundles/${id}.json`)).body(),
+  )
+  writeFileSync(join(dir, "key.pem"), await (await request.get("/api/signing-key.pem")).body())
+  const verified = spawnSync(
+    process.execPath,
+    [
+      resolve(import.meta.dirname, "../../../deploy/verify-bundle.mjs"),
+      join(dir, "bundle.json"),
+      join(dir, "key.pem"),
+    ],
+    { encoding: "utf8" },
+  )
+  expect(verified.stdout).toContain("valid")
+  expect(verified.status).toBe(0)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto(`/compliance?event=${id}`)
+  await expect(bundle).toContainText("match")
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
 })

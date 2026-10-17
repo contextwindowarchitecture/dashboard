@@ -28,10 +28,18 @@ export function renderApp(
   } = {},
 ) {
   const client = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } })
-  const source = createFileSource("/data", fixtureFetch(fetchOptions))
+  const fetchFn = fixtureFetch(fetchOptions)
+  const source = createFileSource("/data", fetchFn)
   const router = createMemoryRouter(ROUTES, { initialEntries: [path] })
   const app = (
-    <AppProviders client={client} source={source} config={config} router={router} replay={replay} />
+    <AppProviders
+      client={client}
+      source={source}
+      config={config}
+      router={router}
+      replay={replay}
+      fetchFn={fetchFn}
+    />
   )
   const rendered = render(strict ? <StrictMode>{app}</StrictMode> : app)
   return { ...rendered, router }

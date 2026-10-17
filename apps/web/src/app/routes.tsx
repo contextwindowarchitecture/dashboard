@@ -9,6 +9,7 @@ import { GuardrailView } from "../features/guardrails/components/guardrails-view
 import { PolicyView } from "../features/registry/components/policy-view"
 import { ProfileView } from "../features/registry/components/profile-view"
 import { FleetPage } from "./pages/fleet"
+import { CompliancePage } from "./pages/compliance"
 import { ConflictsPage } from "./pages/conflicts"
 import { FinopsPage } from "./pages/finops"
 import { SourcesPage } from "./pages/sources"
@@ -152,6 +153,11 @@ export const ROUTES: RouteObject[] = [
         path: "glossary",
         lazy: () => import("./pages/glossary"),
         handle: handle("Glossary", () => "Glossary"),
+      },
+      {
+        path: "compliance",
+        element: <CompliancePage />,
+        handle: handle("Compliance", () => "Compliance"),
       },
       {
         path: "sandbox",

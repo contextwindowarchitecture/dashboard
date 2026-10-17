@@ -18,15 +18,26 @@ export interface AppProvidersProps {
   readonly router: ReturnType<typeof createBrowserRouter>
   /** The replay service's client; null when config.json names no apiBase. */
   readonly replay?: ReplayClient | null
+  /** The fetch the source uses; the tests pass theirs. */
+  readonly fetchFn?: typeof fetch
 }
 
-export function AppProviders({ client, source, config, router, replay = null }: AppProvidersProps) {
+export function AppProviders({
+  client,
+  source,
+  config,
+  router,
+  replay = null,
+  fetchFn,
+}: AppProvidersProps) {
   return (
     <QueryClientProvider client={client}>
       <DataProvider
         source={source}
         root={config.dataRoot}
         {...(config.prices ? { prices: config.prices } : {})}
+        {...(config.apiBase ? { apiBase: config.apiBase } : {})}
+        {...(fetchFn ? { fetchFn } : {})}
       >
         <ReplayContext.Provider value={replay}>
           <TooltipProvider>

@@ -38,6 +38,7 @@ const PAGES = [
   "/sources",
   "/conflicts",
   "/finops",
+  "/compliance",
   "/conflicts?event=01M4YZXVT0N9BECJFQPP1EDDVP",
   "/guardrails",
   "/guardrails/05",

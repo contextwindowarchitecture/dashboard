@@ -1,4 +1,5 @@
-// The data source, its root and the configured prices, shared with every page through context.
+// The data source, its root, the configured prices and the service's base, shared with every page
+// through context.
 
 import { createContext, useContext } from "react"
 
@@ -11,6 +12,10 @@ export interface Data {
   readonly root: string
   /** What input tokens cost, from config.json; absent, money is "Not available". */
   readonly prices?: Prices
+  /** The Node service's base, from config.json, for what only it answers (a compliance bundle). */
+  readonly apiBase?: string
+  /** The fetch the source uses, for those requests too; the tests' reads the fixtures. */
+  readonly fetchFn?: typeof fetch
 }
 
 export const DataContext = createContext<Data | null>(null)
