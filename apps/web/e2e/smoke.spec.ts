@@ -435,6 +435,45 @@ test("a reader signs in through the issuer and out again, in both themes and at 
   expect((await page.context().cookies()).some((c) => c.name === "cwa_session")).toBe(false)
 })
 
+test("a body withheld from an anonymous reader is theirs to read once signed in as its route's owner", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "chromium-api",
+    "roles run over the query API, with an issuer",
+  )
+  const events = resolve(import.meta.dirname, "../../../packages/demo-traffic/fixtures/events")
+  // e2e/access.json gives anonymous readers every route but policy-desk.
+  const desk = readdirSync(events)
+    .filter((name) => name !== "index.json")
+    .map(
+      (name) =>
+        JSON.parse(readFileSync(join(events, name), "utf8")) as {
+          event_id: string
+          outcome: string
+          snapshot?: { route_policy: { route: string } }
+        },
+    )
+    .find((e) => e.outcome === "assembled" && e.snapshot?.route_policy.route === "policy-desk")!
+  await page.goto(`/traces/${desk.event_id}`)
+  const items = page.getByRole("list", { name: "Included items" })
+  await expect(items).toContainText("body withheld · your role")
+  await expect(items).toContainText("owner:policy-desk")
+  await expectAccessible(page)
+  await page.getByRole("banner").getByRole("link", { name: "sign in" }).click()
+  await expect(page).toHaveURL(new RegExp(`/traces/${desk.event_id}$`))
+  await expect(page.getByRole("banner").getByRole("button", { name: /^Account/ })).toBeVisible()
+  await expect(items).not.toContainText("body withheld")
+  await expect(items.getByText(/^body · /).first()).toBeVisible()
+  // Signing out forgets what only the owner could read.
+  await page
+    .getByRole("banner")
+    .getByRole("button", { name: /^Account/ })
+    .click()
+  await page.getByRole("menuitem", { name: "Sign out" }).click()
+  await expect(items).toContainText("body withheld · your role")
+})
+
 test("a session opens from the list, selects a turn, and reads in both themes and at 400px", async ({
   page,
 }) => {

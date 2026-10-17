@@ -8,6 +8,8 @@ import type { DocumentByKind, Kind } from "./validate"
 export type RegionState<T> =
   | { status: "loading" }
   | { status: "error"; error: Error; retry: () => void }
+  /** The API refused the reader: to sign in (401), or their roles do not reach (403). */
+  | { status: "not-allowed"; signIn: boolean }
   /** The source answered that the document is not there. */
   | { status: "not-found"; what: string }
   /** A document of no dashboard schema, another version, or another kind. */
@@ -25,6 +27,12 @@ export function regionOf<K extends Kind>(
   if (query.isError) {
     if (query.error instanceof SourceError && query.error.kind === "not-found") {
       return { status: "not-found", what: options.what }
+    }
+    if (
+      query.error instanceof SourceError &&
+      (query.error.kind === "unauthorised" || query.error.kind === "forbidden")
+    ) {
+      return { status: "not-allowed", signIn: query.error.kind === "unauthorised" }
     }
     return { status: "error", error: query.error, retry: () => void query.refetch() }
   }

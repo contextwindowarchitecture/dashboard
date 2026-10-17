@@ -44,12 +44,21 @@ export type Body =
       readonly content_sha256: string
       readonly token_counts: Record<string, number>
     }
+  /** Withheld from the reader's role by the API (ADR-0011): the digest, never the body. */
+  | { readonly form: "withheld"; readonly content_sha256: string }
   | { readonly form: "raw"; readonly value: unknown }
   | { readonly form: "absent" }
 
 export function bodyOf(value: unknown, present: boolean): Body {
   if (!present) return { form: "absent" }
   if (typeof value === "string") return { form: "text", text: value }
+  if (
+    isRecord(value) &&
+    value["withheld"] === "role" &&
+    typeof value["content_sha256"] === "string"
+  ) {
+    return { form: "withheld", content_sha256: value["content_sha256"] }
+  }
   if (
     isRecord(value) &&
     value["redacted"] === "digest_only" &&

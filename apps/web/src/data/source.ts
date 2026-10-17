@@ -5,7 +5,16 @@
 
 import { errorMessage } from "./config.ts"
 
-export type SourceErrorKind = "not-found" | "http" | "network" | "parse" | "aborted"
+export type SourceErrorKind =
+  | "not-found"
+  /** The API asks the reader to sign in (401, ADR-0011). */
+  | "unauthorised"
+  /** The reader's roles do not include the document (403). */
+  | "forbidden"
+  | "http"
+  | "network"
+  | "parse"
+  | "aborted"
 
 /** A fetch that did not yield a document, and which way it failed. */
 export class SourceError extends Error {
@@ -58,6 +67,10 @@ export function createFileSource(root: string, fetchFn: typeof fetch = fetch): E
     }
     if (response.status === 404)
       throw new SourceError("not-found", target, `${target} is not there`, 404)
+    if (response.status === 401)
+      throw new SourceError("unauthorised", target, `${target} needs a reader to sign in`, 401)
+    if (response.status === 403)
+      throw new SourceError("forbidden", target, `${target} is outside the reader's roles`, 403)
     if (!response.ok) {
       throw new SourceError(
         "http",

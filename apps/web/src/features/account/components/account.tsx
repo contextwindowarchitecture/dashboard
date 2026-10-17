@@ -62,9 +62,8 @@ export function Account() {
         <DropdownMenuItem
           onSelect={() => {
             signedOut.current = true
-            void signOut(apiBase, fetchFn).then(() =>
-              client.invalidateQueries({ queryKey: ["me"] }),
-            )
+            // Every document read while signed in may hold what only this reader may see.
+            void signOut(apiBase, fetchFn).then(() => client.resetQueries())
           }}
         >
           Sign out

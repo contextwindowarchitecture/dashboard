@@ -42,8 +42,36 @@ function overScrubbedText(snapshot: unknown): Snapshot {
   return copy as unknown as Snapshot
 }
 
+/** Whether the API withheld any body from the reader (ADR-0011): then nothing it holds is the body. */
+function anyWithheld(snapshot: unknown): boolean {
+  const batches =
+    isRecord(snapshot) && Array.isArray(snapshot["batches"]) ? snapshot["batches"] : []
+  return batches.some(
+    (batch) =>
+      isRecord(batch) &&
+      Array.isArray(batch["items"]) &&
+      batch["items"].some(
+        (item) =>
+          isRecord(item) &&
+          [
+            item["body"],
+            ...(Array.isArray(item["variants"]) ? item["variants"] : []).map((v) =>
+              isRecord(v) ? v["body"] : undefined,
+            ),
+          ].some((body) => isRecord(body) && body["withheld"] === "role"),
+      ),
+  )
+}
+
 export function replayable(event: AssemblyEventV1): Replayable {
   const snapshot = (event.snapshot ?? event.rejection?.snapshot) as unknown
+  if (anyWithheld(snapshot)) {
+    return {
+      kind: "none",
+      reason:
+        "This event's bodies were withheld from your roles: what the page holds is their digests, not the text, so there is nothing to assemble. An owner of its route can replay it.",
+    }
+  }
   if (event.redaction_mode === "digest_only") {
     return {
       kind: "none",

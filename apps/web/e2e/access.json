@@ -1,0 +1,14 @@
+{
+  "anonymous": [
+    "viewer",
+    "owner:agent-loop",
+    "owner:contract-fixture",
+    "owner:contract-review",
+    "owner:document-qa",
+    "owner:extract",
+    "owner:long-context-qa",
+    "owner:support-chat"
+  ],
+  "signed_in": ["viewer"],
+  "groups": { "cwa:owners": ["owner:*"] }
+}

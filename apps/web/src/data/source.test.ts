@@ -53,6 +53,17 @@ describe("createFileSource", () => {
     expect((await failure(source().fleet(controller.signal))).kind).toBe("aborted")
   })
 
+  it("tells a refusal for want of sign-in from one for want of a role", async () => {
+    const refusing = source({
+      overrides: {
+        "/data/events/index.json": { status: 401, body: "{}" },
+        "/data/fleet.json": { status: 403, body: "{}" },
+      },
+    })
+    await expect(refusing.index()).rejects.toMatchObject({ kind: "unauthorised", status: 401 })
+    await expect(refusing.fleet()).rejects.toMatchObject({ kind: "forbidden", status: 403 })
+  })
+
   it("never fetches outside the tree, whatever an id holds", async () => {
     const requested: string[] = []
     const files = createFileSource(

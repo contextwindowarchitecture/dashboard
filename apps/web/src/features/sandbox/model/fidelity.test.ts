@@ -5,6 +5,7 @@ import type { AssemblyEventV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/ty
 import { describe, expect, it } from "vitest"
 
 import { FIXTURES_DIR } from "../../../test/fixture-fetch"
+import { withheld } from "../../../test/withheld"
 import { parity, replayable, type Replayed } from "./fidelity"
 
 const index = JSON.parse(
@@ -45,6 +46,15 @@ describe("replayable", () => {
     )
     expect(bodies(result.snapshot)).toEqual(texts)
     expect(result.reason).toContain("scrubbed")
+  })
+
+  it("cannot replay an event whose bodies were withheld from the reader, and says why", () => {
+    for (const event of [full, scrubbed]) {
+      const answer = replayable(withheld(event))
+      expect(answer.kind).toBe("none")
+      expect(answer.kind === "none" && answer.reason).toMatch(/withheld/)
+      expect(answer.kind === "none" && answer.reason).toMatch(/owner/)
+    }
   })
 
   it("cannot replay a digested event, and says why and where the setting is", () => {

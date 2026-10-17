@@ -281,6 +281,23 @@ function BodyView({
           <pre>{JSON.stringify(body.value, null, 2)}</pre>
         </details>
       )
+    case "withheld":
+      return (
+        <details data-slot="item-body">
+          <summary>body withheld · your role</summary>
+          <dl data-slot="key-values">
+            <div>
+              <dt>sha256</dt>
+              <dd>{body.content_sha256}</dd>
+            </div>
+          </dl>
+          <p data-slot="note">
+            Your roles do not include this route&rsquo;s bodies. The dashboard&rsquo;s access file
+            grants them as <code data-mono="">{`owner:${route}`}</code>, by group or to every
+            signed-in reader.
+          </p>
+        </details>
+      )
     case "absent":
       return <p data-slot="cell-note">no body</p>
   }

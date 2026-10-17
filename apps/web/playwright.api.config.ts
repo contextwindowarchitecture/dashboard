@@ -1,11 +1,11 @@
 // The browser tests over the query API (ADR-0007): the same smoke, accessibility and visual specs,
 // with config.json's dataRoot at /api/data, so every document comes from the ingest service's
 // PostgreSQL store (PGlite, in memory) and none from a tree: the preview's own /data/ serves an
-// empty directory. Setup projects post the demo tree's events, freeze the shadow corpus and deposit the demo vault's bodies. `pnpm test:e2e:api`.
+// empty directory. Setup projects post the demo tree's events, freeze the shadow corpus and deposit the demo vault's bodies; sign-in runs through the test issuer and roles from e2e/access.json. `pnpm test:e2e:api`.
 
 import { mkdtempSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { join, resolve } from "node:path"
 
 import { defineConfig, devices } from "@playwright/test"
 
@@ -59,6 +59,9 @@ export default defineConfig({
         OIDC_CLIENT_ID: OIDC_TEST.clientId,
         OIDC_CLIENT_SECRET: OIDC_TEST.clientSecret,
         OIDC_REDIRECT_URI: `http://localhost:${port}/api/auth/callback`,
+        // Who may read what (ADR-0011): anonymous readers own every demo route but policy-desk, so
+        // the suite reads as before, and the test person's group owns them all.
+        ACCESS_FILE: resolve(import.meta.dirname, "e2e/access.json"),
       },
       reuseExistingServer: false,
       timeout: 60_000,

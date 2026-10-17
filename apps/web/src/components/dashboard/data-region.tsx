@@ -5,6 +5,7 @@ import type { ReactNode } from "react"
 
 import type { RegionState } from "../../data/region"
 import { EmptyState } from "./empty-state"
+import { NotAllowed } from "./not-allowed"
 
 const SHOWN_ISSUES = 5
 
@@ -36,6 +37,8 @@ export function DataRegion<T>({ region, label, empty, skeleton, children }: Data
           </button>
         </div>
       )
+    case "not-allowed":
+      return <NotAllowed signIn={region.signIn} />
     case "not-found":
       return (
         <div data-slot="missing-panel">
