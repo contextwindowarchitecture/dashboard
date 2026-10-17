@@ -5,10 +5,11 @@
 
 export const TELEMETRY = {
   writtenAgainst: "16de4be0534583f135a597171c927d42c87ee82c",
-  /** How an event reaches the dashboard in Phase 1. */
+  /** How an event, and a vaulted route's bodies, reach the dashboard. */
   arrival: [
     "A wrapper around a conformant assembler times each assemble() call, applies the route's redaction mode, and builds one assembly event around the frozen snapshot and the trace the assembler returned.",
-    "It posts the event to the ingest service with the deployment's token. The service checks it against assembly-event v1, whose snapshot and trace are held to the vendored schemas, writes it into the event tree, adds it to its session, and rebuilds the index a moment later.",
+    "It posts the event to the ingest service with the deployment's token. The service checks it against assembly-event v1, whose snapshot and trace are held to the vendored schemas, and keeps it in its store, the event tree or PostgreSQL, from which the index, the sessions and the reports are derived.",
+    "A route opted into the vault deposits its original bodies first, each with PUT /bodies/<sha256> and the same token, as the bytes the event's content_sha256 digests. The event names the vault; the operator resolves a body in the inspector with the operator token, a different one, and the page shows it only when its bytes match the digest.",
     "The demo traffic in this deployment comes the same way, from the TypeScript assembler run over the conformance cases and the authored scenarios, and is labelled demo.",
   ],
   /** Phase 2's ingestion patterns: named, not built, their overhead not measured. */
@@ -20,10 +21,6 @@ export const TELEMETRY = {
     {
       name: "Event bus",
       use: "A stream such as Kafka for services that assemble at a rate one writer cannot take.",
-    },
-    {
-      name: "Snapshot vault",
-      use: "Bodies kept in a content-addressed store, so a digest_only event can be replayed by a reader allowed to see them.",
     },
     {
       name: "Gateway",

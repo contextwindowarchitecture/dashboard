@@ -50,6 +50,15 @@ describe("the telemetry page", () => {
     expect(later.textContent).not.toMatch(/\d\s*(µs|μs|ms)\b/)
     expect(later).toHaveTextContent("Not available")
   })
+
+  it("says how a vaulted route's bodies arrive and who resolves them, and lists the vault as built", async () => {
+    renderApp("/telemetry")
+    const today = await screen.findByRole("region", { name: "How events arrive" })
+    expect(today).toHaveTextContent("PUT /bodies/<sha256>")
+    expect(today).toHaveTextContent("operator token")
+    expect(screen.getByRole("main")).toHaveTextContent("routes.<route>.vault")
+    expect(screen.getByRole("region", { name: "Phase 2" })).not.toHaveTextContent(/vault/i)
+  })
 })
 
 describe("the about page", () => {

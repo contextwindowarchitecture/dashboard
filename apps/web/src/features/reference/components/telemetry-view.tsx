@@ -102,7 +102,9 @@ Authorization: Bearer <the deployment's INGEST_TOKEN>
           <p data-slot="panel-note">
             A route's mode is the wrapper's setting <code>routes.&lt;route&gt;.redaction_mode</code>
             , applied before an event leaves the service. The dashboard shows what the event holds
-            and never changes a body.
+            and never changes a body. A route under <code>pii_scrubbed</code> or{" "}
+            <code>digest_only</code> may also keep its bodies in the vault,{" "}
+            <code>routes.&lt;route&gt;.vault</code>, for the operator to resolve.
           </p>
           <DocTable heading="Redaction" label="Redaction modes" />
         </section>
