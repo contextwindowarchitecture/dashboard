@@ -1,5 +1,5 @@
 {
-  "anonymous": ["viewer", "owner:*"],
+  "anonymous": ["viewer@default", "owner:*@default"],
   "signed_in": ["viewer", "owner:*", "auditor"],
   "groups": {}
 }

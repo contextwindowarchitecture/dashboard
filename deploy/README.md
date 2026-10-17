@@ -111,6 +111,7 @@ oc -n cwa-dashboard rollout status statefulset/dashboard-postgres
 oc -n cwa-dashboard rollout status deployment/dashboard-ingest
 # The demo traffic, posted as a wrapper would, with the ingest token:
 node deploy/seed-events.mjs packages/demo-traffic/fixtures/events https://dashboard.contextwindowarchitecture.io/api --token "$INGEST_TOKEN"
+node deploy/seed-events.mjs packages/demo-traffic/fixtures/tenants/northwind/events https://dashboard.contextwindowarchitecture.io/api --token "$INGEST_TOKEN"
 ```
 
 Applying `deploy/overlays/prod` again switches back to the tree; the StatefulSet and its claim stay until deleted by hand.
@@ -194,7 +195,7 @@ With `ACCESS_FILE`, a JSON file, the service grants roles and refuses what they 
 
 `viewer` reads every event's metadata and every document derived from them; `owner:<route>` (or `owner:*`) also reads that route's bodies and its compliance bundles; `auditor` reads every bundle; `operator` reads what a viewer does. A role may end in `@<tenant>` to hold in that tenant alone (`viewer@default`, `owner:support-chat@northwind`) or `@*` for all; a role without one holds in every tenant (`docs/adr/0012-tenants.md`). Another tenant's documents are at `/api/data/tenants/<tenant>/`, `/api/data/tenants.json` lists the tenants a reader may read, and bundles, corpora and shadow runs take `?tenant=`. A body a reader's roles do not cover is served withheld, with its digest, and the inspector says so. An unknown key or role stops the service at start. A reader with no role is told to sign in (401), or that their roles do not reach (403).
 
-On the cluster, `deploy/overlays/prod-sign-in/access.json` is the file, mounted from the ConfigMap `dashboard-access`: the public demo stays open to anonymous readers, bodies and all (D11, P3-D5), and every signed-in member of the organisation is also an auditor. Add a team under `groups` as `"contextwindowarchitecture:<team>": [...]`, then `oc apply -k deploy/overlays/prod-sign-in`; the ConfigMap's new name rolls the ingest service.
+On the cluster, `deploy/overlays/prod-sign-in/access.json` is the file, mounted from the ConfigMap `dashboard-access`: the default tenant stays open to anonymous readers, bodies and all (D11, P3-D5); the demo's second tenant, northwind, is for signed-in members of the organisation alone, who are also auditors (`docs/adr/0012-tenants.md`). Add a team under `groups` as `"contextwindowarchitecture:<team>": [...]`, then `oc apply -k deploy/overlays/prod-sign-in`; the ConfigMap's new name rolls the ingest service.
 
 ## The vault
 

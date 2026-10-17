@@ -173,5 +173,10 @@ describe("the repository's access files", () => {
     const anonymous = rolesOf(live, undefined)
     expect(mayRead(anonymous, "default")).toBe(true)
     expect(mayOwn(anonymous, "support-chat", "default")).toBe(true)
+    // The demo's second tenant is its members' alone (ADR-0012): the isolation shows.
+    expect(mayRead(anonymous, "northwind")).toBe(false)
+    const member = rolesOf(live, { groups: [] })
+    expect(mayRead(member, "northwind")).toBe(true)
+    expect(mayOwn(member, "support-chat", "northwind")).toBe(true)
   })
 })
