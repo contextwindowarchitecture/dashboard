@@ -7,7 +7,7 @@ import { join } from "node:path"
 
 import { REGISTRY } from "@cwa-dashboard/contract/registry"
 import type { AssemblyEventV1, EventsIndexV1 } from "@cwa-dashboard/telemetry/types"
-import { fireEvent, screen, within } from "@testing-library/react"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
@@ -188,6 +188,62 @@ describe("the authoring page", () => {
     expect(await within(preview).findByRole("alert")).toHaveTextContent("under way")
     const post = sent.find((s) => s.url === "/api/shadow")!
     expect(post.body).toEqual({ corpus: "chat", candidate: { profile: PROFILE } })
+  })
+})
+
+describe("focus between the list and a draft", () => {
+  it("moves to the page's title when a draft opens, and again when the list comes back", async () => {
+    open("/authoring", {
+      "/api/drafts.json": json(200, {
+        drafts: [
+          {
+            id: ID,
+            kind: "profile",
+            route: PROFILE.route,
+            started_from: DRAFT.started_from,
+            updated_at: DRAFT.updated_at,
+          },
+        ],
+      }),
+      [`/api/drafts/${ID}.json`]: json(200, DRAFT),
+    })
+    const title = await screen.findByRole("heading", { level: 1, name: "Authoring" })
+    const table = await screen.findByRole("table", { name: "Your drafts" })
+    await userEvent.click(within(table).getByRole("link", { name: PROFILE.route }))
+    await screen.findByLabelText("version")
+    await waitFor(() => expect(document.activeElement).toBe(title))
+    await userEvent.click(screen.getByRole("link", { name: "All your drafts" }))
+    await screen.findByRole("table", { name: "Your drafts" })
+    await waitFor(() => expect(document.activeElement).toBe(title))
+  })
+})
+
+describe("what a screen reader is told", () => {
+  it("names a field's problem as its description, not as an alert at every keystroke", async () => {
+    open(`/authoring?draft=${ID}`, { [`/api/drafts/${ID}.json`]: json(200, DRAFT) })
+    const version = await screen.findByLabelText("version")
+    fireEvent.change(version, { target: { value: "two" } })
+    expect(version).toHaveAttribute("aria-invalid", "true")
+    expect(version).toHaveAccessibleDescription(/version is a whole number/)
+    expect(screen.queryByRole("alert")).toBeNull()
+  })
+
+  it("announces a replay's answer when it arrives", async () => {
+    open(`/authoring?draft=${ID}`, { [`/api/drafts/${ID}.json`]: json(200, DRAFT) })
+    const preview = await screen.findByRole("region", { name: "Replay an event" })
+    await userEvent.click(await within(preview).findByRole("combobox", { name: "Event" }))
+    await userEvent.click(screen.getByRole("option", { name: new RegExp(CHAT.event_id) }))
+    await userEvent.click(await within(preview).findByRole("button", { name: "Replay" }))
+    const result = await within(preview).findByRole("table", { name: "Replay result" })
+    expect(result.closest("[aria-live]")).toHaveAttribute("aria-live", "polite")
+  })
+
+  it("keeps the focus on the delete confirmation, and back on Delete when it is kept", async () => {
+    open(`/authoring?draft=${ID}`, { [`/api/drafts/${ID}.json`]: json(200, DRAFT) })
+    await userEvent.click(await screen.findByRole("button", { name: "Delete" }))
+    expect(screen.getByRole("button", { name: "Delete the draft for good" })).toHaveFocus()
+    await userEvent.click(screen.getByRole("button", { name: "Keep it" }))
+    expect(screen.getByRole("button", { name: "Delete" })).toHaveFocus()
   })
 })
 

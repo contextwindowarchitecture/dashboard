@@ -8,9 +8,10 @@
 import { FIELDS, type Field } from "@cwa-dashboard/contract/data"
 import type { AssemblyEventV1, DraftV1 } from "@cwa-dashboard/telemetry/types"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useId, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router"
 
+import { PAGE_TITLE_ID } from "../../../components/dashboard/dashboard-page"
 import { StatusBadge } from "../../../components/dashboard/status-badge"
 import {
   Select,
@@ -205,6 +206,8 @@ function FieldInput({
 }) {
   const id = `draft-field-${field.name}`
   const multiline = field.kind === "json"
+  // The problem is the field's description, read with it; an alert would interrupt every keystroke.
+  const described = problem === undefined ? `${id}-about` : `${id}-problem ${id}-about`
   return (
     <div data-slot="field">
       <label htmlFor={id} data-label="" data-mono="">
@@ -217,7 +220,7 @@ function FieldInput({
           rows={Math.min(12, Math.max(3, text.split("\n").length))}
           spellCheck={false}
           value={text}
-          aria-describedby={`${id}-about`}
+          aria-describedby={described}
           aria-invalid={problem !== undefined}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -227,7 +230,7 @@ function FieldInput({
           data-slot="input"
           spellCheck={false}
           value={text}
-          aria-describedby={`${id}-about`}
+          aria-describedby={described}
           aria-invalid={problem !== undefined}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -238,7 +241,7 @@ function FieldInput({
         {field.values && field.kind === "enum" ? ` One of ${field.values.join(", ")}.` : ""}
       </p>
       {problem === undefined ? null : (
-        <p data-slot="note" role="alert">
+        <p id={`${id}-problem`} data-slot="note">
           {problem}
         </p>
       )}
@@ -401,34 +404,40 @@ function ReplayChosen({
           Replay
         </button>
       </div>
-      {run.status === "running" ? (
-        <p role="status" data-slot="cell-note">
-          Replaying…
-        </p>
-      ) : run.status === "done" ? (
-        <div role="region" aria-label="Replay result table" tabIndex={0} data-slot="scroll-region">
-          <table aria-label="Replay result" data-slot="chart-table">
-            <tbody>
-              <tr>
-                <th scope="row">As recorded</th>
-                <td>
-                  <Recorded event={event} />
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">With the draft</th>
-                <td>
-                  {run.answer.kind === "replayed" ? (
-                    <Outcome answer={run.answer} />
-                  ) : (
-                    <Failure answer={run.answer} />
-                  )}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      ) : null}
+      {/* One polite live region for the run, so its answer is read when it arrives. */}
+      <div aria-live="polite">
+        {run.status === "running" ? (
+          <p data-slot="cell-note">Replaying…</p>
+        ) : run.status === "done" ? (
+          <div
+            role="region"
+            aria-label="Replay result table"
+            tabIndex={0}
+            data-slot="scroll-region"
+          >
+            <table aria-label="Replay result" data-slot="chart-table">
+              <tbody>
+                <tr>
+                  <th scope="row">As recorded</th>
+                  <td>
+                    <Recorded event={event} />
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">With the draft</th>
+                  <td>
+                    {run.answer.kind === "replayed" ? (
+                      <Outcome answer={run.answer} />
+                    ) : (
+                      <Failure answer={run.answer} />
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -797,6 +806,15 @@ function Editor({ apiBase, draft }: { readonly apiBase: string; readonly draft: 
   const [json, setJson] = useState<{ text: string; problem?: string } | undefined>(undefined)
   const [saved, setSaved] = useState<Saved>({ status: "idle" })
   const [deleting, setDeleting] = useState(false)
+  // The confirmation takes the place of Delete, and Delete of the confirmation: focus moves with them.
+  const confirm = useRef<HTMLButtonElement>(null)
+  const deleteButton = useRef<HTMLButtonElement>(null)
+  const asked = useRef(false)
+  useEffect(() => {
+    if (deleting) confirm.current?.focus()
+    else if (asked.current) deleteButton.current?.focus()
+    asked.current = deleting || asked.current
+  }, [deleting])
   const kind = draft.kind
   const start = startingDocument(draft.started_from)
   const route = routeOf(document)
@@ -954,7 +972,12 @@ function Editor({ apiBase, draft }: { readonly apiBase: string; readonly draft: 
         </button>
         {deleting ? (
           <>
-            <button type="button" data-slot="ghost-button" onClick={() => void remove()}>
+            <button
+              ref={confirm}
+              type="button"
+              data-slot="ghost-button"
+              onClick={() => void remove()}
+            >
               Delete the draft for good
             </button>
             <button type="button" data-slot="ghost-button" onClick={() => setDeleting(false)}>
@@ -962,7 +985,12 @@ function Editor({ apiBase, draft }: { readonly apiBase: string; readonly draft: 
             </button>
           </>
         ) : (
-          <button type="button" data-slot="ghost-button" onClick={() => setDeleting(true)}>
+          <button
+            ref={deleteButton}
+            type="button"
+            data-slot="ghost-button"
+            onClick={() => setDeleting(true)}
+          >
             Delete
           </button>
         )}
@@ -1025,6 +1053,16 @@ export function AuthoringView() {
   const location = useLocation()
   const [search] = useSearchParams()
   const draftId = search.get("draft")
+  // The list and a draft are one route, told apart by ?draft=, so the route's own focus move does
+  // not happen between them; the control that was pressed is gone, and focus would fall to the
+  // document. It goes to the page's title instead, as on a change of route.
+  const shown = useRef(draftId)
+  useEffect(() => {
+    if (shown.current === draftId) return
+    shown.current = draftId
+    const frame = requestAnimationFrame(() => document.getElementById(PAGE_TITLE_ID)?.focus())
+    return () => cancelAnimationFrame(frame)
+  }, [draftId])
   if (apiBase === undefined) {
     return (
       <div data-slot="content">
