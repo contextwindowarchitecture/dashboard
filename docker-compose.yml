@@ -29,6 +29,9 @@ services:
       INGEST_TOKEN: ${INGEST_TOKEN:-local-dev-token}
       # An Ed25519 PKCS #8 PEM to sign compliance bundles with; unset, the service signs none.
       SIGNING_KEY: ${SIGNING_KEY:-}
+      # The operator token that resolves vaulted bodies (ADR-0009); the vault is PostgreSQL's
+      # (docker-compose.postgres.yml), so this tree stack keeps none unless VAULT_DIR is set.
+      VAULT_TOKEN: ${VAULT_TOKEN:-}
     ports:
       - "${INGEST_PORT:-8090}:8090"
     volumes:

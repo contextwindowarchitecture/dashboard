@@ -4,7 +4,8 @@
 #
 # PostgreSQL in a volume of its own; the ingest service keeps events there (DATABASE_URL) and serves the documents at
 # /api/data, which config.json points the app at; a first run posts the demo tree's events into it through
-# POST /events. POSTGRES_PASSWORD sets the database password.
+# POST /events, and deposits the review agent's vaulted bodies through PUT /bodies (ADR-0009). POSTGRES_PASSWORD
+# sets the database password; VAULT_TOKEN, the operator token that reads the bodies back.
 services:
   postgres:
     image: quay.io/sclorg/postgresql-16-c9s:20260930@sha256:d33717fd33c1a4b11afef94568d0c20812a19d62fb8c633fadee1e491e2edd4a
@@ -41,6 +42,22 @@ services:
       - http://dashboard-ingest:8090
     volumes:
       - ./deploy/seed-events.mjs:/seed-events.mjs:ro,Z
+
+  # Deposits the demo vault's bodies once the store answers; a body already held answers 200.
+  seed-vault:
+    image: localhost/dashboard-ingest:dev
+    depends_on:
+      seed-postgres:
+        condition: service_completed_successfully
+    environment:
+      INGEST_TOKEN: ${INGEST_TOKEN:-local-dev-token}
+    command:
+      - node
+      - /seed-vault.mjs
+      - /app/packages/demo-traffic/vault
+      - http://dashboard-ingest:8090
+    volumes:
+      - ./deploy/seed-vault.mjs:/seed-vault.mjs:ro,Z
 
   web:
     volumes:

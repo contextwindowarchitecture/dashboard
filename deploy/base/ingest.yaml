@@ -49,6 +49,15 @@ spec:
                   name: dashboard-signing
                   key: key.pem
                   optional: true
+            # The operator token that resolves and erases vaulted bodies (ADR-0009, deploy/README.md);
+            # without the secret no body is read back. The vault itself is PostgreSQL's
+            # (prod-postgres): the tree overlay keeps none, since its tree is served without a token.
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-vault
+                  key: token
+                  optional: true
           readinessProbe:
             httpGet:
               path: /healthz

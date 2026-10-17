@@ -147,6 +147,27 @@ node deploy/verify-bundle.mjs <event id>.json signing-key.pem
 **Rotating the key**: create a new secret value and restart the service. Every bundle names its key's id (the SHA-256 of the public key), so a bundle signed before the rotation still verifies against the old public key: keep each retired public key where readers can find it, beside the date it was retired.
 
 
+## The vault
+
+A route under `pii_scrubbed` or `digest_only` may keep its original bodies in the vault (`docs/adr/0009-body-vault.md`): its wrapper deposits each body with the ingest token at `PUT /api/bodies/<sha256>`, and the operator resolves one in the inspector with the operator token, `VAULT_TOKEN`, which must differ from the ingest token (the service refuses to start otherwise). The inspector shows a body only when its bytes hash to the digest the event holds.
+
+Where the bodies are kept: with `DATABASE_URL`, in PostgreSQL's `cwa_bodies` table (migration 5); otherwise in `VAULT_DIR`, which the service refuses inside `EVENTS_DIR`, since the web server serves the tree under `/data/` without a token. The cluster's vault is PostgreSQL's (`prod-postgres`); the tree overlay keeps none. The operator token is the secret `dashboard-vault`:
+
+```sh
+# The token goes from openssl straight into the secret, never printed; the operator reads it back
+# from there when resolving: oc -n cwa-dashboard extract secret/dashboard-vault --to=-
+openssl rand -hex 32 | oc -n cwa-dashboard create secret generic dashboard-vault --from-file=token=/dev/stdin
+oc -n cwa-dashboard rollout restart deployment/dashboard-ingest
+# The demo's vaulted bodies (the review agent's route), deposited as its wrapper would:
+node deploy/seed-vault.mjs packages/demo-traffic/vault https://dashboard.contextwindowarchitecture.io/api --token "$INGEST_TOKEN"
+```
+
+Locally, `docker-compose.postgres.yml` deposits the demo's bodies on a first run, and `VAULT_TOKEN=… podman compose -f docker-compose.yml -f docker-compose.postgres.yml up` gives the service an operator token.
+
+**Erasing a body**, for an erasure request: `curl -X DELETE -H "authorization: Bearer $VAULT_TOKEN" https://dashboard.contextwindowarchitecture.io/api/bodies/<sha256>` answers 204, or 404 when the vault does not hold it. The event keeps its digest and its counts; the inspector then says the vault does not hold the body.
+
+**What it holds** is the PII the redaction kept out of the events, under the database's protection and one token: the backups above carry `cwa_bodies` with the events, so they are kept as carefully. Rotating the operator token is a new secret value and a restart; nothing stored depends on it.
+
 ## Shadow regression
 
 A shadow run replays a frozen corpus of stored events twice through the pinned assembler, as recorded and with a candidate route policy, profile or both, and reports every assembly that changes (`docs/adr/0008-shadow-regression.md`). Only events recorded in `full` replay; the rest are counted as skipped, with why.
