@@ -206,7 +206,10 @@ export function createIngestServer(options: IngestOptions): Server {
         return eventsRoute(request, response)
       }
       if (path.startsWith("/data/")) {
-        if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
+        // HEAD as GET: Node's server sends the headers and leaves the body out.
+        if (request.method !== "GET" && request.method !== "HEAD") {
+          return send(response, 405, { ok: false }, { allow: "GET, HEAD" })
+        }
         return dataRoute(path, response)
       }
       if (path === "/replay") {

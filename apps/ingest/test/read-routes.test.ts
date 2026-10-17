@@ -93,6 +93,14 @@ describe("the read routes", () => {
     expect((await fetch(`${base}/data/fleet.json`, { method: "POST" })).status).toBe(405)
   })
 
+  it("answer HEAD as GET, headers without a body, as nginx does for the tree", async () => {
+    const base = await serve(await demoStore())
+    const head = await fetch(`${base}/data/events/${EVENTS[0]!.event_id}.json`, { method: "HEAD" })
+    expect(head.status).toBe(200)
+    expect(head.headers.get("cache-control")).toBe("public, max-age=31536000, immutable")
+    expect(await head.text()).toBe("")
+  })
+
   it("say the store is not configured when there is none", async () => {
     const base = await serve()
     const response = await fetch(`${base}/data/events/index.json`)
