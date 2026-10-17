@@ -461,7 +461,7 @@ export function sourceFacts(event: AssemblyEventV1): SourceFacts {
       submitted: entry.submitted,
       admitted: entry.admitted.size,
       compressed: entry.compressed.size,
-      tokens_admitted: entry.tokens,
+      included_tokens: entry.tokens,
       excluded: [...entry.excluded].map(([key, items]) => {
         const [reason, stage] = key.split("\u0000") as [string, Excluded["stage"]]
         return { reason, stage, items }
@@ -488,7 +488,7 @@ export function sourcesFromFacts(
       submitted: 0,
       admitted: 0,
       compressed: 0,
-      tokens_admitted: 0,
+      included_tokens: 0,
       excluded: [],
       rejected_events: 0,
       excludedBy: new Map<string, number>(),
@@ -503,7 +503,7 @@ export function sourcesFromFacts(
       target.submitted += producer.submitted
       target.admitted += producer.admitted
       target.compressed += producer.compressed
-      target.tokens_admitted += producer.tokens_admitted
+      target.included_tokens += producer.included_tokens
       for (const { reason, stage, items } of producer.excluded) {
         const key = `${reason}\u0000${stage}`
         target.excludedBy.set(key, (target.excludedBy.get(key) ?? 0) + items)

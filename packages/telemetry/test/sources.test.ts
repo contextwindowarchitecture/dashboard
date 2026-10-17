@@ -30,7 +30,7 @@ describe("sourcesReport", () => {
         kind: "interaction",
         submitted: 1,
         admitted: 1,
-        tokens_admitted: 6,
+        included_tokens: 6,
         ...none,
       },
       {
@@ -38,7 +38,7 @@ describe("sourcesReport", () => {
         kind: "retrieval",
         submitted: 1,
         admitted: 1,
-        tokens_admitted: 8,
+        included_tokens: 8,
         ...none,
       },
       {
@@ -46,7 +46,7 @@ describe("sourcesReport", () => {
         kind: "policy",
         submitted: 1,
         admitted: 1,
-        tokens_admitted: 10,
+        included_tokens: 10,
         ...none,
       },
       {
@@ -54,7 +54,7 @@ describe("sourcesReport", () => {
         kind: "retrieval",
         submitted: 2,
         admitted: 1,
-        tokens_admitted: 5,
+        included_tokens: 5,
         ...none,
         excluded: [
           { reason: "duplicate_content", stage: "producer", items: 1 },

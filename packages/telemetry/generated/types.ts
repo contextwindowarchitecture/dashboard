@@ -431,9 +431,9 @@ export interface Producer {
    */
   compressed: number
   /**
-   * The tokens its included occurrences took, as the traces count them.
+   * The tokens its included occurrences took, as the traces count them (trace.included[].tokens).
    */
-  tokens_admitted: number
+  included_tokens: number
   /**
    * Its items the traces exclude, by reason code and stage, in the contract's reason order.
    */

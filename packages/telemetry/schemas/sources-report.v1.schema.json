@@ -39,7 +39,7 @@
         "submitted",
         "admitted",
         "compressed",
-        "tokens_admitted",
+        "included_tokens",
         "excluded",
         "rejected_events"
       ],
@@ -65,8 +65,8 @@
           "description": "Of those, the items the trace compressed.",
           "$ref": "#/$defs/count"
         },
-        "tokens_admitted": {
-          "description": "The tokens its included occurrences took, as the traces count them.",
+        "included_tokens": {
+          "description": "The tokens its included occurrences took, as the traces count them (trace.included[].tokens).",
           "$ref": "#/$defs/count"
         },
         "excluded": {

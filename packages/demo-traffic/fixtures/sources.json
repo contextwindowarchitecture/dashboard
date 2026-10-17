@@ -14,7 +14,7 @@
       "submitted": 1,
       "admitted": 1,
       "compressed": 0,
-      "tokens_admitted": 5,
+      "included_tokens": 5,
       "excluded": [],
       "rejected_events": 0
     },
@@ -25,7 +25,7 @@
       "submitted": 3,
       "admitted": 2,
       "compressed": 0,
-      "tokens_admitted": 10,
+      "included_tokens": 10,
       "excluded": [
         {
           "reason": "capability_not_allowed",
@@ -42,7 +42,7 @@
       "submitted": 18,
       "admitted": 15,
       "compressed": 0,
-      "tokens_admitted": 255,
+      "included_tokens": 255,
       "excluded": [
         {
           "reason": "capability_not_allowed",
@@ -59,7 +59,7 @@
       "submitted": 4,
       "admitted": 0,
       "compressed": 0,
-      "tokens_admitted": 0,
+      "included_tokens": 0,
       "excluded": [],
       "rejected_events": 0
     },
@@ -70,7 +70,7 @@
       "submitted": 163,
       "admitted": 120,
       "compressed": 0,
-      "tokens_admitted": 1458,
+      "included_tokens": 1458,
       "excluded": [
         {
           "reason": "authority_not_allowed",
@@ -97,7 +97,7 @@
       "submitted": 43,
       "admitted": 26,
       "compressed": 0,
-      "tokens_admitted": 143,
+      "included_tokens": 143,
       "excluded": [
         {
           "reason": "producer_slot_not_allowed",
@@ -144,7 +144,7 @@
       "submitted": 8,
       "admitted": 4,
       "compressed": 0,
-      "tokens_admitted": 40,
+      "included_tokens": 40,
       "excluded": [
         {
           "reason": "producer_slot_not_allowed",
@@ -171,7 +171,7 @@
       "submitted": 19,
       "admitted": 16,
       "compressed": 8,
-      "tokens_admitted": 550,
+      "included_tokens": 550,
       "excluded": [
         {
           "reason": "authority_not_allowed",
@@ -193,7 +193,7 @@
       "submitted": 1,
       "admitted": 0,
       "compressed": 0,
-      "tokens_admitted": 0,
+      "included_tokens": 0,
       "excluded": [
         {
           "reason": "producer_not_authenticated",
@@ -210,7 +210,7 @@
       "submitted": 17,
       "admitted": 9,
       "compressed": 0,
-      "tokens_admitted": 97,
+      "included_tokens": 97,
       "excluded": [
         {
           "reason": "missing_field:expires",
@@ -262,7 +262,7 @@
       "submitted": 198,
       "admitted": 85,
       "compressed": 11,
-      "tokens_admitted": 1056,
+      "included_tokens": 1056,
       "excluded": [
         {
           "reason": "producer_not_authenticated",
@@ -399,7 +399,7 @@
       "submitted": 163,
       "admitted": 107,
       "compressed": 3,
-      "tokens_admitted": 1737,
+      "included_tokens": 1737,
       "excluded": [
         {
           "reason": "producer_slot_not_allowed",
@@ -436,7 +436,7 @@
       "submitted": 1,
       "admitted": 0,
       "compressed": 0,
-      "tokens_admitted": 0,
+      "included_tokens": 0,
       "excluded": [
         {
           "reason": "below_threshold",
@@ -453,7 +453,7 @@
       "submitted": 48,
       "admitted": 27,
       "compressed": 0,
-      "tokens_admitted": 165,
+      "included_tokens": 165,
       "excluded": [
         {
           "reason": "authority_not_allowed",
@@ -495,7 +495,7 @@
       "submitted": 1,
       "admitted": 0,
       "compressed": 0,
-      "tokens_admitted": 0,
+      "included_tokens": 0,
       "excluded": [
         {
           "reason": "capability_not_allowed",
@@ -512,7 +512,7 @@
       "submitted": 7,
       "admitted": 4,
       "compressed": 0,
-      "tokens_admitted": 206,
+      "included_tokens": 206,
       "excluded": [
         {
           "reason": "producer_slot_not_allowed",
@@ -534,7 +534,7 @@
       "submitted": 12,
       "admitted": 6,
       "compressed": 0,
-      "tokens_admitted": 33,
+      "included_tokens": 33,
       "excluded": [
         {
           "reason": "conflict_lost",
