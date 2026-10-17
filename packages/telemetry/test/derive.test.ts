@@ -75,6 +75,27 @@ function rejected(id: string, overrides: Partial<AssemblyEventV1> = {}): Assembl
   } as AssemblyEventV1
 }
 
+describe("indexRow's compression saving", () => {
+  const demo = resolve(import.meta.dirname, "../../demo-traffic/fixtures/events")
+  const events = readdirSync(demo)
+    .filter((name) => name.endsWith(".json") && name !== "index.json")
+    .map((name) => JSON.parse(readFileSync(join(demo, name), "utf8")) as AssemblyEventV1)
+
+  it("is what the trace's compressed rows saved, from before to after, and absent without a trace", () => {
+    const compressed = events.filter((e) => (e.trace?.compressed.length ?? 0) > 0)
+    expect(compressed.length).toBeGreaterThan(0)
+    for (const event of events) {
+      const row = indexRow(event)
+      if (event.trace === undefined) {
+        expect(row.compressed_saved, event.event_id).toBeUndefined()
+        continue
+      }
+      const saved = event.trace.compressed.reduce((n, c) => n + (c.from - c.to), 0)
+      expect(row.compressed_saved, event.event_id).toBe(saved)
+    }
+  })
+})
+
 describe("indexRow", () => {
   it("lists an assembled event's route, profile, tokens and reason codes in reasons.json order", () => {
     const e = event("admission-reasons")

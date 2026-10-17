@@ -26,6 +26,7 @@
       "reason_codes": [
         "superseded"
       ],
+      "compressed_saved": 229,
       "input_tokens": 493,
       "session": {
         "id": "ir-3",
@@ -53,6 +54,7 @@
       "reason_codes": [
         "superseded"
       ],
+      "compressed_saved": 64,
       "input_tokens": 471,
       "session": {
         "id": "ir-3",
@@ -78,6 +80,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 331,
       "session": {
         "id": "ir-3",
@@ -104,6 +107,7 @@
       "outcome": "refused",
       "refused_reason": "slot_floor_over_budget",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.227958000000001
     },
     {
@@ -125,6 +129,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.20862500000001205
     },
     {
@@ -145,6 +150,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 65,
       "session": {
         "id": "desk-agent-12",
@@ -171,6 +177,7 @@
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [],
+      "compressed_saved": 0,
       "session": {
         "id": "desk-agent-12",
         "turn_index": 0
@@ -200,6 +207,7 @@
         "duplicate_content",
         "source_diversity_cap"
       ],
+      "compressed_saved": 0,
       "input_tokens": 75,
       "total_ms": 0.24112500000001091
     },
@@ -223,6 +231,7 @@
       "reason_codes": [
         "below_threshold"
       ],
+      "compressed_saved": 0,
       "input_tokens": 40,
       "total_ms": 0.1454169999999806
     },
@@ -246,6 +255,7 @@
       "reason_codes": [
         "conflict_lost"
       ],
+      "compressed_saved": 0,
       "input_tokens": 51,
       "total_ms": 0.16887499999998568
     },
@@ -271,6 +281,7 @@
         "capability_not_allowed",
         "superseded"
       ],
+      "compressed_saved": 0,
       "input_tokens": 265,
       "session": {
         "id": "agent-run-412",
@@ -299,6 +310,7 @@
         "producer_slot_not_allowed",
         "capability_not_allowed"
       ],
+      "compressed_saved": 0,
       "input_tokens": 251,
       "session": {
         "id": "agent-run-412",
@@ -329,6 +341,7 @@
         "expired",
         "out_of_scope"
       ],
+      "compressed_saved": 0,
       "session": {
         "id": "intake-12",
         "turn_index": 2
@@ -353,6 +366,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 215,
       "session": {
         "id": "intake-12",
@@ -378,6 +392,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 160,
       "session": {
         "id": "intake-12",
@@ -405,6 +420,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 79,
       "input_tokens": 554,
       "session": {
         "id": "refund-7",
@@ -432,6 +448,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 585,
       "session": {
         "id": "refund-7",
@@ -457,6 +474,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 623,
       "session": {
         "id": "refund-7",
@@ -482,6 +500,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 510,
       "session": {
         "id": "refund-7",
@@ -507,6 +526,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 438,
       "session": {
         "id": "refund-7",
@@ -547,6 +567,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 34,
       "session": {
         "id": "fixture-c1",
@@ -849,6 +870,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 116,
       "total_ms": 0.132000000000005
     },
@@ -873,6 +895,7 @@
         "below_threshold",
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 28,
       "total_ms": 0.1173339999999996
     },
@@ -896,6 +919,7 @@
       "reason_codes": [
         "superseded"
       ],
+      "compressed_saved": 0,
       "input_tokens": 83,
       "total_ms": 0.24966700000001651
     },
@@ -921,6 +945,7 @@
         "superseded",
         "duplicate_content"
       ],
+      "compressed_saved": 0,
       "input_tokens": 51,
       "total_ms": 0.20425000000000182
     },
@@ -945,6 +970,7 @@
       "reason_codes": [
         "superseded"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.10341600000000994
     },
     {
@@ -968,6 +994,7 @@
       "reason_codes": [
         "untrusted_in_governance"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.08383299999999849
     },
     {
@@ -991,6 +1018,7 @@
       "reason_codes": [
         "untrusted_in_governance"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.0704589999999996
     },
     {
@@ -1011,6 +1039,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 41,
       "total_ms": 0.14629099999999085
     },
@@ -1033,6 +1062,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.7763750000000016
     },
     {
@@ -1054,6 +1084,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.05808300000001054
     },
     {
@@ -1075,6 +1106,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.07616600000000062
     },
     {
@@ -1099,6 +1131,7 @@
         "expired",
         "slot_unplaced"
       ],
+      "compressed_saved": 0,
       "input_tokens": 43,
       "total_ms": 0.135832999999991
     },
@@ -1121,6 +1154,7 @@
       "outcome": "refused",
       "refused_reason": "required_slot_missing",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.05445900000000847
     },
     {
@@ -1144,6 +1178,7 @@
       "reason_codes": [
         "slot_unplaced"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.11650000000000205
     },
     {
@@ -1167,6 +1202,7 @@
         "below_threshold",
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 53,
       "total_ms": 0.21249999999997726
     },
@@ -1188,6 +1224,7 @@
       "compressed_count": 2,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 35,
       "input_tokens": 65,
       "total_ms": 0.08549999999999613
     },
@@ -1212,6 +1249,7 @@
         "authority_not_allowed",
         "capability_not_allowed"
       ],
+      "compressed_saved": 0,
       "input_tokens": 77,
       "total_ms": 0.20966599999999858
     },
@@ -1235,6 +1273,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 56,
       "total_ms": 0.2311249999999916
     },
@@ -1259,6 +1298,7 @@
         "duplicate_content",
         "source_diversity_cap"
       ],
+      "compressed_saved": 0,
       "input_tokens": 83,
       "total_ms": 0.16604200000000446
     },
@@ -1280,6 +1320,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 64,
       "total_ms": 0.150291999999979
     },
@@ -1303,6 +1344,7 @@
       "reason_codes": [
         "expired"
       ],
+      "compressed_saved": 0,
       "input_tokens": 34,
       "total_ms": 0.0977500000000191
     },
@@ -1327,6 +1369,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.11195800000001555
     },
     {
@@ -1351,6 +1394,7 @@
         "out_of_scope",
         "below_threshold"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.06725000000000136
     },
     {
@@ -1374,6 +1418,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.13220799999999144
     },
     {
@@ -1395,6 +1440,7 @@
       "outcome": "refused",
       "refused_reason": "evidence_required",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.06441600000002268
     },
     {
@@ -1418,6 +1464,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.07791599999998766
     },
     {
@@ -1440,6 +1487,7 @@
       "reason_codes": [
         "below_threshold"
       ],
+      "compressed_saved": 0,
       "input_tokens": 39,
       "total_ms": 0.08787499999999682
     },
@@ -1463,6 +1511,7 @@
       "reason_codes": [
         "below_threshold"
       ],
+      "compressed_saved": 0,
       "input_tokens": 47,
       "total_ms": 0.08745900000002393
     },
@@ -1489,6 +1538,7 @@
         "duplicate_content",
         "source_diversity_cap"
       ],
+      "compressed_saved": 0,
       "input_tokens": 55,
       "total_ms": 0.19729199999997604
     },
@@ -1513,6 +1563,7 @@
       "reason_codes": [
         "source_diversity_cap"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.09212500000001
     },
     {
@@ -1536,6 +1587,7 @@
         "duplicate_content",
         "source_diversity_cap"
       ],
+      "compressed_saved": 0,
       "input_tokens": 83,
       "total_ms": 0.19116699999997877
     },
@@ -1559,6 +1611,7 @@
       "reason_codes": [
         "below_threshold"
       ],
+      "compressed_saved": 0,
       "input_tokens": 48,
       "total_ms": 0.10008299999998371
     },
@@ -1582,6 +1635,7 @@
       "reason_codes": [
         "duplicate_content"
       ],
+      "compressed_saved": 0,
       "input_tokens": 41,
       "total_ms": 0.1348340000000121
     },
@@ -1607,6 +1661,7 @@
         "conflict_lost",
         "duplicate_content"
       ],
+      "compressed_saved": 0,
       "input_tokens": 53,
       "total_ms": 0.49066700000000196
     },
@@ -1630,6 +1685,7 @@
       "reason_codes": [
         "duplicate_content"
       ],
+      "compressed_saved": 0,
       "input_tokens": 93,
       "total_ms": 0.2821249999999793
     },
@@ -1654,6 +1710,7 @@
       "reason_codes": [
         "duplicate_content"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.21774999999999523
     },
     {
@@ -1676,6 +1733,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 32,
       "total_ms": 0.12716700000001424
     },
@@ -1698,6 +1756,7 @@
       "outcome": "refused",
       "refused_reason": "required_slot_missing",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.07587499999999636
     },
     {
@@ -1719,6 +1778,7 @@
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.07491699999999923
     },
     {
@@ -1742,6 +1802,7 @@
       "reason_codes": [
         "conflict_lost"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.09699999999997999
     },
     {
@@ -1763,6 +1824,7 @@
       "outcome": "refused",
       "refused_reason": "conflict_unresolved",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.06774999999998954
     },
     {
@@ -1786,6 +1848,7 @@
         "untrusted_in_governance",
         "conflict_deferred"
       ],
+      "compressed_saved": 0,
       "input_tokens": 227,
       "total_ms": 0.44445799999999736
     },
@@ -1810,6 +1873,7 @@
         "expired",
         "conflict_lost"
       ],
+      "compressed_saved": 0,
       "input_tokens": 124,
       "total_ms": 0.42549999999999955
     },
@@ -1833,6 +1897,7 @@
       "reason_codes": [
         "capability_not_allowed"
       ],
+      "compressed_saved": 0,
       "input_tokens": 16,
       "total_ms": 0.069500000000005
     },
@@ -1856,6 +1921,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 25,
       "input_tokens": 61,
       "total_ms": 0.13116700000000492
     },
@@ -1879,6 +1945,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 11,
       "input_tokens": 50,
       "total_ms": 0.1253330000000119
     },
@@ -1901,6 +1968,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.07987499999998704
     },
     {
@@ -1923,6 +1991,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 5,
       "input_tokens": 36,
       "total_ms": 0.1857090000000028
     },
@@ -1947,6 +2016,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "total_ms": 0.20962500000001683
     },
     {
@@ -1969,6 +2039,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 5,
       "input_tokens": 61,
       "total_ms": 0.20683299999998894
     },
@@ -1992,6 +2063,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 23,
       "input_tokens": 62,
       "total_ms": 0.2742080000000158
     },
@@ -2013,6 +2085,7 @@
       "compressed_count": 1,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 12,
       "input_tokens": 57,
       "total_ms": 0.20395800000000008
     },
@@ -2036,6 +2109,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 6,
       "input_tokens": 52,
       "total_ms": 0.6326249999999902
     },
@@ -2059,6 +2133,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 63,
       "total_ms": 0.19037499999998886
     },
@@ -2080,6 +2155,7 @@
       "compressed_count": 2,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 20,
       "input_tokens": 44,
       "total_ms": 0.146000000000015
     },
@@ -2103,6 +2179,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 40,
       "total_ms": 0.16075000000000728
     },
@@ -2126,6 +2203,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 10,
       "input_tokens": 52,
       "total_ms": 0.38554099999998925
     },
@@ -2149,6 +2227,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 33,
       "total_ms": 0.13045799999997598
     },
@@ -2171,6 +2250,7 @@
       "outcome": "refused",
       "refused_reason": "protected_content_over_budget",
       "reason_codes": [],
+      "compressed_saved": 0,
       "total_ms": 0.11400000000000432
     },
     {
@@ -2193,6 +2273,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 52,
       "total_ms": 0.1367089999999962
     },
@@ -2216,6 +2297,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 42,
       "total_ms": 0.17120800000000713
     },
@@ -2237,6 +2319,7 @@
       "compressed_count": 0,
       "outcome": "assembled",
       "reason_codes": [],
+      "compressed_saved": 0,
       "input_tokens": 97,
       "total_ms": 0.4065840000000094
     },
@@ -2260,6 +2343,7 @@
       "reason_codes": [
         "over_budget"
       ],
+      "compressed_saved": 0,
       "input_tokens": 118,
       "total_ms": 0.589082999999988
     },
@@ -2284,6 +2368,7 @@
         "producer_slot_not_allowed",
         "capability_not_allowed"
       ],
+      "compressed_saved": 0,
       "input_tokens": 36,
       "total_ms": 0.22783400000000142
     },
@@ -2332,6 +2417,7 @@
         "below_threshold",
         "not_eligible"
       ],
+      "compressed_saved": 0,
       "input_tokens": 153,
       "total_ms": 5.750165999999993
     }

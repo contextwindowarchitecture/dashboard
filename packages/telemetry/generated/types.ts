@@ -171,6 +171,10 @@ export type Row = {
    */
   budget_input?: number
   /**
+   * What the trace's compressed rows saved: the sum of from minus to over trace.compressed[]. Absent without a trace, and in an index written before it was recorded.
+   */
+  compressed_saved?: number
+  /**
    * The trace's compressed rows: occurrences stepped down to a variant.
    */
   compressed_count?: number

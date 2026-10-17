@@ -70,8 +70,34 @@ describe("migration 2", () => {
     expect(
       (await db.query<{ version: number }>("select max(version) as version from cwa_schema"))
         .rows[0]!.version,
-    ).toBe(2)
+    ).toBeGreaterThanOrEqual(2)
     await store.close()
+    await db.close()
+  })
+})
+
+describe("migration 3", () => {
+  it("rewrites the index rows a version 2 database holds, so they carry the compression saving", async () => {
+    const { DEMO_EVENTS } = await import("./store-contract.ts")
+    const db = new PGlite()
+    const store = await createPostgresStore(db)
+    for (const event of DEMO_EVENTS) await store.write(event)
+    // As version 2 left them: the rows without the saving, and the schema at 2.
+    const { rows } = await db.query<{ event_id: string; index_row: string }>(
+      "select event_id, index_row from cwa_events",
+    )
+    for (const row of rows) {
+      const old = JSON.parse(row.index_row)
+      delete old.compressed_saved
+      await db.query("update cwa_events set index_row = $1 where event_id = $2", [
+        JSON.stringify(old),
+        row.event_id,
+      ])
+    }
+    await db.query("delete from cwa_schema where version > 2")
+    const reopened = await createPostgresStore(db)
+    const index = await reopened.index()
+    expect(index.events.filter((row) => row.compressed_saved !== undefined).length).toBe(86)
     await db.close()
   })
 })

@@ -48,3 +48,26 @@ describe("the tree store's files", () => {
     }
   })
 })
+
+describe("a tree written before the index rows' compression saving", () => {
+  it("gets it on start, for the current window's rows", async () => {
+    const { cpSync, writeFileSync } = await import("node:fs")
+    const root = mkdtempSync(join(tmpdir(), "cwa-tree-store-"))
+    cpSync(join(import.meta.dirname, "../../../packages/demo-traffic/fixtures"), root, {
+      recursive: true,
+    })
+    const indexPath = join(root, "events/index.json")
+    const old = JSON.parse(readFileSync(indexPath, "utf8"))
+    for (const row of old.events) delete row.compressed_saved
+    writeFileSync(indexPath, JSON.stringify(old))
+    const store = await createStore(root, { debounceMs: 1 })
+    try {
+      await store.flush()
+      const rows = (await store.index()).events
+      expect(rows.filter((row) => row.compressed_saved !== undefined).length).toBe(86)
+    } finally {
+      await store.close()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})

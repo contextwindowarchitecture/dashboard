@@ -216,6 +216,11 @@
           "type": "integer",
           "minimum": 0
         },
+        "compressed_saved": {
+          "description": "What the trace's compressed rows saved: the sum of from minus to over trace.compressed[]. Absent without a trace, and in an index written before it was recorded.",
+          "type": "integer",
+          "minimum": 0
+        },
         "compressed_count": {
           "description": "The trace's compressed rows: occurrences stepped down to a variant.",
           "type": "integer",

@@ -79,13 +79,20 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
   // The fleet and sources reports read a few facts of every event; they are read from the tree once.
   const facts: FleetFacts[] = []
   const sourceFactsById = new Map<string, SourceFacts>()
+  const freshRows = new Map<string, IndexRow>()
   for (const name of await readdir(events)) {
     if (!name.endsWith(".json") || name === "index.json") continue
     const event = await readJson<AssemblyEventV1>(join(events, name))
     if (event === undefined) continue
     facts.push(fleetFacts(event))
     sourceFactsById.set(event.event_id, sourceFacts(event))
+    freshRows.set(event.event_id, indexRow(event))
   }
+  // An index written by an older store lacks fields a row now carries: the current window's rows are
+  // derived again from their events, and the index rebuilt once if any changed.
+  const before = JSON.stringify(rows)
+  rows = rows.map((row) => freshRows.get(row.event_id) ?? row)
+  const stale = JSON.stringify(rows) !== before
   // The sources report covers the current window's events, as the index does.
   const sourcesOf = (generatedAt: string) =>
     sourcesFromFacts(
@@ -157,6 +164,8 @@ export async function createStore(root: string, options: StoreOptions = {}): Pro
     const [session] = buildSessions([...turns.filter((e) => e !== undefined), event])
     if (session !== undefined) await replace(path, session)
   }
+
+  if (stale) schedule()
 
   const store: EventStore = {
     async write(candidate: unknown): Promise<WriteResult> {

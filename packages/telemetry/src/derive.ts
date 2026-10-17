@@ -57,6 +57,9 @@ export function indexRow(event: AssemblyEventV1): IndexRow {
       ? { refused_reason: trace.refused.reason }
       : {}),
     reason_codes: inReasonOrder(trace?.excluded.map((row) => row.reason) ?? []),
+    ...(trace === undefined
+      ? {}
+      : { compressed_saved: trace.compressed.reduce((n, row) => n + (row.from - row.to), 0) }),
     ...(event.outcome === "assembled" && trace?.result
       ? { input_tokens: trace.result.input_tokens }
       : {}),

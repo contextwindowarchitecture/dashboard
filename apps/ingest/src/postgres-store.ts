@@ -65,6 +65,18 @@ const MIGRATIONS: (string | ((db: Queryable) => Promise<void>))[] = [
       ])
     }
   },
+  // 3: the index rows again, now that they carry the compression saving.
+  async (db) => {
+    const { rows } = await db.query<{ event_id: string; event: string }>(
+      "select event_id, event from cwa_events",
+    )
+    for (const row of rows) {
+      await db.query("update cwa_events set index_row = $1 where event_id = $2", [
+        JSON.stringify(indexRow(JSON.parse(row.event) as AssemblyEventV1)),
+        row.event_id,
+      ])
+    }
+  },
 ]
 
 async function migrate(db: Queryable) {
