@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
@@ -16,9 +17,13 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 
 import {
+  DEMO_VAULT_BASE,
   differences,
   FIXTURES,
   generateTree,
+  generateVault,
+  VAULT,
+  vaultDifferences,
   withoutMeasurements,
   writeTree,
 } from "../src/generate.ts"
@@ -247,5 +252,43 @@ describe("the demo tree", () => {
 
   it("is committed as generated (CI fails on a difference)", () => {
     expect(differences(tree, FIXTURES)).toEqual([])
+  })
+})
+
+describe("the demo vault (ADR-0009)", () => {
+  const vaulted = () => events.filter((event) => event.vault !== undefined)
+  const digestsOf = (event: AssemblyEventV1) =>
+    JSON.stringify(event.snapshot ?? event.rejection?.snapshot).match(
+      /(?<="content_sha256":")[0-9a-f]{64}/g,
+    ) ?? []
+
+  it("opts the review agent's route into the vault, and no other", () => {
+    expect(vaulted().length).toBeGreaterThan(0)
+    for (const event of events) {
+      const review = event.service.name === "review-agent"
+      expect(event.vault, event.event_id).toEqual(review ? { base: DEMO_VAULT_BASE } : undefined)
+      if (review) expect(event.redaction_mode).toBe("digest_only")
+    }
+  })
+
+  it("deposits every body a vaulted event's digests name, in the directory vault's layout", () => {
+    const vault = generateVault()
+    for (const event of vaulted()) {
+      for (const digest of digestsOf(event)) {
+        const path = [...vault.keys()].find((p) => p.startsWith(`${digest.slice(0, 2)}/${digest}.`))
+        expect(path, digest).toBeDefined()
+        expect(createHash("sha256").update(vault.get(path!)!, "utf8").digest("hex")).toBe(digest)
+      }
+    }
+    const named = new Set(vaulted().flatMap(digestsOf))
+    expect([...vault.keys()].map((p) => p.split("/")[1]!.split(".")[0])).toEqual(
+      expect.arrayContaining([...named]),
+    )
+    expect(vault.size).toBe(named.size)
+  })
+
+  it("is kept beside the tree, never in what the web server serves, and committed as generated", () => {
+    expect(VAULT.startsWith(`${FIXTURES}/`)).toBe(false)
+    expect(vaultDifferences(generateVault(), VAULT)).toEqual([])
   })
 })

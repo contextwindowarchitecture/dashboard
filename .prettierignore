@@ -6,5 +6,7 @@ apps/web/src/styles/tokens.css
 apps/web/src/components/ui/
 apps/web/src/hooks/use-mobile.ts
 **/fixtures/
+# Deposited bodies are exact bytes, digested; nothing may reformat them.
+packages/demo-traffic/vault/
 # nginx configuration: Prettier has no parser for it and reflows it as prose.
 deploy/base/nginx/

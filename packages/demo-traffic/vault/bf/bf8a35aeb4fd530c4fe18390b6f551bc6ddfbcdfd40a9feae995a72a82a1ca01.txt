@@ -1,0 +1,1 @@
+{"name": "comment_pr", "parameters": {"pr": "integer", "body": "string"}}

@@ -152,7 +152,7 @@ export const prReview: Scenario = {
     "Two steps of a code-review agent: an instruction-shaped diff stays evidence, an unallowed tool and an adapter-supplied tool are kept out, and CI's newer run supersedes its first.",
   service: "review-agent",
   session: "agent-run-412",
-  redaction: { mode: "digest_only" },
+  redaction: { mode: "digest_only", vault: true },
   turns: [
     step(
       0,

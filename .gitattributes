@@ -1,0 +1,2 @@
+# Deposited bodies are exact bytes, digested: never convert their line endings.
+packages/demo-traffic/vault/** -text

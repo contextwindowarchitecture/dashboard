@@ -22,7 +22,10 @@
   },
   "redaction_mode": "digest_only",
   "timings_ms": {
-    "total": 0.2607500000000016
+    "total": 0.254209000000003
+  },
+  "vault": {
+    "base": "https://dashboard.contextwindowarchitecture.io/api"
   },
   "outcome": "assembled",
   "snapshot": {
@@ -734,12 +737,12 @@
       }
     ],
     "timings": {
-      "admission": 0.07983300000000781,
-      "conflicts": 0.0006669999999928677,
-      "supersession": 0.007499999999993179,
-      "deduplication": 0.0007920000000183336,
-      "diversity": 0.0007090000000005148,
-      "fitting": 0.07287499999998204
+      "admission": 0.08358400000000188,
+      "conflicts": 0.0007080000000030395,
+      "supersession": 0.00595799999999258,
+      "deduplication": 0.0007500000000106866,
+      "diversity": 0.0007499999999822649,
+      "fitting": 0.06479199999998286
     }
   },
   "payload": {

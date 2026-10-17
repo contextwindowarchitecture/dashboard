@@ -287,7 +287,7 @@
         "id": "agent-run-412",
         "turn_index": 1
       },
-      "total_ms": 0.22279199999999832
+      "total_ms": 0.2324169999999981
     },
     {
       "event_id": "01M4ZKH0N4HT508FAY0X5JVM7S",
@@ -316,7 +316,7 @@
         "id": "agent-run-412",
         "turn_index": 0
       },
-      "total_ms": 0.2607500000000016
+      "total_ms": 0.254209000000003
     },
     {
       "event_id": "01M4ZHGXW4QVNQ7FTKA8D9EVT2",

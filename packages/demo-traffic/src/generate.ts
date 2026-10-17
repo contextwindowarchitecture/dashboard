@@ -19,6 +19,11 @@
 //   fleet.json               the fleet report v1
 //   sources.json             the sources report v1, over the current window
 //
+// Beside the tree, never in it (the web server serves the tree without a token), the vault: the
+// bodies of the routes opted into it (ADR-0009), in the directory vault's layout,
+// packages/demo-traffic/vault/<first two hex digits>/<sha256>.txt|.json, so VAULT_DIR can name a
+// copy and a seed can deposit them.
+//
 // Timings are measured, so they differ from run to run: the committed tree keeps the measurements,
 // --check compares everything else, and a regeneration that changes only measurements writes
 // nothing. A regeneration keeps the measurements of every event whose content did not change, so
@@ -54,7 +59,7 @@ import type { AssemblyEventV1, FleetReportV1 } from "@cwa-dashboard/telemetry/ty
 
 import { longCalls } from "./long.ts"
 import { SCENARIOS } from "./scenarios/index.ts"
-import { record, ulid } from "./wrapper.ts"
+import { bodyDeposits, record, ulid } from "./wrapper.ts"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
 /** The dashboard's vendored contract files, by path, with their SHA-256 (packages/contract's lock). */
@@ -65,6 +70,9 @@ const CONTRACT_FILES = (
 ).files
 const VENDOR = join(ROOT, "packages/contract/vendor/cwa")
 export const FIXTURES = join(ROOT, "packages/demo-traffic/fixtures")
+export const VAULT = join(ROOT, "packages/demo-traffic/vault")
+/** Where the demo's vaulted routes say they deposit: the public dashboard's API. */
+export const DEMO_VAULT_BASE = "https://dashboard.contextwindowarchitecture.io/api"
 const DEMO = "demo"
 
 export interface Options {
@@ -96,7 +104,11 @@ interface Call {
   readonly recordedAt: string
   readonly service: AssemblyEventV1["service"]
   readonly session?: AssemblyEventV1["session"]
-  readonly redaction: { mode: AssemblyEventV1["redaction_mode"]; scrub?: readonly string[] }
+  readonly redaction: {
+    mode: AssemblyEventV1["redaction_mode"]
+    scrub?: readonly string[]
+    vault?: true
+  }
 }
 
 const readJson = (path: string): unknown => JSON.parse(readFileSync(path, "utf8"))
@@ -192,7 +204,11 @@ export function generateTree(options: Options = {}): Map<string, string> {
       recordedAt: call.recordedAt,
       service: call.service,
       ...(call.session === undefined ? {} : { session: call.session }),
-      redaction: call.redaction,
+      redaction: {
+        mode: call.redaction.mode,
+        ...(call.redaction.scrub ? { scrub: call.redaction.scrub } : {}),
+      },
+      ...(call.redaction.vault ? { vault: { base: DEMO_VAULT_BASE } } : {}),
       traceId: `trace-${eventId.toLowerCase()}`,
     })
   })
@@ -250,6 +266,52 @@ export function generateTree(options: Options = {}): Map<string, string> {
     ),
   )
   return files
+}
+
+// --- the vault -----------------------------------------------------------------------------------
+
+/** The deposits of the scenarios opted into the vault, as paths in a directory vault and their text. */
+export function generateVault(): Map<string, string> {
+  const files = new Map<string, string>()
+  for (const scenario of SCENARIOS) {
+    if (!scenario.redaction.vault) continue
+    for (const turn of scenario.turns) {
+      for (const deposit of bodyDeposits(turn.snapshot)) {
+        const extension = deposit.media_type === "application/json" ? "json" : "txt"
+        files.set(`${deposit.sha256.slice(0, 2)}/${deposit.sha256}.${extension}`, deposit.text)
+      }
+    }
+  }
+  return new Map([...files].sort(([a], [b]) => a.localeCompare(b)))
+}
+
+function readVault(root: string): Map<string, string> {
+  const files = new Map<string, string>()
+  if (!existsSync(root)) return files
+  for (const prefix of readdirSync(root).sort()) {
+    for (const name of readdirSync(join(root, prefix)).sort())
+      files.set(`${prefix}/${name}`, readFileSync(join(root, prefix, name), "utf8"))
+  }
+  return files
+}
+
+/** The differences between the generated vault and one on disk. */
+export function vaultDifferences(generated: Map<string, string>, root: string): string[] {
+  const onDisk = readVault(root)
+  return [
+    ...[...generated]
+      .filter(([path, text]) => onDisk.get(path) !== text)
+      .map(([path]) => `vault/${path}: ${onDisk.has(path) ? "differs" : "missing"}`),
+    ...[...onDisk.keys()].filter((p) => !generated.has(p)).map((p) => `vault/${p}: not generated`),
+  ]
+}
+
+function writeVault(files: Map<string, string>, root: string) {
+  rmSync(root, { recursive: true, force: true })
+  for (const [path, text] of files) {
+    mkdirSync(dirname(join(root, path)), { recursive: true })
+    writeFileSync(join(root, path), text)
+  }
 }
 
 // --- comparing trees -----------------------------------------------------------------------------
@@ -337,8 +399,13 @@ function main(argv: string[]) {
   // The committed tree's measurements are kept wherever an event did not change, so a change to a
   // few events changes those events' files and the documents that depend on them, not every file.
   const files = generateTree({ events, seed, long, ...(existsSync(out) ? { previous: out } : {}) })
+  // The committed tree's vault; a larger tree's is not needed (its bodies are the scenarios').
+  const vault = out === FIXTURES ? generateVault() : undefined
   if (argv.includes("--check")) {
-    const problems = differences(files, out)
+    const problems = [
+      ...differences(files, out),
+      ...(vault === undefined ? [] : vaultDifferences(vault, VAULT)),
+    ]
     if (problems.length > 0) {
       process.stderr.write(
         `generate: ${problems.length} difference(s) from ${relative(ROOT, out)}, regenerate:\n`,
@@ -352,6 +419,10 @@ function main(argv: string[]) {
     return
   }
   const where = relative(ROOT, out) || out
+  if (vault !== undefined && vaultDifferences(vault, VAULT).length > 0) {
+    writeVault(vault, VAULT)
+    process.stdout.write(`generate: wrote ${vault.size} bodies into ${relative(ROOT, VAULT)}\n`)
+  }
   if (writeTree(files, out) === "unchanged") {
     process.stdout.write(`generate: ${where} is current, measurements aside; left as it is\n`)
   } else {

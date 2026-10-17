@@ -39,6 +39,8 @@ export interface Scenario {
   readonly redaction: {
     readonly mode: AssemblyEventV1["redaction_mode"]
     readonly scrub?: readonly string[]
+    /** The route is opted into the vault (ADR-0009): its bodies are deposited, its events say where. */
+    readonly vault?: true
   }
   readonly turns: readonly ScenarioTurn[]
 }
