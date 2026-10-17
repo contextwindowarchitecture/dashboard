@@ -3,14 +3,14 @@
 // issuer, against a store holding the demo events. Then what each reads of an event's bodies, and how
 // the answers may be cached. Adding a route means adding its row.
 
-import { generateKeyPairSync } from "node:crypto"
-import { writeFileSync, mkdtempSync, rmSync } from "node:fs"
+import { createHash, generateKeyPairSync } from "node:crypto"
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { PGlite } from "@electric-sql/pglite"
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 
 import { accessFrom, loadAccess } from "../src/access.ts"
 import { createAuth } from "../src/auth.ts"
@@ -19,14 +19,17 @@ import { createPostgresStore, type PostgresStore } from "../src/postgres-store.t
 import { replay } from "../src/replay.ts"
 import type { Runner } from "../src/runner.ts"
 import { createIngestServer } from "../src/server.ts"
+import { TEXT_TYPE } from "../src/vault.ts"
 import { startIssuer } from "./oidc-issuer.ts"
 import { freePort, signIn } from "./sign-in.ts"
-import { DEMO_EVENTS } from "./store-contract.ts"
+import { DEMO_EVENTS, inTenant } from "./store-contract.ts"
+import { DEMO_DEPOSITS } from "./vault-contract.ts"
 
 const CLIENT = { clientId: "cwa-dashboard", clientSecret: "client-secret" }
 const KEY = signingKeyFrom(
   generateKeyPairSync("ed25519").privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
 )
+const VAULT = join(import.meta.dirname, "../../../packages/demo-traffic/vault")
 const runner: Runner = { run: async (snapshot) => replay(snapshot), close: async () => {} }
 const routeOf = (e: AssemblyEventV1) => e.snapshot?.route_policy.route
 const full = (test: (e: AssemblyEventV1) => boolean) =>
@@ -36,22 +39,35 @@ const OTHER = full((e) => routeOf(e) !== "support-chat")
 const SESSION = DEMO_EVENTS.find((e) => e.session !== undefined)!.session!.id
 const ACCESS = {
   anonymous: [],
-  signed_in: ["viewer"],
+  signed_in: [],
   groups: {
-    "cwa:owners": ["owner:support-chat"],
+    "cwa:members": ["viewer"],
+    "cwa:owners": ["viewer", "owner:support-chat"],
     "cwa:auditors": ["auditor"],
     "cwa:ops": ["operator"],
+    // Only the default tenant's viewer.
+    "cwa:local": ["viewer@default"],
+    // Owns the review agent's route, whose bodies are in the vault.
+    "cwa:agents": ["owner:agent-loop"],
   },
 }
 
-type Reader = "anonymous" | "member" | "owner" | "auditor" | "operator"
-const READERS: Reader[] = ["anonymous", "member", "owner", "auditor", "operator"]
+type Reader = "anonymous" | "member" | "owner" | "auditor" | "operator" | "local" | "agents"
+const READERS: Reader[] = ["anonymous", "member", "owner", "auditor", "operator", "local", "agents"]
 const GROUPS: Record<Exclude<Reader, "anonymous">, string[]> = {
-  member: [],
+  member: ["cwa:members"],
   owner: ["cwa:owners"],
   auditor: ["cwa:auditors"],
   operator: ["cwa:ops"],
+  // Only the default tenant's viewer.
+  local: ["cwa:local"],
+  // Owns the review agent's route, whose bodies are in the vault.
+  agents: ["cwa:agents"],
 }
+const NORTHWIND = inTenant(
+  DEMO_EVENTS.filter((e) => e.session?.id === "refund-7"),
+  "northwind",
+)
 
 let base = ""
 let store: PostgresStore
@@ -62,7 +78,16 @@ beforeAll(async () => {
   const issuer = await startIssuer({ ...CLIENT, person: { sub: "x", name: "x" } })
   const db = new PGlite()
   store = await createPostgresStore(db)
-  for (const event of DEMO_EVENTS) await store.write(event)
+  for (const event of [...DEMO_EVENTS, ...NORTHWIND]) await store.write(event)
+  // A body the vault holds that the review agent's events do not: a session must not reach it.
+  await store.vault.put(DEMO_DEPOSITS[0]!.sha256, DEMO_DEPOSITS[0]!.deposit)
+  // The demo vault's bodies, deposited as the review agent's wrapper would.
+  for (const prefix of readdirSync(VAULT)) {
+    for (const name of readdirSync(join(VAULT, prefix))) {
+      const bytes = new Uint8Array(readFileSync(join(VAULT, prefix, name)))
+      await store.vault.put(name.split(".")[0]!, { bytes, mediaType: TEXT_TYPE })
+    }
+  }
   const port = await freePort()
   base = `http://127.0.0.1:${port}`
   const server = createIngestServer({
@@ -71,6 +96,8 @@ beforeAll(async () => {
     maxQueue: 8,
     store,
     signingKey: KEY,
+    vault: store.vault,
+    vaultToken: "operator-token",
     access: accessFrom(ACCESS),
     auth: createAuth({
       config: { issuer: issuer.url, ...CLIENT, redirectUri: `${base}/auth/callback` },
@@ -121,15 +148,24 @@ const TABLE: [string, string, Record<Reader, Expect>, unknown?][] = [
   ["GET", "/corpora/none.json", readers(404)],
   ["POST", "/shadow", readers(404), { corpus: "none", candidate: { profile: {} } }],
   ["POST", "/replay", readers("pass"), CHAT.snapshot],
+  ["GET", `/bundles/${CHAT.event_id}.json`, { ...readers(403), owner: 200, auditor: 200 }],
+  ["GET", `/bundles/${OTHER.event_id}.json`, { ...readers(403), auditor: 200 }],
+  // Another tenant's documents (ADR-0012): no reader whose roles stop at the default's.
+  ["GET", "/data/tenants/northwind/events/index.json", { ...readers(200), local: 403 }],
   [
     "GET",
-    `/bundles/${CHAT.event_id}.json`,
-    { anonymous: 401, member: 403, owner: 200, auditor: 200, operator: 403 },
+    `/data/tenants/northwind/events/${NORTHWIND[0]!.event_id}.json`,
+    { ...readers(200), local: 403 },
   ],
+  ["GET", "/data/tenants/northwind/sessions/refund-7.json", { ...readers(200), local: 403 }],
+  // A name no tenant can have names nothing, before anyone's roles are asked.
+  ["GET", "/data/tenants/Not-A-Tenant/events/index.json", every(404)],
+  ["GET", "/data/tenants.json", readers(200)],
+  ["GET", "/corpora.json?tenant=northwind", { ...readers(200), local: 403 }],
   [
     "GET",
-    `/bundles/${OTHER.event_id}.json`,
-    { anonymous: 401, member: 403, owner: 403, auditor: 200, operator: 403 },
+    `/bundles/${NORTHWIND[0]!.event_id}.json?tenant=northwind`,
+    { ...readers(403), owner: 200, auditor: 200, local: 403 },
   ],
 ]
 
@@ -209,6 +245,127 @@ describe("loadAccess", () => {
       expect(() => loadAccess({ ACCESS_FILE: join(dir, "bad.json") })).toThrow(/root/)
     } finally {
       rmSync(dir, { recursive: true, force: true })
+    }
+  })
+})
+
+describe("tenants through the routes (ADR-0012)", () => {
+  const json = async (reader: Reader, path: string) => (await ask(reader, "GET", path)).json()
+
+  it("serves another tenant's documents with its events alone", async () => {
+    const index = (await json("member", "/data/tenants/northwind/events/index.json")) as {
+      events: { event_id: string }[]
+    }
+    expect(index.events.map((row) => row.event_id).sort()).toEqual(
+      NORTHWIND.map((e) => e.event_id).sort(),
+    )
+    // An event is found under its own tenant only.
+    expect((await ask("member", "GET", `/data/events/${NORTHWIND[0]!.event_id}.json`)).status).toBe(
+      404,
+    )
+  })
+
+  it("lists the tenants a reader may read, and only those", async () => {
+    expect(await json("member", "/data/tenants.json")).toEqual({
+      $schema: "cwa-dashboard/tenants/v1",
+      tenants: [
+        { tenant: "default", events: DEMO_EVENTS.length },
+        { tenant: "northwind", events: NORTHWIND.length },
+      ],
+    })
+    expect(await json("local", "/data/tenants.json")).toEqual({
+      $schema: "cwa-dashboard/tenants/v1",
+      tenants: [{ tenant: "default", events: DEMO_EVENTS.length }],
+    })
+  })
+})
+
+describe("the vault by role (ADR-0012)", () => {
+  const agent = DEMO_EVENTS.find((e) => e.vault !== undefined && e.outcome === "assembled")!
+  const held = JSON.stringify(agent.snapshot).match(/(?<="content_sha256":")[0-9a-f]{64}/g)!
+  const sha = held[0]!
+  const resolve = (reader: Reader, digest: string, event = agent.event_id) =>
+    ask(reader, "GET", `/bodies/${digest}?event=${event}`)
+
+  it("gives a route's owner a body its event holds, by session, and logs who", async () => {
+    const lines: string[] = []
+    const spy = vi.spyOn(process.stdout, "write").mockImplementation((chunk) => {
+      lines.push(String(chunk))
+      return true
+    })
+    try {
+      const answer = await resolve("agents", sha)
+      expect(answer.status).toBe(200)
+      const bytes = Buffer.from(await answer.arrayBuffer())
+      expect(createHash("sha256").update(bytes).digest("hex")).toBe(sha)
+    } finally {
+      spy.mockRestore()
+    }
+    expect(lines.join("")).toMatch(
+      new RegExp(`vault: resolved ${sha} for agents via ${agent.event_id}`),
+    )
+  })
+
+  it("refuses a reader who does not own the event's route, and one without a session", async () => {
+    expect((await resolve("member", sha)).status).toBe(403)
+    expect((await resolve("owner", sha)).status).toBe(403)
+    expect((await resolve("anonymous", sha)).status).toBe(401)
+  })
+
+  it("gives nothing for a digest the event does not hold, or an event the reader cannot see", async () => {
+    const other = DEMO_DEPOSITS[0]!.sha256
+    expect(held).not.toContain(other)
+    expect((await resolve("agents", other)).status).toBe(404)
+    expect((await resolve("agents", sha, "01M5ZZZZZZZZZZZZZZZZZZZZZY")).status).toBe(404)
+  })
+
+  it("still answers the operator token, without an event, and logs it", async () => {
+    const lines: string[] = []
+    const spy = vi.spyOn(process.stdout, "write").mockImplementation((chunk) => {
+      lines.push(String(chunk))
+      return true
+    })
+    try {
+      const answer = await fetch(`${base}/bodies/${sha}`, {
+        headers: { authorization: "Bearer operator-token" },
+      })
+      expect(answer.status).toBe(200)
+    } finally {
+      spy.mockRestore()
+    }
+    expect(lines.join("")).toMatch(new RegExp(`vault: resolved ${sha} for the operator token`))
+  })
+})
+
+describe("the vault for anonymous readers who own every route (the public demo's grant)", () => {
+  it("still resolves nothing without a session", async () => {
+    const db = new PGlite()
+    const open = await createPostgresStore(db)
+    const agent = DEMO_EVENTS.find((e) => e.vault !== undefined && e.outcome === "assembled")!
+    await open.write(agent)
+    const sha = JSON.stringify(agent.snapshot).match(/(?<="content_sha256":")[0-9a-f]{64}/)![0]
+    const file = readdirSync(join(VAULT, sha.slice(0, 2)))[0]!
+    await open.vault.put(sha, {
+      bytes: new Uint8Array(readFileSync(join(VAULT, sha.slice(0, 2), file))),
+      mediaType: TEXT_TYPE,
+    })
+    const port = await freePort()
+    const server = createIngestServer({
+      runner,
+      maxBodyBytes: 1024 * 1024,
+      maxQueue: 8,
+      store: open,
+      vault: open.vault,
+      access: accessFrom({ anonymous: ["viewer", "owner:*"] }),
+    })
+    await new Promise<void>((done) => server.listen(port, "127.0.0.1", done))
+    try {
+      const answer = await fetch(`http://127.0.0.1:${port}/bodies/${sha}?event=${agent.event_id}`)
+      expect(answer.status).toBe(401)
+      expect(await answer.json()).toMatchObject({ kind: "sign-in" })
+    } finally {
+      await new Promise((done) => server.close(() => done(undefined)))
+      await db.close()
     }
   })
 })

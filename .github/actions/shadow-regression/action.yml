@@ -16,6 +16,10 @@ inputs:
   corpus:
     description: The frozen corpus to replay
     required: true
+  tenant:
+    description: The tenant the corpus belongs to; the default when empty
+    required: false
+    default: ""
   route-policy:
     description: A candidate route policy, a JSON file in the calling repository
     required: false
@@ -50,6 +54,7 @@ runs:
       env:
         API: ${{ inputs.api }}
         CORPUS: ${{ inputs.corpus }}
+        TENANT: ${{ inputs.tenant }}
         ROUTE_POLICY: ${{ inputs.route-policy }}
         PROFILE: ${{ inputs.profile }}
         MAX_REFUSALS_ADDED: ${{ inputs.max-refusals-added }}
@@ -61,6 +66,7 @@ runs:
           --max-refusals-added "$MAX_REFUSALS_ADDED"
           --max-shedding-increase "$MAX_SHEDDING_INCREASE"
           --max-candidate-rejected "$MAX_CANDIDATE_REJECTED")
+        if [ -n "$TENANT" ]; then args+=(--tenant "$TENANT"); fi
         if [ -n "$ROUTE_POLICY" ]; then args+=(--route-policy "$ROUTE_POLICY"); fi
         if [ -n "$PROFILE" ]; then args+=(--profile "$PROFILE"); fi
         node "$GITHUB_ACTION_PATH/../../../deploy/shadow-check.mjs" "${args[@]}"

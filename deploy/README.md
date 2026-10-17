@@ -192,7 +192,7 @@ With `ACCESS_FILE`, a JSON file, the service grants roles and refuses what they 
 }
 ```
 
-`viewer` reads every event's metadata and every document derived from them; `owner:<route>` (or `owner:*`) also reads that route's bodies and its compliance bundles; `auditor` reads every bundle; `operator` reads what a viewer does. A body a reader's roles do not cover is served withheld, with its digest, and the inspector says so. An unknown key or role stops the service at start. A reader with no role is told to sign in (401), or that their roles do not reach (403).
+`viewer` reads every event's metadata and every document derived from them; `owner:<route>` (or `owner:*`) also reads that route's bodies and its compliance bundles; `auditor` reads every bundle; `operator` reads what a viewer does. A role may end in `@<tenant>` to hold in that tenant alone (`viewer@default`, `owner:support-chat@northwind`) or `@*` for all; a role without one holds in every tenant (`docs/adr/0012-tenants.md`). Another tenant's documents are at `/api/data/tenants/<tenant>/`, `/api/data/tenants.json` lists the tenants a reader may read, and bundles, corpora and shadow runs take `?tenant=`. A body a reader's roles do not cover is served withheld, with its digest, and the inspector says so. An unknown key or role stops the service at start. A reader with no role is told to sign in (401), or that their roles do not reach (403).
 
 On the cluster, `deploy/overlays/prod-sign-in/access.json` is the file, mounted from the ConfigMap `dashboard-access`: the public demo stays open to anonymous readers, bodies and all (D11, P3-D5), and every signed-in member of the organisation is also an auditor. Add a team under `groups` as `"contextwindowarchitecture:<team>": [...]`, then `oc apply -k deploy/overlays/prod-sign-in`; the ConfigMap's new name rolls the ingest service.
 
@@ -214,6 +214,8 @@ node deploy/seed-vault.mjs packages/demo-traffic/vault https://dashboard.context
 
 Locally, `docker-compose.postgres.yml` deposits the demo's bodies on a first run, and `VAULT_TOKEN=… podman compose -f docker-compose.yml -f docker-compose.postgres.yml up` gives the service an operator token.
 
+**A route's owner resolves its own bodies** by session, without the operator token: the inspector asks `GET /api/bodies/<sha256>?event=<event id>` (with `&tenant=` for another tenant's event), which answers only a signed-in reader whose roles own the event's route, and only for a digest that event holds. An anonymous reader never resolves, whatever the access file grants. Every resolution, by session or by token, is a line in the ingest service's log: `vault: resolved <sha256> for <subject, or the operator token> via <event> at <time>`.
+
 **Erasing a body**, for an erasure request: `curl -X DELETE -H "authorization: Bearer $VAULT_TOKEN" https://dashboard.contextwindowarchitecture.io/api/bodies/<sha256>` answers 204, or 404 when the vault does not hold it. The event keeps its digest and its counts; the inspector then says the vault does not hold the body.
 
 **What it holds** is the PII the redaction kept out of the events, under the database's protection and one token: the backups above carry `cwa_bodies` with the events, so they are kept as carefully. Rotating the operator token is a new secret value and a restart; nothing stored depends on it.
@@ -222,7 +224,7 @@ Locally, `docker-compose.postgres.yml` deposits the demo's bodies on a first run
 
 A shadow run replays a frozen corpus of stored events twice through the pinned assembler, as recorded and with a candidate route policy, profile or both, and reports every assembly that changes (`docs/adr/0008-shadow-regression.md`). Only events recorded in `full` replay; the rest are counted as skipped, with why.
 
-A corpus is frozen with the ingest token, from event ids or from the stream's index filtered by `route`, `outcome` or `profile` (at most 200 events, `limit` fewer). It lives in the store (`corpora/` in the tree, `cwa_corpora` in PostgreSQL) and is never overwritten: freezing a name again answers 409.
+A corpus is frozen with the ingest token, from one tenant's events (`"tenant"` in the request; the default when absent), from event ids or from the stream's index filtered by `route`, `outcome` or `profile` (at most 200 events, `limit` fewer). It lives in the store (`corpora/` in the tree, `cwa_corpora` in PostgreSQL) and is never overwritten: freezing a name again answers 409.
 
 ```sh
 curl -s -X POST https://dashboard.contextwindowarchitecture.io/api/corpora \
@@ -235,7 +237,7 @@ curl -s https://dashboard.contextwindowarchitecture.io/api/corpora.json
 
 ```sh
 node deploy/shadow-check.mjs --api https://dashboard.contextwindowarchitecture.io/api \
-  --corpus support-chat-baseline --profile profiles/cache-first-chat.json \
+  --corpus support-chat-baseline [--tenant <tenant>] --profile profiles/cache-first-chat.json \
   --max-refusals-added 0 --max-shedding-increase 0 --max-candidate-rejected 0 --report shadow.json
 ```
 

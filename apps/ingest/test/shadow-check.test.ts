@@ -15,6 +15,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { createPostgresStore } from "../src/postgres-store.ts"
 import { replay } from "../src/replay.ts"
 import { createIngestServer } from "../src/server.ts"
+import { inTenant } from "./store-contract.ts"
 
 const SCRIPT = resolve(import.meta.dirname, "../../../deploy/shadow-check.mjs")
 const EVENTS = resolve(import.meta.dirname, "../../../packages/demo-traffic/fixtures/events")
@@ -41,6 +42,23 @@ beforeAll(async () => {
     method: "POST",
     headers: { "content-type": "application/json", authorization: "Bearer t" },
     body: JSON.stringify({ name: "chat", from: { profile: "cache-first-chat" } }),
+  })
+  // The same calls in another tenant, and a corpus frozen there (ADR-0012).
+  const chat = (await store.index()).events.filter((row) => row.profile?.id === "cache-first-chat")
+  const events = await Promise.all(chat.map((row) => store.event(row.event_id)))
+  for (const event of inTenant(
+    events.map((e) => e!),
+    "northwind",
+  ))
+    await store.write(event)
+  await fetch(`${base}/corpora`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: "Bearer t" },
+    body: JSON.stringify({
+      name: "chat-nw",
+      tenant: "northwind",
+      from: { profile: "cache-first-chat" },
+    }),
   })
   stop = async () => {
     await new Promise((done) => server.close(() => done(undefined)))
@@ -121,6 +139,24 @@ describe("deploy/shadow-check.mjs", () => {
     expect((await check(["--api", base, "--corpus", "chat"])).status).toBe(2)
   })
 
+  it("runs a corpus of another tenant with --tenant, and finds none without it", async () => {
+    const chat = REGISTRY.profiles.find((p) => p.id === "cache-first-chat")!
+    const own = file("own-nw.json", chat)
+    const there = await check([
+      "--api",
+      base,
+      "--tenant",
+      "northwind",
+      "--corpus",
+      "chat-nw",
+      "--profile",
+      own,
+    ])
+    expect(there.out).toMatch(/replayed \d+/)
+    expect(there.status).toBe(0)
+    expect((await check(["--api", base, "--corpus", "chat-nw", "--profile", own])).status).toBe(2)
+  })
+
   it("is what the composite action runs, every input passed as the flag the script reads", () => {
     const actionDir = resolve(import.meta.dirname, "../../../.github/actions/shadow-regression")
     const action = readFileSync(join(actionDir, "action.yml"), "utf8")
@@ -128,6 +164,7 @@ describe("deploy/shadow-check.mjs", () => {
     expect(resolve(actionDir, run)).toBe(SCRIPT)
     const script = readFileSync(SCRIPT, "utf8")
     for (const input of [
+      "tenant",
       "route-policy",
       "profile",
       "max-refusals-added",

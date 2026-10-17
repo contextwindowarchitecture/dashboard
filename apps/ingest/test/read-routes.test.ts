@@ -103,11 +103,13 @@ describe("the read routes", () => {
   })
 
   it("answer a store's failure with a 500 that names nothing of the database", async () => {
-    const broken = {
+    const broken: EventStore = {
       ...(await demoStore()),
       index: async () => {
         throw new Error('relation "cwa_events" does not exist')
       },
+      // The routes read a tenant's view: this one is the broken store for every tenant.
+      forTenant: () => broken,
     }
     const base = await serve(broken)
     const response = await fetch(`${base}/data/events/index.json`)

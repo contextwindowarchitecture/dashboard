@@ -8,7 +8,10 @@ import { readFileSync } from "node:fs"
 import { canonicalJson } from "@cwa-dashboard/telemetry/canonical"
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
 
-export type Role = "viewer" | "auditor" | "operator" | `owner:${string}`
+/** A role, for every tenant, or for one (`@<tenant>`) or all (`@*`) named (ADR-0012). */
+export type Role = string
+
+const BASE = /^(viewer|auditor|operator|owner:(\*|[^\s*@]+))(@(\*|[a-z0-9][a-z0-9._-]{0,63}))?$/
 
 export interface Access {
   readonly anonymous: readonly Role[]
@@ -16,11 +19,19 @@ export interface Access {
   readonly groups: Readonly<Record<string, readonly Role[]>>
 }
 
-const isRole = (value: unknown): value is Role =>
-  value === "viewer" ||
-  value === "auditor" ||
-  value === "operator" ||
-  (typeof value === "string" && /^owner:(\*|[^\s*]+)$/.test(value))
+const isRole = (value: unknown): value is Role => typeof value === "string" && BASE.test(value)
+
+/** The roles a reader holds for one tenant, without their tenant: those for every tenant, and its. */
+function forTenant(held: ReadonlySet<Role>, tenant: string): Set<string> {
+  const roles = new Set<string>()
+  for (const role of held) {
+    const at = role.indexOf("@")
+    const named = at < 0 ? undefined : role.slice(at + 1)
+    if (named === undefined || named === "*" || named === tenant)
+      roles.add(at < 0 ? role : role.slice(0, at))
+  }
+  return roles
+}
 
 function roles(value: unknown, where: string, problems: string[]): Role[] {
   if (value === undefined) return []
@@ -86,12 +97,18 @@ export function rolesOf(
   return held
 }
 
-/** Every role reads what a viewer reads: the metadata and every document derived from it. */
-export const mayRead = (held: ReadonlySet<Role>) => held.size > 0
+/** Every role reads what a viewer reads in its tenant: the metadata and every document derived from it. */
+export const mayRead = (held: ReadonlySet<Role>, tenant: string) => forTenant(held, tenant).size > 0
 
-/** Whether a reader owns a route: its bodies and its bundles. */
-export const mayOwn = (held: ReadonlySet<Role>, route: string | undefined) =>
-  held.has("owner:*") || (route !== undefined && held.has(`owner:${route}`))
+/** Whether a reader owns a route in a tenant: its bodies, its bundles, its vaulted bodies. */
+export function mayOwn(held: ReadonlySet<Role>, route: string | undefined, tenant: string) {
+  const roles = forTenant(held, tenant)
+  return roles.has("owner:*") || (route !== undefined && roles.has(`owner:${route}`))
+}
+
+/** Whether a reader audits a tenant: every bundle in it. */
+export const mayAudit = (held: ReadonlySet<Role>, tenant: string) =>
+  forTenant(held, tenant).has("auditor")
 
 /** The route an event ran, when its snapshot says. */
 export function routeOf(event: AssemblyEventV1): string | undefined {

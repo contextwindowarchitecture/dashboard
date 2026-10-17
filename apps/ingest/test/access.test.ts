@@ -10,7 +10,7 @@ import { canonicalJson } from "@cwa-dashboard/telemetry/canonical"
 import { validateAssemblyEventV1 } from "@cwa-dashboard/telemetry/validators"
 import { describe, expect, it } from "vitest"
 
-import { accessFrom, mayOwn, mayRead, rolesOf, withholdBodies } from "../src/access.ts"
+import { accessFrom, mayAudit, mayOwn, mayRead, rolesOf, withholdBodies } from "../src/access.ts"
 import { DEMO_EVENTS } from "./store-contract.ts"
 
 const ACCESS = accessFrom({
@@ -54,13 +54,38 @@ describe("rolesOf", () => {
       "owner:support-chat",
       "owner:*",
     ] as const) {
-      expect(mayRead(new Set([role])), role).toBe(true)
+      expect(mayRead(new Set([role]), "default"), role).toBe(true)
     }
-    expect(mayRead(new Set())).toBe(false)
-    expect(mayOwn(new Set(["owner:support-chat"]), "support-chat")).toBe(true)
-    expect(mayOwn(new Set(["owner:support-chat"]), "extract")).toBe(false)
-    expect(mayOwn(new Set(["owner:*"]), "extract")).toBe(true)
-    expect(mayOwn(new Set(["auditor", "operator", "viewer"]), "support-chat")).toBe(false)
+    expect(mayRead(new Set(), "default")).toBe(false)
+    expect(mayOwn(new Set(["owner:support-chat"]), "support-chat", "default")).toBe(true)
+    expect(mayOwn(new Set(["owner:support-chat"]), "extract", "default")).toBe(false)
+    expect(mayOwn(new Set(["owner:*"]), "extract", "default")).toBe(true)
+    expect(mayOwn(new Set(["auditor", "operator", "viewer"]), "support-chat", "default")).toBe(
+      false,
+    )
+  })
+})
+
+describe("roles by tenant (ADR-0012)", () => {
+  const held = (roles: string[]) => rolesOf(accessFrom({ anonymous: roles }), undefined)
+
+  it("reads a bare role as every tenant's, a named one as its tenant's alone, and @* as every tenant's", () => {
+    expect(mayRead(held(["viewer"]), "northwind")).toBe(true)
+    expect(mayRead(held(["viewer@default"]), "default")).toBe(true)
+    expect(mayRead(held(["viewer@default"]), "northwind")).toBe(false)
+    expect(mayRead(held(["auditor@*"]), "northwind")).toBe(true)
+    expect(mayOwn(held(["owner:support-chat@northwind"]), "support-chat", "northwind")).toBe(true)
+    expect(mayOwn(held(["owner:support-chat@northwind"]), "support-chat", "default")).toBe(false)
+    expect(mayOwn(held(["owner:*@northwind"]), "extract", "northwind")).toBe(true)
+    expect(mayOwn(held(["owner:*"]), "extract", "acme")).toBe(true)
+    expect(mayAudit(held(["auditor@default"]), "default")).toBe(true)
+    expect(mayAudit(held(["auditor@default"]), "northwind")).toBe(false)
+    expect(mayAudit(held(["viewer", "owner:*"]), "default")).toBe(false)
+  })
+
+  it("refuses a role naming a tenant no store would keep", () => {
+    expect(() => accessFrom({ anonymous: ["viewer@North Wind"] })).toThrow(/viewer@North Wind/)
+    expect(() => accessFrom({ anonymous: ["viewer@"] })).toThrow(/viewer@/)
   })
 })
 
@@ -146,7 +171,7 @@ describe("the repository's access files", () => {
       JSON.parse(readFileSync(join(ROOT, "deploy/overlays/prod-sign-in/access.json"), "utf8")),
     )
     const anonymous = rolesOf(live, undefined)
-    expect(mayRead(anonymous)).toBe(true)
-    expect(mayOwn(anonymous, "support-chat")).toBe(true)
+    expect(mayRead(anonymous, "default")).toBe(true)
+    expect(mayOwn(anonymous, "support-chat", "default")).toBe(true)
   })
 })

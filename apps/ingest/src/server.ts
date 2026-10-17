@@ -14,6 +14,7 @@ import { COMPONENTS } from "@cwa-dashboard/contract/data"
 
 import {
   type Access,
+  mayAudit,
   mayOwn,
   mayRead,
   type Role,
@@ -25,9 +26,9 @@ import type { Auth } from "./auth.ts"
 import type { Session } from "./sessions.ts"
 import { ReplayTimeoutError, type Runner } from "./runner.ts"
 import { buildBundle, type SigningKey } from "./bundle.ts"
-import { CORPUS_NAME, type EventStore as Store } from "./event-store.ts"
+import { CORPUS_NAME, DEFAULT_TENANT, type EventStore as Store, TENANT } from "./event-store.ts"
 import { shadowReport, type Candidate } from "./shadow.ts"
-import { type BodyVault, checkDeposit, SHA256 } from "./vault.ts"
+import { type BodyVault, checkDeposit, type Deposit, SHA256 } from "./vault.ts"
 
 export interface IngestOptions {
   readonly runner: Runner
@@ -168,10 +169,11 @@ export function createIngestServer(options: IngestOptions): Server {
   async function asReader(
     request: IncomingMessage,
     response: ServerResponse,
+    tenant: string,
     then: (reader: Reader) => Promise<void>,
   ) {
     const reader = await readerOf(request)
-    if (reader.held !== undefined && !mayRead(reader.held)) return refuse(response, reader)
+    if (reader.held !== undefined && !mayRead(reader.held, tenant)) return refuse(response, reader)
     return then(reader)
   }
 
@@ -182,7 +184,13 @@ export function createIngestServer(options: IngestOptions): Server {
       : fail(response, 403, "forbidden", ["Your roles do not include this."])
 
   // The vault (ADR-0009): a deposit with the ingest token; a read or an erasure with the operator's.
-  async function bodiesRoute(request: IncomingMessage, response: ServerResponse, path: string) {
+  async function bodiesRoute(
+    request: IncomingMessage,
+    response: ServerResponse,
+    path: string,
+    url: URL,
+    tenant: string,
+  ) {
     const { vault, token, vaultToken } = options
     const match = /^\/bodies\/([^/]+)$/.exec(path)
     const sha256 = match?.[1]
@@ -192,6 +200,13 @@ export function createIngestServer(options: IngestOptions): Server {
       ])
     }
     const writing = request.method === "PUT"
+    // A route's owner resolves by session, naming the event whose digest it is (ADR-0012); the
+    // operator token, when sent, keeps its own way.
+    const eventId = url.searchParams.get("event")
+    const byToken = vaultToken !== undefined && vaultToken !== "" && authorised(request, vaultToken)
+    if (request.method === "GET" && eventId !== null && !byToken) {
+      return resolveBySession(response, request, vault, sha256, eventId, tenant)
+    }
     const needed = writing ? token : vaultToken
     if (needed === undefined || needed === "") {
       return fail(response, 503, "not-configured", [
@@ -242,6 +257,59 @@ export function createIngestServer(options: IngestOptions): Server {
     const held = await vault.get(sha256)
     if (held === undefined)
       return fail(response, 404, "not-found", [`The vault holds no body ${sha256}.`])
+    audit(sha256, "the operator token")
+    return serveBody(response, held)
+  }
+
+  /** Every resolution, in the service's log (ADR-0012): the digest, who, the event, when. */
+  const audit = (sha256: string, who: string, event?: string) =>
+    process.stdout.write(
+      `vault: resolved ${sha256} for ${who}${event === undefined ? "" : ` via ${event}`} at ${new Date().toISOString()}\n`,
+    )
+
+  async function resolveBySession(
+    response: ServerResponse,
+    request: IncomingMessage,
+    vault: BodyVault,
+    sha256: string | undefined,
+    eventId: string,
+    tenant: string,
+  ) {
+    if (options.access === undefined || options.store === undefined) {
+      response.setHeader("www-authenticate", "Bearer")
+      return fail(response, 401, "unauthorised", [
+        "Send the operator token as a bearer token; resolving by session needs an access file.",
+      ])
+    }
+    if (sha256 === undefined || !SHA256.test(sha256) || !TENANT.test(tenant)) {
+      return fail(response, 404, "not-found", ["No such body."])
+    }
+    const reader = await readerOf(request)
+    // By session only: an anonymous reader never resolves, whatever the access file grants them.
+    if (reader.session === undefined) {
+      return fail(response, 401, "sign-in", [
+        "Sign in as an owner of the event's route to resolve its bodies.",
+      ])
+    }
+    const event = await options.store.forTenant(tenant).event(eventId)
+    if (event === undefined) return fail(response, 404, "not-found", [`No event ${eventId}.`])
+    if (!mayOwn(reader.held!, routeOf(event), tenant)) return refuse(response, reader)
+    // Only a digest the event holds: a session never fetches a body by guessing one.
+    const digests = JSON.stringify(event.snapshot ?? event.rejection?.snapshot ?? {}).match(
+      /(?<="content_sha256":")[0-9a-f]{64}/g,
+    )
+    if (!(digests ?? ([] as string[])).includes(sha256)) {
+      return fail(response, 404, "not-found", [`Event ${eventId} holds no body ${sha256}.`])
+    }
+    const held = await vault.get(sha256)
+    if (held === undefined) {
+      return fail(response, 404, "not-found", [`The vault holds no body ${sha256}.`])
+    }
+    audit(sha256, reader.session.subject, eventId)
+    return serveBody(response, held)
+  }
+
+  function serveBody(response: ServerResponse, held: Deposit) {
     response.writeHead(200, {
       "content-type": held.mediaType,
       "content-length": String(held.bytes.byteLength),
@@ -295,9 +363,8 @@ export function createIngestServer(options: IngestOptions): Server {
 
   // The tree's documents at the tree's paths, from the store (ADR-0007), with the cache rules nginx
   // gives the tree: an event never changes; every other document does.
-  async function dataRoute(path: string, response: ServerResponse, reader: Reader) {
-    const { store } = options
-    if (store === undefined) {
+  async function dataRoute(path: string, response: ServerResponse, reader: Reader, tenant: string) {
+    if (options.store === undefined) {
       return fail(response, 503, "not-configured", [
         "No event store: set DATABASE_URL or EVENTS_DIR to serve events.",
       ])
@@ -311,6 +378,8 @@ export function createIngestServer(options: IngestOptions): Server {
         return undefined
       }
     }
+    // Another tenant's documents are its own store's (ADR-0012).
+    const store = options.store.forTenant(tenant)
     const NO_CACHE = { "cache-control": "no-cache" }
     let document: unknown
     let headers = NO_CACHE
@@ -322,7 +391,9 @@ export function createIngestServer(options: IngestOptions): Server {
     } else if (id(/^\/data\/events\/([^/]+)\.json$/) !== undefined) {
       const event = await store.event(id(/^\/data\/events\/([^/]+)\.json$/)!)
       document =
-        event === undefined || reader.held === undefined || mayOwn(reader.held, routeOf(event))
+        event === undefined ||
+        reader.held === undefined ||
+        mayOwn(reader.held, routeOf(event), tenant)
           ? event
           : withholdBodies(event)
       headers = { "cache-control": "public, max-age=31536000, immutable" }
@@ -336,8 +407,14 @@ export function createIngestServer(options: IngestOptions): Server {
   }
 
   // A compliance bundle for a stored event, its replay through the same bounded runner as /replay.
-  async function bundleRoute(path: string, response: ServerResponse, reader: Reader) {
-    const { store, signingKey } = options
+  async function bundleRoute(
+    path: string,
+    response: ServerResponse,
+    reader: Reader,
+    tenant: string,
+  ) {
+    const { signingKey } = options
+    const store = options.store?.forTenant(tenant)
     if (store === undefined || signingKey === undefined) {
       return fail(response, 503, "not-configured", [
         store === undefined
@@ -357,8 +434,8 @@ export function createIngestServer(options: IngestOptions): Server {
     // A bundle holds the event as stored, bodies and all: an auditor's, or the route's owner's.
     if (
       reader.held !== undefined &&
-      !reader.held.has("auditor") &&
-      !mayOwn(reader.held, routeOf(event))
+      !mayAudit(reader.held, tenant) &&
+      !mayOwn(reader.held, routeOf(event), tenant)
     ) {
       return refuse(response, reader)
     }
@@ -408,7 +485,14 @@ export function createIngestServer(options: IngestOptions): Server {
       name?: unknown
       event_ids?: unknown
       from?: { route?: unknown; outcome?: unknown; profile?: unknown; limit?: unknown }
+      tenant?: unknown
     }
+    const tenant = (body.value as { tenant?: unknown } | undefined)?.tenant ?? DEFAULT_TENANT
+    if (typeof tenant !== "string" || !TENANT.test(tenant)) {
+      return fail(response, 400, "invalid", ["tenant must name a tenant, as an event does."])
+    }
+    // A corpus is one tenant's events (ADR-0012).
+    const scoped = options.store!.forTenant(tenant)
     if (typeof name !== "string" || !CORPUS_NAME.test(name)) {
       return fail(response, 400, "invalid", [
         "name must be lowercase letters, digits, dots, dashes or underscores, at most 64.",
@@ -418,7 +502,7 @@ export function createIngestServer(options: IngestOptions): Server {
     if (Array.isArray(given)) ids = given.map(String)
     else {
       const limit = typeof from?.limit === "number" ? Math.min(from.limit, MAX_CORPUS) : MAX_CORPUS
-      ids = (await store.index()).events
+      ids = (await scoped.index()).events
         .filter((row) => from?.route === undefined || row.route === from.route)
         .filter((row) => from?.outcome === undefined || row.outcome === from.outcome)
         .filter((row) => from?.profile === undefined || row.profile?.id === from.profile)
@@ -429,7 +513,7 @@ export function createIngestServer(options: IngestOptions): Server {
     if (ids.length > MAX_CORPUS) {
       return fail(response, 400, "invalid", [`A corpus holds at most ${MAX_CORPUS} events.`])
     }
-    const events = await Promise.all(ids.map((id) => store.event(id)))
+    const events = await Promise.all(ids.map((id) => scoped.event(id)))
     const missing = ids.filter((_, i) => events[i] === undefined)
     if (missing.length > 0) {
       return fail(response, 400, "invalid", [`The store holds no event ${missing.join(", ")}.`])
@@ -437,13 +521,14 @@ export function createIngestServer(options: IngestOptions): Server {
     const corpus = {
       $schema: "cwa-dashboard/corpus/v1" as const,
       name,
+      ...(tenant === DEFAULT_TENANT ? {} : { tenant }),
       created_at: new Date().toISOString(),
       events: events.map((event) => ({
         event_id: event!.event_id,
         ...(event!.trace ? { snapshot_digest: event!.trace.context.snapshot_digest } : {}),
       })),
     }
-    if ((await store.saveCorpus(corpus)) === "exists") {
+    if ((await scoped.saveCorpus(corpus)) === "exists") {
       return fail(response, 409, "duplicate", [
         `A corpus ${name} exists; a corpus is never overwritten.`,
       ])
@@ -453,9 +538,8 @@ export function createIngestServer(options: IngestOptions): Server {
 
   // One shadow run at a time: each is many replays, and a public deployment answers anyone.
   let shadowing = false
-  async function shadowPost(request: IncomingMessage, response: ServerResponse) {
-    const { store } = options
-    if (store === undefined) {
+  async function shadowPost(request: IncomingMessage, response: ServerResponse, tenant: string) {
+    if (options.store === undefined) {
       return fail(response, 503, "not-configured", [
         "No event store: set DATABASE_URL or EVENTS_DIR.",
       ])
@@ -476,6 +560,7 @@ export function createIngestServer(options: IngestOptions): Server {
         "candidate must hold a route_policy, a profile, or both.",
       ])
     }
+    const store = options.store.forTenant(tenant)
     const corpus = typeof name === "string" ? await store.corpus(name) : undefined
     if (corpus === undefined)
       return fail(response, 404, "not-found", [`No corpus ${String(name)}.`])
@@ -502,13 +587,39 @@ export function createIngestServer(options: IngestOptions): Server {
     }
   }
 
-  async function corporaGet(path: string, response: ServerResponse) {
-    const { store } = options
-    if (store === undefined) {
+  // The tenants a reader may read, with their events (ADR-0012).
+  async function tenantsRoute(request: IncomingMessage, response: ServerResponse) {
+    if (options.store === undefined) {
       return fail(response, 503, "not-configured", [
         "No event store: set DATABASE_URL or EVENTS_DIR.",
       ])
     }
+    const reader = await readerOf(request)
+    const tenants = (await options.store.tenants()).filter(
+      (each) => reader.held === undefined || mayRead(reader.held, each.tenant),
+    )
+    if (
+      reader.held !== undefined &&
+      tenants.length === 0 &&
+      !mayRead(reader.held, DEFAULT_TENANT)
+    ) {
+      return refuse(response, reader)
+    }
+    return send(
+      response,
+      200,
+      { $schema: "cwa-dashboard/tenants/v1", tenants },
+      { "cache-control": options.access === undefined ? "no-cache" : "private, no-cache" },
+    )
+  }
+
+  async function corporaGet(path: string, response: ServerResponse, tenant: string) {
+    if (options.store === undefined) {
+      return fail(response, 503, "not-configured", [
+        "No event store: set DATABASE_URL or EVENTS_DIR.",
+      ])
+    }
+    const store = options.store.forTenant(tenant)
     if (path === "/corpora.json")
       return send(
         response,
@@ -523,7 +634,10 @@ export function createIngestServer(options: IngestOptions): Server {
   }
 
   return createServer((request, response) => {
-    const path = new URL(request.url ?? "/", "http://localhost").pathname
+    const url = new URL(request.url ?? "/", "http://localhost")
+    const path = url.pathname
+    // The tenant a route other than /data reads (ADR-0012): ?tenant=, the default when absent.
+    const tenant = url.searchParams.get("tenant") ?? DEFAULT_TENANT
     const route = async () => {
       if (path === "/healthz") {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
@@ -543,11 +657,13 @@ export function createIngestServer(options: IngestOptions): Server {
       }
       if (path === "/corpora.json" || path.startsWith("/corpora/")) {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
-        return asReader(request, response, () => corporaGet(path, response))
+        if (!TENANT.test(tenant)) return fail(response, 404, "not-found", [`No tenant ${tenant}.`])
+        return asReader(request, response, tenant, () => corporaGet(path, response, tenant))
       }
       if (path === "/shadow") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
-        return asReader(request, response, () => shadowPost(request, response))
+        if (!TENANT.test(tenant)) return fail(response, 404, "not-found", [`No tenant ${tenant}.`])
+        return asReader(request, response, tenant, () => shadowPost(request, response, tenant))
       }
       if (path === "/signing-key.pem") {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
@@ -562,7 +678,10 @@ export function createIngestServer(options: IngestOptions): Server {
       }
       if (path.startsWith("/bundles/")) {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
-        return asReader(request, response, (reader) => bundleRoute(path, response, reader))
+        if (!TENANT.test(tenant)) return fail(response, 404, "not-found", [`No tenant ${tenant}.`])
+        return asReader(request, response, tenant, (reader) =>
+          bundleRoute(path, response, reader, tenant),
+        )
       }
       if (path === "/me") {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
@@ -606,18 +725,28 @@ export function createIngestServer(options: IngestOptions): Server {
         if (!["GET", "PUT", "DELETE"].includes(request.method ?? "")) {
           return send(response, 405, { ok: false }, { allow: "GET, PUT, DELETE" })
         }
-        return bodiesRoute(request, response, path)
+        return bodiesRoute(request, response, path, url, tenant)
       }
       if (path.startsWith("/data/")) {
         // HEAD as GET: Node's server sends the headers and leaves the body out.
         if (request.method !== "GET" && request.method !== "HEAD") {
           return send(response, 405, { ok: false }, { allow: "GET, HEAD" })
         }
-        return asReader(request, response, (reader) => dataRoute(path, response, reader))
+        if (path === "/data/tenants.json") return tenantsRoute(request, response)
+        // Another tenant's documents, at /data/tenants/<tenant>/ in the default's layout (ADR-0012).
+        const other = /^\/data\/tenants\/([^/]+)(\/.*)$/.exec(path)
+        if (other !== null && !TENANT.test(other[1]!)) {
+          return fail(response, 404, "not-found", [`No tenant ${other[1]}.`])
+        }
+        const scope = other === null ? DEFAULT_TENANT : other[1]!
+        const inner = other === null ? path : `/data${other[2]}`
+        return asReader(request, response, scope, (reader) =>
+          dataRoute(inner, response, reader, scope),
+        )
       }
       if (path === "/replay") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
-        return asReader(request, response, () => replayRoute(request, response))
+        return asReader(request, response, DEFAULT_TENANT, () => replayRoute(request, response))
       }
       return fail(response, 404, "not-found", [`No route ${path}.`])
     }

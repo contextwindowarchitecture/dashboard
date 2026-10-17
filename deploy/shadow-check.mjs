@@ -3,7 +3,8 @@
 // on a dashboard's ingest service (POST /shadow), prints what changed, and fails over its thresholds.
 // Node only, nothing to install, so a pull request check in a policy repository can run it.
 //
-//   node deploy/shadow-check.mjs --api <base> --corpus <name> [--route-policy <file>] [--profile <file>]
+//   node deploy/shadow-check.mjs --api <base> --corpus <name> [--tenant <tenant>]
+//        [--route-policy <file>] [--profile <file>]
 //        [--max-refusals-added 0] [--max-shedding-increase 0] [--max-candidate-rejected 0] [--report <file>]
 //
 // Exits 0 within every threshold, 1 over one, 2 when it could not run (a usage error, a corpus the
@@ -53,7 +54,10 @@ const limits = {
 
 let response
 try {
-  response = await fetch(`${api.replace(/\/+$/, "")}/shadow`, {
+  // A corpus belongs to a tenant (ADR-0012); without --tenant, the default's.
+  const tenant = option("--tenant")
+  const query = tenant === undefined ? "" : `?tenant=${encodeURIComponent(tenant)}`
+  response = await fetch(`${api.replace(/\/+$/, "")}/shadow${query}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ corpus, candidate }),
