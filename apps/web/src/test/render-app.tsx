@@ -9,6 +9,7 @@ import { createMemoryRouter } from "react-router"
 
 import { AppProviders } from "../app/providers"
 import { ROUTES } from "../app/routes"
+import type { AppConfig } from "../data/config"
 import { createFileSource } from "../data/source"
 import type { ReplayClient } from "../features/sandbox/api/replay"
 import { fixtureFetch, type FixtureFetchOptions } from "./fixture-fetch"
@@ -19,19 +20,18 @@ export function renderApp(
   {
     strict = false,
     replay = null,
-  }: { readonly strict?: boolean; readonly replay?: ReplayClient | null } = {},
+    config = { dataRoot: "/data", source: "file" },
+  }: {
+    readonly strict?: boolean
+    readonly replay?: ReplayClient | null
+    readonly config?: AppConfig
+  } = {},
 ) {
   const client = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } })
   const source = createFileSource("/data", fixtureFetch(fetchOptions))
   const router = createMemoryRouter(ROUTES, { initialEntries: [path] })
   const app = (
-    <AppProviders
-      client={client}
-      source={source}
-      config={{ dataRoot: "/data", source: "file" }}
-      router={router}
-      replay={replay}
-    />
+    <AppProviders client={client} source={source} config={config} router={router} replay={replay} />
   )
   const rendered = render(strict ? <StrictMode>{app}</StrictMode> : app)
   return { ...rendered, router }

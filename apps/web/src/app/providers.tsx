@@ -23,7 +23,11 @@ export interface AppProvidersProps {
 export function AppProviders({ client, source, config, router, replay = null }: AppProvidersProps) {
   return (
     <QueryClientProvider client={client}>
-      <DataProvider source={source} root={config.dataRoot}>
+      <DataProvider
+        source={source}
+        root={config.dataRoot}
+        {...(config.prices ? { prices: config.prices } : {})}
+      >
         <ReplayContext.Provider value={replay}>
           <TooltipProvider>
             <RouterProvider router={router} />

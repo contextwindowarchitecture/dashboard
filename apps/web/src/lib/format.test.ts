@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   formatCount,
   formatInstant,
+  formatMoney,
   formatMs,
   formatPercent,
   formatTokens,
@@ -21,6 +22,14 @@ describe("format", () => {
     expect(formatMs(0.784)).toBe("0.78 ms")
     expect(formatMs(12.44)).toBe("12.4 ms")
     expect(formatMs(312.6)).toBe("313 ms")
+  })
+
+  it("writes money in the configured currency, to three significant digits, and nothing without one", () => {
+    expect(formatMoney(0.001332, "USD")).toBe("$0.00133")
+    expect(formatMoney(1234.5, "EUR")).toBe("€1,230")
+    expect(formatMoney(0, "USD")).toBe("$0")
+    expect(formatMoney(undefined, "USD")).toBe("Not available")
+    expect(formatMoney(3, undefined)).toBe("Not available")
   })
 
   it("writes instants in UTC, to the second", () => {

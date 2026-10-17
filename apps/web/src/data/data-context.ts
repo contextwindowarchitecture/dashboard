@@ -1,13 +1,16 @@
-// The data source and its root, shared with every query through context.
+// The data source, its root and the configured prices, shared with every page through context.
 
 import { createContext, useContext } from "react"
 
+import type { Prices } from "./config"
 import type { EventSource } from "./source"
 
 export interface Data {
   readonly source: EventSource
   /** The data root, which every query key carries. */
   readonly root: string
+  /** What input tokens cost, from config.json; absent, money is "Not available". */
+  readonly prices?: Prices
 }
 
 export const DataContext = createContext<Data | null>(null)

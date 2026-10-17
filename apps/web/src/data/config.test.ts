@@ -32,6 +32,26 @@ describe("parseConfig", () => {
   })
 })
 
+describe("parseConfig's prices", () => {
+  const base = { dataRoot: "/data", source: "file" }
+  it("reads a currency and a price per million input tokens for each route", () => {
+    const prices = {
+      currency: "USD",
+      per_million_input_tokens: { "support-chat": 3, extract: 0.25 },
+    }
+    expect(parseConfig({ ...base, prices })).toEqual({ dataRoot: "/data", source: "file", prices })
+  })
+
+  it("refuses prices it cannot use, saying why", () => {
+    const priced = (prices: unknown) => () => parseConfig({ ...base, prices })
+    expect(priced("3 USD")).toThrow(/prices/)
+    expect(priced({ currency: "dollars", per_million_input_tokens: {} })).toThrow(/currency/)
+    expect(priced({ currency: "USD" })).toThrow(/per_million_input_tokens/)
+    expect(priced({ currency: "USD", per_million_input_tokens: { a: -1 } })).toThrow(/a/)
+    expect(priced({ currency: "USD", per_million_input_tokens: { a: "3" } })).toThrow(/a/)
+  })
+})
+
 describe("loadConfig", () => {
   it("fetches /config.json", async () => {
     await expect(loadConfig(fixtureFetch())).resolves.toEqual({ dataRoot: "/data", source: "file" })

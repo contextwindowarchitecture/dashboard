@@ -1,6 +1,7 @@
 // The runtime configuration (dashboard-plan.md 9): served beside the build as /config.json, so one
 // build serves every deployment. It names where the data tree is served and, when there is one, the
-// replay service. A missing or malformed document is an error the app shows, never a default.
+// replay service, and what input tokens cost, if anyone has said. A missing or malformed document is an
+// error the app shows, never a default.
 
 export interface AppConfig {
   /** Where the tree (events/, sessions/, fleet.json) is served, without a trailing slash. */
@@ -9,6 +10,37 @@ export interface AppConfig {
   readonly source: "file"
   /** The Node service's base (POST /replay); absent, the sandbox says it is not configured. */
   readonly apiBase?: string
+  /** What input tokens cost, by route; absent, every money figure reads "Not available". */
+  readonly prices?: Prices
+}
+
+/** Prices are configuration only: no figure is ever written in code (AGENTS.md). */
+export interface Prices {
+  /** An ISO 4217 code: USD, EUR. */
+  readonly currency: string
+  /** What a million input tokens cost on a route, in the currency. */
+  readonly per_million_input_tokens: Readonly<Record<string, number>>
+}
+
+function parsePrices(value: unknown): Prices {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ConfigError('"prices", when set, must be an object')
+  }
+  const { currency, per_million_input_tokens: table } = value as Record<string, unknown>
+  if (typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency)) {
+    throw new ConfigError('"prices.currency" must be an ISO 4217 code, such as "USD"')
+  }
+  if (typeof table !== "object" || table === null || Array.isArray(table)) {
+    throw new ConfigError('"prices.per_million_input_tokens" must map routes to prices')
+  }
+  for (const [route, price] of Object.entries(table)) {
+    if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
+      throw new ConfigError(
+        `"prices.per_million_input_tokens.${route}" must be a number of 0 or more`,
+      )
+    }
+  }
+  return { currency, per_million_input_tokens: table as Record<string, number> }
 }
 
 export class ConfigError extends Error {
@@ -43,10 +75,12 @@ export function parseConfig(json: unknown): AppConfig {
   if (apiBase !== undefined && (typeof apiBase !== "string" || !isLocation(apiBase))) {
     throw new ConfigError('"apiBase", when set, must be an absolute path or an http(s) URL')
   }
+  const prices = value["prices"]
   return {
     dataRoot: dataRoot.replace(/\/+$/, ""),
     source,
     ...(apiBase === undefined ? {} : { apiBase: (apiBase as string).replace(/\/+$/, "") }),
+    ...(prices === undefined ? {} : { prices: parsePrices(prices) }),
   }
 }
 

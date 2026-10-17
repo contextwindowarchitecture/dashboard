@@ -37,3 +37,19 @@ export function formatPercent(value: number | null | undefined): string {
     ? `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value * 100)}%`
     : NOT_AVAILABLE
 }
+
+/**
+ * Money in the configured currency, to three significant digits, since the cost of one window's
+ * tokens can be a fraction of a cent. Without an amount or a currency there is no figure to show.
+ */
+export function formatMoney(
+  value: number | null | undefined,
+  currency: string | undefined,
+): string {
+  if (!known(value) || currency === undefined) return NOT_AVAILABLE
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumSignificantDigits: 3,
+  }).format(value)
+}
