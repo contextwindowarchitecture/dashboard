@@ -14,6 +14,7 @@ resources:
 
 components:
   - ../../components/sign-in
+  - ../../components/publish
 
 configMapGenerator:
   - name: dashboard-access
@@ -24,3 +25,8 @@ configMapGenerator:
       - issuer=https://dashboard.contextwindowarchitecture.io/dex
       - redirect-uri=https://dashboard.contextwindowarchitecture.io/api/auth/callback
       - github-org=contextwindowarchitecture
+  # Publish (ADR-0014): the default tenant's drafts go to the demo's policy repository; northwind has none, so its
+  # owners are given the file and the commands.
+  - name: dashboard-publish
+    literals:
+      - 'repositories={"default": "contextwindowarchitecture/policies-demo"}'

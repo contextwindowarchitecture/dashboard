@@ -1,0 +1,34 @@
+# Publish (ADR-0014): the ingest service opens pull requests in each tenant's policy repository as a GitHub App. Needs
+# the sign-in component, whose drafts it publishes, and two things the overlay or the operator supplies: the secret
+# dashboard-github-app (app-id, installation-id and private-key.pem, created by hand from the App's page) and the
+# ConfigMap dashboard-publish (repositories: a JSON object, tenant to owner/name). deploy/README.md says how.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Deployment
+      name: dashboard-ingest
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: GITHUB_APP_DIR
+          value: /etc/dashboard/github-app
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: POLICY_REPOSITORIES
+          valueFrom: { configMapKeyRef: { name: dashboard-publish, key: repositories } }
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: github-app
+          mountPath: /etc/dashboard/github-app
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: github-app
+          secret:
+            secretName: dashboard-github-app

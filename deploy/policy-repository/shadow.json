@@ -1,0 +1,12 @@
+{
+  "api": "https://dashboard.contextwindowarchitecture.io/api",
+  "tenant": "default",
+  "corpora": {
+    "support-chat": "support-chat-baseline"
+  },
+  "limits": {
+    "max-refusals-added": 0,
+    "max-shedding-increase": 0,
+    "max-candidate-rejected": 0
+  }
+}

@@ -199,7 +199,31 @@ On the cluster, `deploy/overlays/prod-sign-in/access.json` is the file, mounted 
 
 ## Drafts
 
-A signed-in owner of a route keeps drafts of its route policy and profiles in the API (`docs/adr/0013-authoring.md`): `GET /api/drafts.json` lists the reader's own, `GET`, `PUT` and `DELETE /api/drafts/<id>.json` read, keep and remove one. They live in PostgreSQL (migration 8), each its author's: another author's drafts answer 404, a draft for a route the author does not own is refused, and a write from another site is refused. A draft is kept as it was saved, valid or not; nothing of it is kept in the browser's storage.
+A signed-in owner of a route keeps drafts of its route policy and profiles in the API (`docs/adr/0013-authoring.md`): `GET /api/drafts.json` lists the reader's own, `GET`, `PUT` and `DELETE /api/drafts/<id>.json` read, keep and remove one. They live in PostgreSQL (migrations 8 and 9), each its author's and its tenant's (`?tenant=`): another author's drafts answer 404, as does a draft of another tenant, a draft for a route the author does not own is refused, and a write from another site is refused. A draft is kept as it was saved, valid or not; nothing of it is kept in the browser's storage.
+
+## Publish
+
+`POST /api/drafts/<id>/publish` opens a pull request with the draft, as saved, in its tenant's policy repository (`docs/adr/0014-publish.md`): the file where the layout puts it (`deploy/policy-repository/README.md`), on the branch `cwa-dashboard/<id>`, the author and, with `{"corpus": "<name>"}`, a shadow run's counts in its body. The draft's author must still own its route, and the contract must accept the draft; a version the repository already holds is refused. Without the App, or for a tenant with no repository, it answers with the file, the path and the commands.
+
+The App, made once per organisation on GitHub (Settings, Developer settings, GitHub Apps, New GitHub App): no callback URL, no user authorization, the webhook off; repository permissions **Contents** and **Pull requests** read and write, **Metadata** read, nothing else; installable on this account only. Generate a private key on its page, then install it on the policy repositories alone ("Only select repositories"); the installation's page's URL ends in its id. The live host's App is `cwa-dashboard-publisher`. Then, from your own terminal, so the key passes through nothing else:
+
+```sh
+oc -n cwa-dashboard create secret generic dashboard-github-app \
+  --from-file=private-key.pem=<the downloaded key> \
+  --from-literal=app-id=<App ID> --from-literal=installation-id=<installation id>
+```
+
+and delete the downloaded key. `deploy/components/publish` mounts the secret into the ingest pod at `/etc/dashboard/github-app` (`GITHUB_APP_DIR`) and reads `POLICY_REPOSITORIES` from the ConfigMap `dashboard-publish`, which `deploy/overlays/prod-sign-in` makes: `{"default": "contextwindowarchitecture/policies-demo"}`. Rotating the key is a new one on the App's page, the secret made again, and `oc -n cwa-dashboard rollout restart deployment/dashboard-ingest`.
+
+A policy repository starts from `deploy/policy-repository/`: its README, `shadow.json` (the dashboard's API, the tenant, a corpus per route, the limits), the check's workflow and the two empty directories. The App cannot branch from an empty repository, so commit that first:
+
+```sh
+git clone git@github.com:contextwindowarchitecture/policies-demo.git && cd policies-demo
+cp -R ../dashboard/deploy/policy-repository/. .
+git add . && git commit -s -m "Lay out the policy repository" && git push origin main
+```
+
+The workflow uses the `policy-check` Action at a pinned commit of this repository, so the repository holding the Action must be one the policy repository can use: public, or, for a private policy repository, private with its Actions shared across the organisation.
 
 ## The vault
 
