@@ -109,6 +109,8 @@ interface Call {
     scrub?: readonly string[]
     vault?: true
   }
+  /** Another tenant's call (ADR-0012); the default's when absent. */
+  readonly tenant?: string
 }
 
 const readJson = (path: string): unknown => JSON.parse(readFileSync(path, "utf8"))
@@ -143,6 +145,28 @@ function committedCalls(): Call[] {
     })),
   )
   return [...suite, ...scenarios]
+}
+
+/**
+ * The demo's other tenants (ADR-0012): a scenario replayed for another team's own service, its events
+ * in that tenant alone, so a page reads the default's and northwind's apart.
+ */
+const TENANTS = [{ tenant: "northwind", scenario: "refund-session", service: "northwind-support" }]
+
+function tenantCalls(): Call[] {
+  return TENANTS.flatMap(({ tenant, scenario: id, service }) => {
+    const scenario = SCENARIOS.find((s) => s.id === id)!
+    return scenario.turns.map((turn, turnIndex) => ({
+      snapshot: turn.snapshot,
+      recordedAt: new Date(Date.parse(turn.snapshot.assembly_time) + 500).toISOString(),
+      service: { name: service, environment: DEMO },
+      ...(scenario.session === undefined
+        ? {}
+        : { session: { id: scenario.session, turn_index: turnIndex } }),
+      redaction: scenario.redaction,
+      tenant,
+    }))
+  })
 }
 
 /** More calls for a larger tree: the scenarios' turns again, with jittered budgets and instances. */
@@ -188,6 +212,46 @@ function fleet(events: readonly AssemblyEventV1[], generatedAt: string): FleetRe
 
 const text = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`
 
+/** Where a tenant's documents are: the default's at the root, another's under tenants/<tenant>/. */
+const prefixOf = (tenant: string | undefined) =>
+  tenant === undefined || tenant === "default" ? "" : `tenants/${tenant}/`
+
+/** One tenant's documents, derived from its own events alone and dated by its newest. */
+function documents(
+  files: Map<string, string>,
+  prefix: string,
+  events: readonly AssemblyEventV1[],
+  window: Options["window"],
+) {
+  // Generated as of the newest event, so the tree does not depend on when it was generated.
+  const generatedAt = events
+    .map((event) => event.recorded_at)
+    .sort()
+    .at(-1)!
+  // The current window in index.json, the rest closed into their days, as the ingest service keeps it.
+  const { current, closed } = windowRows(events.map(indexRow), window ?? { hours: 24, max: 20_000 })
+  const windows = [...closed].map(([day, rows]) => {
+    files.set(`${prefix}events/index/${day}.json`, text(indexFromRows(rows, generatedAt)))
+    return { day, path: `index/${day}.json`, events: rows.length }
+  })
+  const index = indexFromRows(current, generatedAt)
+  files.set(`${prefix}events/index.json`, text(windows.length > 0 ? { ...index, windows } : index))
+  for (const event of events) files.set(`${prefix}events/${event.event_id}.json`, text(event))
+  for (const session of buildSessions(events))
+    files.set(`${prefix}sessions/${session.session_id}.json`, text(session))
+  files.set(`${prefix}fleet.json`, text(fleet(events, generatedAt)))
+  const inWindow = new Set(current.map((row) => row.event_id))
+  files.set(
+    `${prefix}sources.json`,
+    text(
+      sourcesReport(
+        events.filter((event) => inWindow.has(event.event_id)),
+        generatedAt,
+      ),
+    ),
+  )
+}
+
 /** The tree, as paths relative to its root and their contents. */
 export function generateTree(options: Options = {}): Map<string, string> {
   const random = seeded(options.seed ?? 1)
@@ -196,7 +260,13 @@ export function generateTree(options: Options = {}): Map<string, string> {
     service: { name: "support-assistant", environment: DEMO },
     redaction: { mode: "full" },
   }))
-  const calls = [...committedCalls(), ...volumeCalls(options.events ?? 0, random), ...long]
+  // Another tenant's calls come last, so the default tenant's ids are what they were.
+  const calls = [
+    ...committedCalls(),
+    ...volumeCalls(options.events ?? 0, random),
+    ...long,
+    ...tenantCalls(),
+  ]
   const events = calls.map((call) => {
     const eventId = ulid(Date.parse(call.recordedAt), random)
     return record(call.snapshot, {
@@ -209,20 +279,18 @@ export function generateTree(options: Options = {}): Map<string, string> {
         ...(call.redaction.scrub ? { scrub: call.redaction.scrub } : {}),
       },
       ...(call.redaction.vault ? { vault: { base: DEMO_VAULT_BASE } } : {}),
+      ...(call.tenant === undefined ? {} : { tenant: call.tenant }),
       traceId: `trace-${eventId.toLowerCase()}`,
     })
   })
   if (options.previous !== undefined) {
     for (const [i, event] of events.entries()) {
-      const path = join(options.previous, "events", `${event.event_id}.json`)
+      const relative = `${prefixOf(event.tenant)}events/${event.event_id}.json`
+      const path = join(options.previous, relative)
       if (!existsSync(path)) continue
       const before = readFileSync(path, "utf8")
       const now = text(event)
-      if (
-        withoutMeasurements(`events/${event.event_id}.json`, before) !==
-        withoutMeasurements(`events/${event.event_id}.json`, now)
-      )
-        continue
+      if (withoutMeasurements(relative, before) !== withoutMeasurements(relative, now)) continue
       const kept = JSON.parse(before) as AssemblyEventV1
       const timings = (kept.trace as { timings?: unknown } | undefined)?.timings
       events[i] = {
@@ -234,36 +302,27 @@ export function generateTree(options: Options = {}): Map<string, string> {
       } as AssemblyEventV1
     }
   }
-  // Generated as of the newest event, so the tree does not depend on when it was generated.
-  const generatedAt = events
-    .map((event) => event.recorded_at)
-    .sort()
-    .at(-1)!
   const files = new Map<string, string>()
-  // The current window in index.json, the rest closed into their days, as the ingest service keeps it.
-  const { current, closed } = windowRows(
-    events.map(indexRow),
-    options.window ?? { hours: 24, max: 20_000 },
-  )
-  const windows = [...closed].map(([day, rows]) => {
-    files.set(`events/index/${day}.json`, text(indexFromRows(rows, generatedAt)))
-    return { day, path: `index/${day}.json`, events: rows.length }
-  })
-  const index = indexFromRows(current, generatedAt)
-  files.set("events/index.json", text(windows.length > 0 ? { ...index, windows } : index))
-  for (const event of events) files.set(`events/${event.event_id}.json`, text(event))
-  for (const session of buildSessions(events))
-    files.set(`sessions/${session.session_id}.json`, text(session))
-  files.set("fleet.json", text(fleet(events, generatedAt)))
-  const inWindow = new Set(current.map((row) => row.event_id))
+  const byTenant = new Map<string, AssemblyEventV1[]>()
+  for (const event of events) {
+    const tenant = event.tenant ?? "default"
+    byTenant.set(tenant, [...(byTenant.get(tenant) ?? []), event])
+  }
+  for (const [tenant, own] of byTenant) documents(files, prefixOf(tenant), own, options.window)
   files.set(
-    "sources.json",
-    text(
-      sourcesReport(
-        events.filter((event) => inWindow.has(event.event_id)),
-        generatedAt,
-      ),
-    ),
+    "tenants.json",
+    text({
+      $schema: "cwa-dashboard/tenants/v1",
+      tenants: [...byTenant]
+        .map(([tenant, own]) => ({ tenant, events: own.length }))
+        .sort((a, b) =>
+          a.tenant === "default"
+            ? -1
+            : b.tenant === "default"
+              ? 1
+              : a.tenant.localeCompare(b.tenant),
+        ),
+    }),
   )
   return files
 }
@@ -317,7 +376,9 @@ function writeVault(files: Map<string, string>, root: string) {
 // --- comparing trees -----------------------------------------------------------------------------
 
 /** A file's content with its measured timings set aside, for comparing two generations. */
-export function withoutMeasurements(path: string, content: string): string {
+export function withoutMeasurements(given: string, content: string): string {
+  // Another tenant's documents are measured as the default's are (ADR-0012).
+  const path = given.replace(/^tenants\/[^/]+\//, "")
   const value = JSON.parse(content) as Record<string, unknown>
   // A file of the wrong shape is compared as it is, and so reported as different.
   const list = (key: string) =>

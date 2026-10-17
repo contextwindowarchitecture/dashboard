@@ -1,0 +1,13 @@
+{
+  "$schema": "cwa-dashboard/tenants/v1",
+  "tenants": [
+    {
+      "tenant": "default",
+      "events": 112
+    },
+    {
+      "tenant": "northwind",
+      "events": 5
+    }
+  ]
+}

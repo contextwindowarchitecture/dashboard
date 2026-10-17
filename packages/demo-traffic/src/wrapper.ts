@@ -35,6 +35,8 @@ export interface Recording {
    * the bodies are bodyDeposits(snapshot), put there before the event is sent.
    */
   readonly vault?: { readonly base: string }
+  /** The tenant the wrapper is configured for (ADR-0012); absent for the default. */
+  readonly tenant?: string
 }
 
 /** Records one assemble() call over `snapshot` as an assembly event. */
@@ -65,6 +67,7 @@ export function record(snapshot: unknown, recording: Recording): AssemblyEventV1
     event_id: recording.eventId,
     recorded_at: recording.recordedAt,
     service: recording.service,
+    ...(recording.tenant === undefined ? {} : { tenant: recording.tenant }),
     assembler: {
       language: BUILT_ASSEMBLER.language,
       name: BUILT_ASSEMBLER.name,

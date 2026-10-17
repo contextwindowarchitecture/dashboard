@@ -10,7 +10,12 @@ import {
   validateFleetReportV1,
   validateSessionV1,
 } from "@cwa-dashboard/telemetry/validators"
-import type { AssemblyEventV1, EventsIndexV1, SessionV1 } from "@cwa-dashboard/telemetry/types"
+import type {
+  AssemblyEventV1,
+  EventsIndexV1,
+  FleetReportV1,
+  SessionV1,
+} from "@cwa-dashboard/telemetry/types"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
@@ -290,5 +295,42 @@ describe("the demo vault (ADR-0009)", () => {
   it("is kept beside the tree, never in what the web server serves, and committed as generated", () => {
     expect(VAULT.startsWith(`${FIXTURES}/`)).toBe(false)
     expect(vaultDifferences(generateVault(), VAULT)).toEqual([])
+  })
+})
+
+describe("the demo's second tenant (ADR-0012)", () => {
+  const under = (prefix: string) => [...tree.keys()].filter((path) => path.startsWith(prefix))
+
+  it("replays the refund session for northwind's own service, under tenants/northwind/", () => {
+    const index = json<EventsIndexV1>("tenants/northwind/events/index.json")
+    expect(index.events.length).toBe(SCENARIOS.find((s) => s.id === "refund-session")!.turns.length)
+    for (const row of index.events) {
+      const event = json<AssemblyEventV1>(`tenants/northwind/events/${row.event_id}.json`)
+      valid(validateAssemblyEventV1, event, row.event_id)
+      expect(event.tenant).toBe("northwind")
+      expect(event.service.name).toBe("northwind-support")
+    }
+    expect(under("tenants/northwind/sessions/")).toEqual([
+      "tenants/northwind/sessions/refund-7.json",
+    ])
+    for (const doc of ["fleet.json", "sources.json"])
+      expect(tree.has(`tenants/northwind/${doc}`)).toBe(true)
+  })
+
+  it("keeps the default tenant's documents free of northwind's events", () => {
+    for (const event of events) expect(event.tenant, event.event_id).toBeUndefined()
+    const fleet = json<FleetReportV1>("fleet.json")
+    expect(fleet.services.map((s) => s.name)).not.toContain("northwind-support")
+  })
+
+  it("lists both tenants in tenants.json", () => {
+    const northwind = json<EventsIndexV1>("tenants/northwind/events/index.json").events.length
+    expect(json<unknown>("tenants.json")).toEqual({
+      $schema: "cwa-dashboard/tenants/v1",
+      tenants: [
+        { tenant: "default", events: events.length },
+        { tenant: "northwind", events: northwind },
+      ],
+    })
   })
 })

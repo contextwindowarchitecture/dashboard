@@ -1,0 +1,100 @@
+{
+  "$schema": "cwa-dashboard/sources-report/v1",
+  "generated_at": "2026-10-15T09:08:30.500Z",
+  "window": {
+    "from": "2026-10-15T09:00:30.500Z",
+    "to": "2026-10-15T09:08:30.500Z",
+    "events": 5
+  },
+  "producers": [
+    {
+      "id": "capability-policy",
+      "kind": "capability_policy",
+      "events": 5,
+      "submitted": 10,
+      "admitted": 10,
+      "compressed": 0,
+      "included_tokens": 185,
+      "excluded": [],
+      "rejected_events": 0
+    },
+    {
+      "id": "conversation",
+      "kind": "interaction",
+      "events": 5,
+      "submitted": 25,
+      "admitted": 25,
+      "compressed": 0,
+      "included_tokens": 659,
+      "excluded": [],
+      "rejected_events": 0
+    },
+    {
+      "id": "crm-mcp",
+      "kind": "mcp",
+      "events": 5,
+      "submitted": 3,
+      "admitted": 3,
+      "compressed": 0,
+      "included_tokens": 48,
+      "excluded": [],
+      "rejected_events": 0
+    },
+    {
+      "id": "memory-svc",
+      "kind": "memory",
+      "events": 5,
+      "submitted": 5,
+      "admitted": 5,
+      "compressed": 0,
+      "included_tokens": 50,
+      "excluded": [],
+      "rejected_events": 0
+    },
+    {
+      "id": "policy-corpus",
+      "kind": "retrieval",
+      "events": 5,
+      "submitted": 10,
+      "admitted": 10,
+      "compressed": 1,
+      "included_tokens": 476,
+      "excluded": [],
+      "rejected_events": 0
+    },
+    {
+      "id": "policy-registry",
+      "kind": "policy",
+      "events": 5,
+      "submitted": 20,
+      "admitted": 16,
+      "compressed": 0,
+      "included_tokens": 477,
+      "excluded": [
+        {
+          "reason": "over_budget",
+          "stage": "assembler",
+          "items": 4
+        }
+      ],
+      "rejected_events": 0
+    },
+    {
+      "id": "state-svc",
+      "kind": "state",
+      "events": 5,
+      "submitted": 10,
+      "admitted": 9,
+      "compressed": 0,
+      "included_tokens": 106,
+      "excluded": [
+        {
+          "reason": "over_budget",
+          "stage": "assembler",
+          "items": 1
+        }
+      ],
+      "rejected_events": 0
+    }
+  ]
+}

@@ -331,6 +331,16 @@ describe("the vault (ADR-0009)", () => {
   })
 })
 
+describe("the tenant (ADR-0012)", () => {
+  it("names the tenant a wrapper is configured for, and none for the default", () => {
+    const snapshot = read("conformance/cases/budget-variant-choice/snapshot.json")
+    const named = record(snapshot, { ...RECORDING, tenant: "northwind" })
+    expectValid(named)
+    expect(named.tenant).toBe("northwind")
+    expect(record(snapshot, RECORDING).tenant).toBeUndefined()
+  })
+})
+
 describe("ulid", () => {
   it("encodes the time in its first ten characters, so ids sort by time", () => {
     const random = () => 0.5

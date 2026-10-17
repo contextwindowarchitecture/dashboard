@@ -1,0 +1,161 @@
+{
+  "$schema": "cwa-dashboard/events-index/v1",
+  "generated_at": "2026-10-15T09:08:30.500Z",
+  "window": {
+    "from": "2026-10-15T09:00:30.500Z",
+    "to": "2026-10-15T09:08:30.500Z"
+  },
+  "events": [
+    {
+      "event_id": "01M4ZD3Y5448VVYP1476Z2JDFF",
+      "recorded_at": "2026-10-15T09:08:30.500Z",
+      "service": "northwind-support",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "route_policy_sha256": "474d6e1fb8563eb94e39663976c19682317e30e8cf952955b5505b8c17a91191",
+      "profile_sha256": "5b86d884b783533f3b9b75080be79cbed63a5e5efb35afe864fd34ffdf7c1fcf",
+      "budget_input": 720,
+      "compressed_count": 1,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "compressed_saved": 79,
+      "input_tokens": 554,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 4
+      },
+      "total_ms": 0.44129200000000424
+    },
+    {
+      "event_id": "01M4ZD08Z4XWFDYRD51XSBNGAP",
+      "recorded_at": "2026-10-15T09:06:30.500Z",
+      "service": "northwind-support",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "route_policy_sha256": "474d6e1fb8563eb94e39663976c19682317e30e8cf952955b5505b8c17a91191",
+      "profile_sha256": "5b86d884b783533f3b9b75080be79cbed63a5e5efb35afe864fd34ffdf7c1fcf",
+      "budget_input": 720,
+      "compressed_count": 0,
+      "outcome": "assembled",
+      "reason_codes": [
+        "over_budget"
+      ],
+      "compressed_saved": 0,
+      "input_tokens": 585,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 3
+      },
+      "total_ms": 0.34266700000000583
+    },
+    {
+      "event_id": "01M4ZCWKS4Q65TTQHA0WV8NCBV",
+      "recorded_at": "2026-10-15T09:04:30.500Z",
+      "service": "northwind-support",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "route_policy_sha256": "474d6e1fb8563eb94e39663976c19682317e30e8cf952955b5505b8c17a91191",
+      "profile_sha256": "5b86d884b783533f3b9b75080be79cbed63a5e5efb35afe864fd34ffdf7c1fcf",
+      "budget_input": 720,
+      "compressed_count": 0,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "compressed_saved": 0,
+      "input_tokens": 623,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 2
+      },
+      "total_ms": 0.3181249999999807
+    },
+    {
+      "event_id": "01M4ZCRYK4G6HJ8MJH49D1AE5J",
+      "recorded_at": "2026-10-15T09:02:30.500Z",
+      "service": "northwind-support",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "route_policy_sha256": "474d6e1fb8563eb94e39663976c19682317e30e8cf952955b5505b8c17a91191",
+      "profile_sha256": "5b86d884b783533f3b9b75080be79cbed63a5e5efb35afe864fd34ffdf7c1fcf",
+      "budget_input": 720,
+      "compressed_count": 0,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "compressed_saved": 0,
+      "input_tokens": 510,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 1
+      },
+      "total_ms": 0.30049999999999955
+    },
+    {
+      "event_id": "01M4ZCN9D49VWFVNS6W0RH60WX",
+      "recorded_at": "2026-10-15T09:00:30.500Z",
+      "service": "northwind-support",
+      "language": "typescript",
+      "redaction_mode": "full",
+      "route": "support-chat",
+      "route_policy_version": "illustrative/v1",
+      "profile": {
+        "id": "cache-first-chat",
+        "version": 1
+      },
+      "route_policy_sha256": "474d6e1fb8563eb94e39663976c19682317e30e8cf952955b5505b8c17a91191",
+      "profile_sha256": "5b86d884b783533f3b9b75080be79cbed63a5e5efb35afe864fd34ffdf7c1fcf",
+      "budget_input": 720,
+      "compressed_count": 0,
+      "outcome": "assembled",
+      "reason_codes": [],
+      "compressed_saved": 0,
+      "input_tokens": 438,
+      "session": {
+        "id": "refund-7",
+        "turn_index": 0
+      },
+      "total_ms": 0.28745799999998667
+    }
+  ],
+  "facets": {
+    "outcome": {
+      "assembled": 5
+    },
+    "language": {
+      "typescript": 5
+    },
+    "route": {
+      "support-chat": 5
+    },
+    "reason": {
+      "over_budget": 2
+    },
+    "service": {
+      "northwind-support": 5
+    }
+  }
+}
