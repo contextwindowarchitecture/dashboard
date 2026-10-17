@@ -23,6 +23,7 @@
     "playwright.config.ts",
     "playwright.perf.config.ts",
     "playwright.api.config.ts",
+    "playwright.perf-api.config.ts",
     "dev/**/*.ts",
     "scripts/**/*.ts"
   ]
