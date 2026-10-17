@@ -304,7 +304,7 @@ function Report({ report }: { readonly report: ShadowReportV1 }) {
   )
 }
 
-function Answer({ answer }: { readonly answer: ShadowAnswer }) {
+export function ShadowAnswerView({ answer }: { readonly answer: ShadowAnswer }) {
   if (answer.kind === "ok") return <Report report={answer.report} />
   const words =
     answer.kind === "invalid-response"
@@ -432,7 +432,7 @@ function ShadowRun({
           Replaying {formatCount(corpus.events)} events twice…
         </p>
       ) : run.status === "done" ? (
-        <Answer answer={run.answer} />
+        <ShadowAnswerView answer={run.answer} />
       ) : null}
       <p data-slot="cell-note">
         The same run gates a pull request: <code>deploy/shadow-check.mjs</code> and the{" "}
