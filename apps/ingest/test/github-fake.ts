@@ -5,7 +5,13 @@
 // be told to answer as GitHub does when something is wrong, one way at a time. No network leaves the
 // machine.
 
-import { generateKeyPairSync, randomBytes, verify } from "node:crypto"
+import {
+  createPrivateKey,
+  createPublicKey,
+  generateKeyPairSync,
+  randomBytes,
+  verify,
+} from "node:crypto"
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http"
 import type { AddressInfo } from "node:net"
 
@@ -60,12 +66,23 @@ const read = async (request: IncomingMessage): Promise<Record<string, unknown>> 
     : (JSON.parse(Buffer.concat(chunks).toString("utf8")) as Record<string, unknown>)
 }
 
-export async function startGitHub(
-  options: { repository?: string; port?: number } = {},
-): Promise<FakeGitHub> {
-  const { publicKey, privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 })
-  const appId = "424242"
-  const installationId = "171717"
+export interface GitHubOptions {
+  readonly repository?: string
+  readonly port?: number
+  /** The App's private key, PKCS#1 PEM, for a browser test that hands it to the API; a new one when absent. */
+  readonly privateKey?: string
+  readonly appId?: string
+  readonly installationId?: string
+}
+
+export async function startGitHub(options: GitHubOptions = {}): Promise<FakeGitHub> {
+  const privateKey =
+    options.privateKey === undefined
+      ? generateKeyPairSync("rsa", { modulusLength: 2048 }).privateKey
+      : createPrivateKey(options.privateKey)
+  const publicKey = createPublicKey(privateKey)
+  const appId = options.appId ?? "424242"
+  const installationId = options.installationId ?? "171717"
   const repository = options.repository ?? "acme/policies"
   const [owner] = repository.split("/")
   const defaultBranch = "main"
@@ -118,6 +135,7 @@ export async function startGitHub(
   async function route(request: IncomingMessage, response: ServerResponse) {
     const url = new URL(request.url ?? "/", "http://github.test")
     const method = request.method ?? "GET"
+    if (url.pathname === "/healthz") return json(response, 200, { ok: true })
     if (state.fault === "down") return json(response, 502, { message: "Bad Gateway" })
     if (
       method === "POST" &&

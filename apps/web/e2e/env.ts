@@ -1,6 +1,7 @@
 // What the browser tests and the servers Playwright starts agree on.
 
 import { generateKeyPairSync } from "node:crypto"
+import { mkdtempSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -32,3 +33,22 @@ export const OIDC_TEST = {
   clientId: "cwa-dashboard-e2e",
   clientSecret: "e2e-client-secret",
 } as const
+
+/**
+ * GitHub's API in a process for the browser tests over the query API (ADR-0014), and the App's
+ * secret as the cluster mounts it: app-id, installation-id and private-key.pem, fresh each run.
+ */
+export const GITHUB_TEST = (() => {
+  const appDir = mkdtempSync(join(tmpdir(), "cwa-e2e-github-app-"))
+  const appId = "424242"
+  const installationId = "171717"
+  writeFileSync(join(appDir, "app-id"), appId)
+  writeFileSync(join(appDir, "installation-id"), installationId)
+  writeFileSync(
+    join(appDir, "private-key.pem"),
+    generateKeyPairSync("rsa", { modulusLength: 2048 })
+      .privateKey.export({ type: "pkcs1", format: "pem" })
+      .toString(),
+  )
+  return { port: 8095, repository: "acme/policies", appId, installationId, appDir }
+})()

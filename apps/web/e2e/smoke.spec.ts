@@ -803,7 +803,7 @@ test("the telemetry and about pages read in both themes and at a phone's width",
   }
 })
 
-test("an owner drafts a profile, saves it, finds it again and previews it, in both themes and at 400px", async ({
+test("an owner drafts a profile, saves it, finds it again, previews and publishes it, in both themes and at 400px", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium-api", "drafts are kept in PostgreSQL, with sign-in")
@@ -846,6 +846,17 @@ test("an owner drafts a profile, saves it, finds it again and previews it, in bo
   await expect(version).toHaveValue("9")
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
+  // Publish: a pull request in the tenant's policy repository, shadowed over the corpus first.
+  const publish = page.getByRole("region", { name: "Publish" })
+  await publish.getByRole("combobox", { name: "Shadow over" }).click()
+  await page.getByRole("option", { name: new RegExp(`^${E2E_CORPUS}`) }).click()
+  await publish.getByRole("button", { name: "Publish" }).click()
+  await expect(publish.getByRole("link", { name: /^acme\/policies#\d+$/ })).toBeVisible()
+  await expectAccessible(page)
+  await page.reload()
+  await expect(
+    page.getByRole("list", { name: "Draft" }).getByRole("link", { name: /^acme\/policies#\d+$/ }),
+  ).toBeVisible()
   // The list names it; deleting it takes it off.
   await page.getByRole("link", { name: "All your drafts" }).click()
   const drafts = page.getByRole("table", { name: "Your drafts" })

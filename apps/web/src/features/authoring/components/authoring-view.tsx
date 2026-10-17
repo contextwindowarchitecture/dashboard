@@ -31,7 +31,14 @@ import { replayable } from "../../sandbox/model/fidelity"
 import { runShadow, useCorpora, type ShadowAnswer } from "../../shadow/api/shadow"
 import { ShadowAnswerView } from "../../shadow/components/shadow-view"
 import { candidateChoices } from "../../shadow/model/candidate"
-import { deleteDraft, putDraft, useDraft, useDrafts } from "../api/drafts"
+import {
+  deleteDraft,
+  publishDraft,
+  putDraft,
+  useDraft,
+  useDrafts,
+  type PublishAnswer,
+} from "../api/drafts"
 import {
   changes,
   fieldText,
@@ -636,6 +643,143 @@ function ShadowPreview({
   )
 }
 
+const NO_SHADOW = "none"
+
+type Publishing =
+  | { readonly status: "idle" }
+  | { readonly status: "publishing" }
+  | { readonly status: "done"; readonly answer: PublishAnswer }
+
+const pullName = (published: { readonly repository: string; readonly number: number }) =>
+  `${published.repository}#${published.number}`
+
+/** Publish (ADR-0014): the draft as saved, as a pull request in the tenant's policy repository. */
+function PublishPanel({
+  apiBase,
+  draft,
+  dirty,
+}: {
+  readonly apiBase: string
+  readonly draft: DraftV1
+  readonly dirty: boolean
+}) {
+  const { fetchFn = fetch, tenant = DEFAULT_TENANT } = useData()
+  const queryClient = useQueryClient()
+  const corpora = useCorpora()
+  const [corpus, setCorpus] = useState(NO_SHADOW)
+  const [run, setRun] = useState<Publishing>({ status: "idle" })
+  const labelId = useId()
+  const listed = corpora.data?.kind === "ok" ? corpora.data.corpora : []
+  const publish = async () => {
+    setRun({ status: "publishing" })
+    const answer = await publishDraft(
+      apiBase,
+      tenant,
+      draft.id,
+      corpus === NO_SHADOW ? {} : { corpus },
+      fetchFn,
+    )
+    setRun({ status: "done", answer })
+    if (answer.kind === "published") {
+      void queryClient.invalidateQueries({ queryKey: ["draft", apiBase, tenant, draft.id] })
+    }
+  }
+  const answer = run.status === "done" ? run.answer : undefined
+  return (
+    <section aria-label="Publish" data-slot="panel">
+      <h2 data-slot="panel-header" data-label="">
+        Publish
+      </h2>
+      <div data-slot="stack">
+        <p data-slot="panel-note">
+          Opens a pull request with the draft as saved in the tenant&rsquo;s policy repository,
+          where the file belongs in its layout, naming you as its author. With a corpus, the service
+          shadows the draft over it first and puts the counts in the pull request; the
+          repository&rsquo;s own check shadows it again before it merges. A published version is
+          never edited in place: raise the version to change it.
+        </p>
+        {listed.length === 0 ? null : (
+          <div data-slot="field">
+            <label id={labelId} data-label="">
+              Shadow over
+            </label>
+            <Select value={corpus} onValueChange={setCorpus}>
+              <SelectTrigger aria-labelledby={labelId}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_SHADOW}>No shadow run</SelectItem>
+                {listed.map((c) => (
+                  <SelectItem key={c.name} value={c.name}>
+                    {`${c.name} · ${formatCount(c.events)} events`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        {dirty ? (
+          <p data-slot="cell-note">Save the draft first: Publish takes the draft as saved.</p>
+        ) : null}
+        <div>
+          <button
+            type="button"
+            data-slot="inverse-button"
+            disabled={dirty}
+            aria-busy={run.status === "publishing"}
+            onClick={() => {
+              if (run.status !== "publishing") void publish()
+            }}
+          >
+            Publish
+          </button>
+        </div>
+        {run.status === "publishing" ? (
+          <p role="status" data-slot="cell-note">
+            Publishing…
+          </p>
+        ) : answer === undefined ? null : answer.kind === "published" ? (
+          // A list, so no link sits in running text (axe, link-in-text-block).
+          <div role="status">
+            <ul aria-label="Pull request" data-slot="facts">
+              <li>
+                <span data-label="">published as</span>{" "}
+                <a href={answer.url} rel="noreferrer">
+                  {pullName(answer)}
+                </a>
+              </li>
+              <li>
+                <span data-label="">file</span> <code>{answer.path}</code>
+              </li>
+              <li>
+                <span data-label="">branch</span> <code>{answer.branch}</code>
+              </li>
+            </ul>
+          </div>
+        ) : answer.kind === "by-hand" ? (
+          <section aria-label="Publish by hand" data-slot="stack">
+            <p data-slot="panel-note">
+              {answer.problems.join(" ")} Publish it by hand: save the file at{" "}
+              <span data-mono="">{answer.path}</span> in a clone of the repository, then run the
+              commands.
+            </p>
+            <pre tabIndex={0} aria-label="File" data-slot="raw-json">
+              {answer.file}
+            </pre>
+            <pre tabIndex={0} aria-label="Commands" data-slot="raw-json">
+              {answer.commands.join("\n")}
+            </pre>
+          </section>
+        ) : (
+          <div role="alert" data-slot="note">
+            <p>The draft was not published: {answer.problems.join(" ")}</p>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 type Saved =
   | { readonly status: "idle" }
   | { readonly status: "saving" }
@@ -730,6 +874,14 @@ function Editor({ apiBase, draft }: { readonly apiBase: string; readonly draft: 
         <li>
           <span data-label="">saved</span> {formatInstant(draft.updated_at)}
         </li>
+        {draft.published === undefined ? null : (
+          <li>
+            <span data-label="">published</span>{" "}
+            <a href={draft.published.url} rel="noreferrer">
+              {pullName(draft.published)}
+            </a>
+          </li>
+        )}
       </ul>
       <p>
         <Link to="/authoring">All your drafts</Link>
@@ -824,6 +976,11 @@ function Editor({ apiBase, draft }: { readonly apiBase: string; readonly draft: 
           The draft was not saved: {saved.message}
         </p>
       ) : null}
+      <PublishPanel
+        apiBase={apiBase}
+        draft={draft}
+        dirty={JSON.stringify(document) !== JSON.stringify(draft.document)}
+      />
       <ReplayPreview route={route} kind={kind} document={document} />
       <ShadowPreview apiBase={apiBase} kind={kind} document={document} />
     </div>

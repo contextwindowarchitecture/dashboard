@@ -191,6 +191,104 @@ describe("the authoring page", () => {
   })
 })
 
+describe("publishing a draft", () => {
+  const PUBLISH = `/api/drafts/${ID}/publish`
+  const PATH = `profiles/${PROFILE.id}/${PROFILE.version}.json`
+
+  it("publishes the saved draft, shadowed over a chosen corpus, and links the pull request", async () => {
+    const { sent } = open(`/authoring?draft=${ID}`, {
+      [`/api/drafts/${ID}.json`]: json(200, DRAFT),
+      "/api/corpora.json": json(200, {
+        corpora: [{ name: "chat", created_at: DRAFT.updated_at, events: 6 }],
+      }),
+      [PUBLISH]: json(200, {
+        kind: "published",
+        repository: "acme/policies",
+        path: PATH,
+        branch: `cwa-dashboard/${ID}`,
+        number: 3,
+        url: "https://github.com/acme/policies/pull/3",
+      }),
+    })
+    const panel = await screen.findByRole("region", { name: "Publish" })
+    await userEvent.click(await within(panel).findByRole("combobox", { name: "Shadow over" }))
+    await userEvent.click(screen.getByRole("option", { name: /^chat/ }))
+    await userEvent.click(within(panel).getByRole("button", { name: "Publish" }))
+    const link = await within(panel).findByRole("link", { name: "acme/policies#3" })
+    expect(link).toHaveAttribute("href", "https://github.com/acme/policies/pull/3")
+    const post = await waitForRequest(sent, (s) => s.url === PUBLISH)
+    expect(post).toMatchObject({ method: "POST", body: { corpus: "chat" } })
+  })
+
+  it("names the pull request a draft was last published to", async () => {
+    open(`/authoring?draft=${ID}`, {
+      [`/api/drafts/${ID}.json`]: json(200, {
+        ...DRAFT,
+        published: {
+          repository: "acme/policies",
+          path: PATH,
+          branch: `cwa-dashboard/${ID}`,
+          number: 2,
+          url: "https://github.com/acme/policies/pull/2",
+          at: DRAFT.updated_at,
+        },
+      }),
+    })
+    const facts = await screen.findByRole("list", { name: "Draft" })
+    expect(within(facts).getByRole("link", { name: "acme/policies#2" })).toHaveAttribute(
+      "href",
+      "https://github.com/acme/policies/pull/2",
+    )
+  })
+
+  it("gives the file and the commands where there is no App", async () => {
+    open(`/authoring?draft=${ID}`, {
+      [`/api/drafts/${ID}.json`]: json(200, DRAFT),
+      [PUBLISH]: json(200, {
+        kind: "by-hand",
+        path: PATH,
+        file: '{\n  "id": "x"\n}\n',
+        branch: `cwa-dashboard/${ID}`,
+        commands: [`git switch -c cwa-dashboard/${ID}`, `git push -u origin cwa-dashboard/${ID}`],
+        problems: ["No GitHub App is configured: set GITHUB_APP_DIR and POLICY_REPOSITORIES."],
+      }),
+    })
+    const panel = await screen.findByRole("region", { name: "Publish" })
+    await userEvent.click(within(panel).getByRole("button", { name: "Publish" }))
+    const hand = await within(panel).findByRole("region", { name: "Publish by hand" })
+    expect(hand).toHaveTextContent("No GitHub App is configured")
+    expect(hand).toHaveTextContent(PATH)
+    expect(within(hand).getByLabelText("File")).toHaveTextContent('"id": "x"')
+    expect(within(hand).getByLabelText("Commands")).toHaveTextContent(
+      `git push -u origin cwa-dashboard/${ID}`,
+    )
+  })
+
+  it("says why a draft was not published", async () => {
+    open(`/authoring?draft=${ID}`, {
+      [`/api/drafts/${ID}.json`]: json(200, DRAFT),
+      [PUBLISH]: json(409, {
+        ok: false,
+        kind: "conflict",
+        path: PATH,
+        problems: [`acme/policies already holds ${PATH}: raise the version.`],
+      }),
+    })
+    const panel = await screen.findByRole("region", { name: "Publish" })
+    await userEvent.click(within(panel).getByRole("button", { name: "Publish" }))
+    expect(await within(panel).findByRole("alert")).toHaveTextContent("raise the version")
+  })
+
+  it("publishes the draft as saved, so a change waits for Save", async () => {
+    open(`/authoring?draft=${ID}`, { [`/api/drafts/${ID}.json`]: json(200, DRAFT) })
+    const panel = await screen.findByRole("region", { name: "Publish" })
+    expect(within(panel).getByRole("button", { name: "Publish" })).toBeEnabled()
+    fireEvent.change(screen.getByLabelText("version"), { target: { value: "5" } })
+    expect(within(panel).getByRole("button", { name: "Publish" })).toBeDisabled()
+    expect(panel).toHaveTextContent("Save the draft first")
+  })
+})
+
 async function waitForRequest(sent: Sent[], test: (s: Sent) => boolean): Promise<Sent> {
   for (let i = 0; i < 100; i++) {
     const found = sent.find(test)

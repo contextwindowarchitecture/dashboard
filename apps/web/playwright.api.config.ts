@@ -1,7 +1,7 @@
 // The browser tests over the query API (ADR-0007): the same smoke, accessibility and visual specs,
 // with config.json's dataRoot at /api/data, so every document comes from the ingest service's
 // PostgreSQL store (PGlite, in memory) and none from a tree: the preview's own /data/ serves an
-// empty directory. Setup projects post the demo tree's events, freeze the shadow corpus and deposit the demo vault's bodies; sign-in runs through the test issuer and roles from e2e/access.json. `pnpm test:e2e:api`.
+// empty directory. Setup projects post the demo tree's events, freeze the shadow corpus and deposit the demo vault's bodies; sign-in runs through the test issuer, roles from e2e/access.json, and Publish through GitHub's API in a process. `pnpm test:e2e:api`.
 
 import { mkdtempSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -9,7 +9,14 @@ import { join, resolve } from "node:path"
 
 import { defineConfig, devices } from "@playwright/test"
 
-import { API_INGEST_PORT, INGEST_TOKEN, OIDC_TEST, SIGNING_KEY, VAULT_TOKEN } from "./e2e/env.ts"
+import {
+  API_INGEST_PORT,
+  GITHUB_TEST,
+  INGEST_TOKEN,
+  OIDC_TEST,
+  SIGNING_KEY,
+  VAULT_TOKEN,
+} from "./e2e/env.ts"
 
 const port = 4176
 const empty = mkdtempSync(join(tmpdir(), "cwa-e2e-empty-"))
@@ -46,6 +53,20 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 30_000,
     },
+    // GitHub's API (apps/ingest/test/github-fake.ts), so Publish opens a pull request end to end.
+    {
+      command: "node ../ingest/test/github-fake-main.ts",
+      url: `http://127.0.0.1:${GITHUB_TEST.port}/healthz`,
+      env: {
+        GITHUB_FAKE_PORT: String(GITHUB_TEST.port),
+        GITHUB_FAKE_REPOSITORY: GITHUB_TEST.repository,
+        GITHUB_FAKE_APP_ID: GITHUB_TEST.appId,
+        GITHUB_FAKE_INSTALLATION_ID: GITHUB_TEST.installationId,
+        GITHUB_FAKE_KEY_FILE: join(GITHUB_TEST.appDir, "private-key.pem"),
+      },
+      reuseExistingServer: false,
+      timeout: 30_000,
+    },
     {
       command: "pnpm --dir ../ingest start",
       url: `http://127.0.0.1:${API_INGEST_PORT}/healthz`,
@@ -62,6 +83,9 @@ export default defineConfig({
         // Who may read what (ADR-0011): anonymous readers own every demo route but policy-desk, so
         // the suite reads as before, and the test person's group owns them all.
         ACCESS_FILE: resolve(import.meta.dirname, "e2e/access.json"),
+        GITHUB_APP_DIR: GITHUB_TEST.appDir,
+        GITHUB_API: `http://127.0.0.1:${GITHUB_TEST.port}`,
+        POLICY_REPOSITORIES: JSON.stringify({ default: GITHUB_TEST.repository }),
       },
       reuseExistingServer: false,
       timeout: 60_000,
