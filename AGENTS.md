@@ -65,6 +65,7 @@ pnpm --filter web test:e2e                      # needs `pnpm exec playwright in
 pnpm --filter web budgets                       # after a build: the bundle against the profile's budgets
 pnpm --filter web test:perf                     # a 50,000-event tree against the plan's performance budgets
 pnpm --filter web test:e2e:api                  # the browser tests again, every document read from PostgreSQL through the query API
+pnpm --filter web test:perf:api                 # the performance budgets again, the 50,000 events posted into PostgreSQL first
 pnpm --filter demo-traffic generate             # rebuild the fixture tree; CI fails on a diff
 pnpm vendor ../../contextwindowarchitecture && pnpm generate   # move the contract pin, one commit
 ```

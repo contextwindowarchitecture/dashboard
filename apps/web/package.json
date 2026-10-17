@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "test:e2e": "playwright test",
     "test:perf": "playwright test -c playwright.perf.config.ts",
+    "test:perf:api": "playwright test -c playwright.perf-api.config.ts",
     "budgets": "node scripts/check-budgets.mjs",
     "test:e2e:api": "playwright test -c playwright.api.config.ts"
   },

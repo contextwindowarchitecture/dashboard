@@ -94,6 +94,10 @@ jobs:
         working-directory: dashboard
         run: pnpm --filter web test:perf
 
+      - name: Performance tests over the query API
+        working-directory: dashboard
+        run: pnpm --filter web test:perf:api
+
       # The manifests render: the production overlay and the one with PostgreSQL, as `oc apply -k` would build them.
       - name: Render the deployment
         working-directory: dashboard
