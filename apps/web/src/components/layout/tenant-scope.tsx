@@ -3,30 +3,12 @@
 // so a shared link opens the same tenant. Every document comes from the tenant's own data root,
 // which every query key carries, so two tenants' documents never share a cache entry.
 
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react"
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 import { DataContext, useData } from "../../data/data-context"
 import { createFileSource } from "../../data/source"
-
-export const DEFAULT_TENANT = "default"
-export const TENANT = /^[a-z0-9][a-z0-9._-]{0,63}$/
-
-/** Where a tenant's documents are: the default's at the root, another's under tenants/<tenant>. */
-export const tenantRoot = (root: string, tenant: string) =>
-  tenant === DEFAULT_TENANT ? root : `${root.replace(/\/+$/, "")}/tenants/${tenant}`
-
-const ChooseContext = createContext<(tenant: string) => void>(() => undefined)
-/** Switches the page to a tenant, the default's dropping ?tenant=. */
-export const useChooseTenant = () => useContext(ChooseContext)
+import { ChooseContext, DEFAULT_TENANT, TENANT, tenantRoot } from "../../data/tenant"
 
 export function TenantScope({ children }: { readonly children: ReactNode }) {
   const outer = useData()

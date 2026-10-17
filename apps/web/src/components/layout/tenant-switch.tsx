@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useData } from "../../data/data-context"
 import { formatCount } from "../../lib/format"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { DEFAULT_TENANT, useChooseTenant } from "./tenant-scope"
+import { DEFAULT_TENANT, useChooseTenant } from "../../data/tenant"
 
 function useTenants() {
   const { dataRoot, root, fetchFn = fetch } = useData()
