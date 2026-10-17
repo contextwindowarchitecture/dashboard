@@ -386,3 +386,67 @@ export interface CWADashboardSession {
 
 /** https://contextwindowarchitecture.io/schema/dashboard/session.v1.schema.json */
 export type SessionV1 = CWADashboardSession
+
+export type Count = number
+
+/**
+ * What each producer sent the assemblers in the current window and what became of it, from the events' snapshots and traces: the batches it sent, the items in them, the items admitted and the tokens they took, the items compressed, and the items excluded by reason and stage. A producer is its id and kind together, as the snapshot's batch names it (R-15). Nothing here is estimated: the contract records no cost for an excluded item, so the report has no tokens kept out.
+ */
+export interface CWADashboardSourcesReport {
+  $schema: "cwa-dashboard/sources-report/v1"
+  generated_at: string
+  /**
+   * The events the report covers: the current window of the index, by recorded_at, and how many events that is.
+   */
+  window: {
+    from: string
+    to: string
+    events: number
+  }
+  /**
+   * One entry per producer, ordered by id, then kind.
+   */
+  producers: Producer[]
+}
+export interface Producer {
+  id: string
+  /**
+   * The batch's producer kind, one of the snapshot schema's.
+   */
+  kind: string
+  /**
+   * Assembled or refused events with a batch from this producer.
+   */
+  events: number
+  /**
+   * The items in its batches, across those events.
+   */
+  submitted: number
+  /**
+   * Of those, the items the trace includes, each counted once per event.
+   */
+  admitted: number
+  /**
+   * Of those, the items the trace compressed.
+   */
+  compressed: number
+  /**
+   * The tokens its included occurrences took, as the traces count them.
+   */
+  tokens_admitted: number
+  /**
+   * Its items the traces exclude, by reason code and stage, in the contract's reason order.
+   */
+  excluded: {
+    reason: string
+    stage: "producer" | "assembler"
+    items: Count
+  }[]
+  /**
+   * Events whose snapshot was rejected before assembly and held a batch from this producer.
+   */
+  rejected_events: number
+}
+
+/** https://contextwindowarchitecture.io/schema/dashboard/sources-report.v1.schema.json */
+export type SourcesReportV1 = CWADashboardSourcesReport

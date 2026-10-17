@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contextwindowarchitecture.io/schema/dashboard/sources-report.v1.schema.json",
+  "title": "CWA dashboard sources report",
+  "description": "What each producer sent the assemblers in the current window and what became of it, from the events' snapshots and traces: the batches it sent, the items in them, the items admitted and the tokens they took, the items compressed, and the items excluded by reason and stage. A producer is its id and kind together, as the snapshot's batch names it (R-15). Nothing here is estimated: the contract records no cost for an excluded item, so the report has no tokens kept out.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "generated_at", "window", "producers"],
+  "properties": {
+    "$schema": { "const": "cwa-dashboard/sources-report/v1" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "window": {
+      "description": "The events the report covers: the current window of the index, by recorded_at, and how many events that is.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "events"],
+      "properties": {
+        "from": { "type": "string", "format": "date-time" },
+        "to": { "type": "string", "format": "date-time" },
+        "events": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "producers": {
+      "description": "One entry per producer, ordered by id, then kind.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/producer" }
+    }
+  },
+  "$defs": {
+    "nonblank": { "type": "string", "pattern": "\\S" },
+    "count": { "type": "integer", "minimum": 0 },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "events",
+        "submitted",
+        "admitted",
+        "compressed",
+        "tokens_admitted",
+        "excluded",
+        "rejected_events"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonblank" },
+        "kind": {
+          "description": "The batch's producer kind, one of the snapshot schema's.",
+          "$ref": "#/$defs/nonblank"
+        },
+        "events": {
+          "description": "Assembled or refused events with a batch from this producer.",
+          "$ref": "#/$defs/count"
+        },
+        "submitted": {
+          "description": "The items in its batches, across those events.",
+          "$ref": "#/$defs/count"
+        },
+        "admitted": {
+          "description": "Of those, the items the trace includes, each counted once per event.",
+          "$ref": "#/$defs/count"
+        },
+        "compressed": {
+          "description": "Of those, the items the trace compressed.",
+          "$ref": "#/$defs/count"
+        },
+        "tokens_admitted": {
+          "description": "The tokens its included occurrences took, as the traces count them.",
+          "$ref": "#/$defs/count"
+        },
+        "excluded": {
+          "description": "Its items the traces exclude, by reason code and stage, in the contract's reason order.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reason", "stage", "items"],
+            "properties": {
+              "reason": { "$ref": "#/$defs/nonblank" },
+              "stage": { "enum": ["producer", "assembler"] },
+              "items": { "$ref": "#/$defs/count" }
+            }
+          }
+        },
+        "rejected_events": {
+          "description": "Events whose snapshot was rejected before assembly and held a batch from this producer.",
+          "$ref": "#/$defs/count"
+        }
+      }
+    }
+  }
+}

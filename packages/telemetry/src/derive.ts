@@ -11,6 +11,7 @@ import type {
   EventsIndexV1,
   FleetReportV1,
   SessionV1,
+  SourcesReportV1,
 } from "../generated/types.ts"
 import { profileDigest, routePolicyDigest } from "./registry-digest.ts"
 
@@ -359,4 +360,189 @@ export function fleetReport(events: readonly FleetFacts[], inputs: FleetInputs):
     })),
     services: serviceRows(events, inputs.contractFiles),
   }
+}
+
+// --- the sources report ------------------------------------------------------------------------
+
+type SourceRow = SourcesReportV1["producers"][number]
+type Excluded = SourceRow["excluded"][number]
+
+/** One event's counts per producer: enough to keep for every event a store holds. */
+export interface SourceFacts {
+  readonly recorded_at: string
+  /** The producers of an assembled or refused event, with what became of their items. */
+  readonly producers: readonly Omit<SourceRow, "events" | "rejected_events">[]
+  /** The producers of a snapshot rejected before assembly. */
+  readonly rejected: readonly { readonly id: string; readonly kind: string }[]
+}
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+// A batch's producer as it names itself, when the batch is well formed enough to.
+function producerOfBatch(batch: unknown) {
+  if (!isObject(batch) || !isObject(batch["producer"])) return undefined
+  const { id, kind } = batch["producer"]
+  return typeof id === "string" && typeof kind === "string" ? { id, kind } : undefined
+}
+
+/**
+ * An event's source facts. Each item belongs to the batch that holds it (the first, if two hold the
+ * same id), or that reports excluding it; a candidate with a blank id is recorded as
+ * "{producer}#invalid-{n}" (conformance/README.md).
+ */
+export function sourceFacts(event: AssemblyEventV1): SourceFacts {
+  if (event.trace === undefined || event.snapshot === undefined) {
+    const batches = isObject(event.rejection?.snapshot) ? event.rejection!.snapshot["batches"] : []
+    const seen = new Map<string, { id: string; kind: string }>()
+    for (const batch of Array.isArray(batches) ? batches : []) {
+      const producer = producerOfBatch(batch)
+      if (producer !== undefined) seen.set(`${producer.id} ${producer.kind}`, producer)
+    }
+    return { recorded_at: event.recorded_at, producers: [], rejected: [...seen.values()] }
+  }
+  type Counts = {
+    id: string
+    kind: string
+    submitted: number
+    admitted: Set<string>
+    compressed: Set<string>
+    tokens: number
+    excluded: Map<string, number>
+  }
+  const counts = new Map<string, Counts>()
+  const byItem = new Map<string, Counts>()
+  const reported = new Map<string, Counts>()
+  const byProducerId = new Map<string, Counts>()
+  for (const batch of event.snapshot.batches) {
+    const producer = producerOfBatch(batch)!
+    const key = `${producer.id} ${producer.kind}`
+    const entry = counts.get(key) ?? {
+      ...producer,
+      submitted: 0,
+      admitted: new Set<string>(),
+      compressed: new Set<string>(),
+      tokens: 0,
+      excluded: new Map<string, number>(),
+    }
+    counts.set(key, entry)
+    byProducerId.set(producer.id, entry)
+    for (const item of batch.items) {
+      entry.submitted += 1
+      const id = isObject(item) ? item["id"] : undefined
+      if (typeof id === "string" && !byItem.has(id)) byItem.set(id, entry)
+    }
+    for (const row of batch.excluded) reported.set(row.item_id, entry)
+  }
+  const ownerOf = (itemId: string) =>
+    byItem.get(itemId) ??
+    reported.get(itemId) ??
+    (itemId.includes("#invalid-")
+      ? byProducerId.get(itemId.slice(0, itemId.lastIndexOf("#invalid-")))
+      : undefined)
+  for (const occurrence of event.trace.included) {
+    const owner = ownerOf(occurrence.item_id)
+    if (owner === undefined) continue
+    owner.admitted.add(occurrence.item_id)
+    owner.tokens += occurrence.tokens
+  }
+  for (const row of event.trace.compressed) ownerOf(row.item_id)?.compressed.add(row.item_id)
+  for (const row of event.trace.excluded) {
+    const owner = ownerOf(row.item_id)
+    if (owner === undefined) continue
+    const key = `${row.reason}\u0000${row.stage}`
+    owner.excluded.set(key, (owner.excluded.get(key) ?? 0) + 1)
+  }
+  return {
+    recorded_at: event.recorded_at,
+    producers: [...counts.values()].map((entry) => ({
+      id: entry.id,
+      kind: entry.kind,
+      submitted: entry.submitted,
+      admitted: entry.admitted.size,
+      compressed: entry.compressed.size,
+      tokens_admitted: entry.tokens,
+      excluded: [...entry.excluded].map(([key, items]) => {
+        const [reason, stage] = key.split("\u0000") as [string, Excluded["stage"]]
+        return { reason, stage, items }
+      }),
+    })),
+    rejected: [],
+  }
+}
+
+/** The sources report over the given events' facts: the current window's, as the index's. */
+export function sourcesFromFacts(
+  facts: readonly SourceFacts[],
+  generatedAt: string,
+): SourcesReportV1 {
+  const rows = new Map<string, SourceRow & { excludedBy: Map<string, number> }>()
+  const row = (id: string, kind: string) => {
+    const key = `${id} ${kind}`
+    const existing = rows.get(key)
+    if (existing !== undefined) return existing
+    const created = {
+      id,
+      kind,
+      events: 0,
+      submitted: 0,
+      admitted: 0,
+      compressed: 0,
+      tokens_admitted: 0,
+      excluded: [],
+      rejected_events: 0,
+      excludedBy: new Map<string, number>(),
+    }
+    rows.set(key, created)
+    return created
+  }
+  for (const fact of facts) {
+    for (const producer of fact.producers) {
+      const target = row(producer.id, producer.kind)
+      target.events += 1
+      target.submitted += producer.submitted
+      target.admitted += producer.admitted
+      target.compressed += producer.compressed
+      target.tokens_admitted += producer.tokens_admitted
+      for (const { reason, stage, items } of producer.excluded) {
+        const key = `${reason}\u0000${stage}`
+        target.excludedBy.set(key, (target.excludedBy.get(key) ?? 0) + items)
+      }
+    }
+    for (const producer of fact.rejected) row(producer.id, producer.kind).rejected_events += 1
+  }
+  const times = facts.map((fact) => fact.recorded_at).sort()
+  const stageRank = (stage: string) => (stage === "producer" ? 0 : 1)
+  return {
+    $schema: "cwa-dashboard/sources-report/v1",
+    generated_at: generatedAt,
+    window: {
+      from: times[0] ?? generatedAt,
+      to: times.at(-1) ?? generatedAt,
+      events: facts.length,
+    },
+    producers: [...rows.values()]
+      .sort((a, b) =>
+        a.id < b.id ? -1 : a.id > b.id ? 1 : a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0,
+      )
+      .map(({ excludedBy, ...rest }) => ({
+        ...rest,
+        excluded: [...excludedBy]
+          .map(([key, items]) => {
+            const [reason, stage] = key.split("\u0000") as [string, Excluded["stage"]]
+            return { reason, stage, items }
+          })
+          .sort(
+            (a, b) => rank(a.reason) - rank(b.reason) || stageRank(a.stage) - stageRank(b.stage),
+          ),
+      })),
+  }
+}
+
+/** The sources report over the given events: the current window's, as the index's. */
+export function sourcesReport(
+  events: readonly AssemblyEventV1[],
+  generatedAt: string,
+): SourcesReportV1 {
+  return sourcesFromFacts(events.map(sourceFacts), generatedAt)
 }
