@@ -165,6 +165,34 @@ function components() {
   }
 }
 
+/**
+ * What an editor offers of a route policy and a profile (ADR-0013): each schema's top-level
+ * properties, in its order, with its names, descriptions and requirements, and how each is edited.
+ */
+function fields(file) {
+  const schema = read(`schema/${file}.schema.json`)
+  return Object.entries(schema.properties).map(([name, property]) => {
+    const kind = Array.isArray(property.enum)
+      ? "enum"
+      : "const" in property
+        ? "const"
+        : ["string", "integer", "boolean"].includes(property.type)
+          ? property.type
+          : "json"
+    return {
+      name,
+      kind,
+      required: (schema.required ?? []).includes(name),
+      description: property.description ?? "",
+      ...(kind === "enum"
+        ? { values: property.enum }
+        : kind === "const"
+          ? { values: [property.const] }
+          : {}),
+    }
+  })
+}
+
 function generateData() {
   const lock = JSON.parse(readFileSync(join(ROOT, "vendor/cwa.lock.json"), "utf8"))
   const source = { repository: lock.repository, commit: lock.spec_commit, dirty: lock.dirty }
@@ -190,6 +218,21 @@ export const SCOPE = ${json(read("contract/assembler-scope.json"))} as const
 
 /** conformance/README.md, Tokenizers and renderers: every published one, and whether every implementation must provide it. */
 export const COMPONENTS = ${json(components())} as const
+
+/** A top-level field of a route policy or a profile, as an editor offers it (ADR-0013). */
+export interface Field {
+  readonly name: string
+  /** How it is edited: as a scalar, a choice of values, a fixed value, or JSON. */
+  readonly kind: "string" | "integer" | "boolean" | "enum" | "const" | "json"
+  readonly required: boolean
+  readonly description: string
+  /** An enum's values, or a const's one. */
+  readonly values?: readonly unknown[]
+}
+
+/** schema/route_policy.schema.json and schema/profile.schema.json: the top-level fields an editor offers (ADR-0013). */
+export const FIELDS: { readonly route_policy: readonly Field[]; readonly profile: readonly Field[] } =
+  ${json({ route_policy: fields("route_policy"), profile: fields("profile") })}
 
 /** implementations/index.json: each implementation's id and label, without its report. */
 export const IMPLEMENTATION_INDEX = ${json(read("implementations/index.json"))} as const

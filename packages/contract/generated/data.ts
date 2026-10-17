@@ -999,6 +999,154 @@ export const COMPONENTS = {
   ]
 } as const
 
+/** A top-level field of a route policy or a profile, as an editor offers it (ADR-0013). */
+export interface Field {
+  readonly name: string
+  /** How it is edited: as a scalar, a choice of values, a fixed value, or JSON. */
+  readonly kind: "string" | "integer" | "boolean" | "enum" | "const" | "json"
+  readonly required: boolean
+  readonly description: string
+  /** An enum's values, or a const's one. */
+  readonly values?: readonly unknown[]
+}
+
+/** schema/route_policy.schema.json and schema/profile.schema.json: the top-level fields an editor offers (ADR-0013). */
+export const FIELDS: { readonly route_policy: readonly Field[]; readonly profile: readonly Field[] } =
+  {
+  "route_policy": [
+    {
+      "name": "route",
+      "kind": "string",
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "version",
+      "kind": "string",
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "clock_skew_seconds",
+      "kind": "integer",
+      "required": false,
+      "description": "Tolerance for producer clocks: freshness may exceed assembly_time by this much before the item is excluded as future_freshness. Default 0."
+    },
+    {
+      "name": "parser",
+      "kind": "boolean",
+      "required": false,
+      "description": "A downstream parser consumes this route's responses, so assembly refuses with required_slot_missing when no governance.output_contract item is admitted (R-4). Default false."
+    },
+    {
+      "name": "requires_evidence",
+      "kind": "boolean",
+      "required": false,
+      "description": "Assembly refuses with evidence_required when fitting leaves no evidence.knowledge or evidence.tool_results item, or fewer items in an evidence slot than its min_included (R-12). Default false."
+    },
+    {
+      "name": "on_unresolved_instruction",
+      "kind": "enum",
+      "required": false,
+      "description": "What assembly does with an instruction conflict group that has no unique supported resolution (R-11): surface keeps every member and marks it in the payload, request_context and refuse refuse with conflict_unresolved. Default refuse.",
+      "values": [
+        "surface",
+        "request_context",
+        "refuse"
+      ]
+    },
+    {
+      "name": "producers",
+      "kind": "json",
+      "required": true,
+      "description": "Producers this route admits, keyed by the identity the application authenticated. Items from any other producer, or from a producer listed with another kind, are excluded with producer_not_authenticated (R-15)."
+    },
+    {
+      "name": "slots",
+      "kind": "json",
+      "required": false,
+      "description": "Per-slot rules: the route's executable eligibility predicate (R-3) and its fitting policy (R-16)."
+    },
+    {
+      "name": "default_overrides",
+      "kind": "json",
+      "required": false,
+      "description": "Route replacements for slot defaults, applied when an item omits a policy field (R-3)."
+    },
+    {
+      "name": "tier_upgrades",
+      "kind": "json",
+      "required": false,
+      "description": "Tiers this route raises above the slot default; items cannot raise their own (R-16). A value at or below the default changes nothing: the effective tier is the higher of the two."
+    },
+    {
+      "name": "fitting_order",
+      "kind": "json",
+      "required": false,
+      "description": "The order in which compressible items are reduced: under budget pressure, once every droppable item a slot floor does not hold is gone, and, for the steps that name a slot, while that slot's max_tokens cap is enforced (R-16). Item token_budget caps apply first, whether or not the payload fits. Each step compresses (selects supplied variants for) or omits one slot's compressible items, lowest-ranked first, until the payload fits or the slot is within its cap; under budget pressure a slot floor can withhold a reduction (conformance/README.md, Fitting). Steps the route does not list follow in the default order: compress each slot, then omit each slot, both in shedding order. With no steps, variants always come before omission."
+    },
+    {
+      "name": "facts",
+      "kind": "json",
+      "required": false,
+      "description": "Factual precedence, keyed by the fact key that fact conflict groups name (R-6, R-11). Instruction authority never ranks facts."
+    }
+  ],
+  "profile": [
+    {
+      "name": "spec",
+      "kind": "const",
+      "required": true,
+      "description": "The specification this profile was written for: \"cwa/draft\" until the first release, then \"cwa/1\". A profile for another specification is invalid (R-19).",
+      "values": [
+        "cwa/draft"
+      ]
+    },
+    {
+      "name": "id",
+      "kind": "string",
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "version",
+      "kind": "integer",
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "route",
+      "kind": "string",
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "model_family",
+      "kind": "json",
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "route_policy_version",
+      "kind": "string",
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "placement",
+      "kind": "json",
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "evaluation",
+      "kind": "json",
+      "required": true,
+      "description": ""
+    }
+  ]
+}
+
 /** implementations/index.json: each implementation's id and label, without its report. */
 export const IMPLEMENTATION_INDEX = [
   {

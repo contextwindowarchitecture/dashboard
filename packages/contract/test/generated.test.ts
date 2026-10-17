@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest"
 import {
   COMPONENTS,
   CONTRACT_SOURCE,
+  FIELDS,
   IMPLEMENTATION_INDEX,
   MODEL,
   REASONS,
@@ -222,5 +223,42 @@ describe("generate --check", () => {
     } finally {
       writeFileSync(path, original)
     }
+  })
+})
+
+describe("FIELDS: what an editor offers of a route policy and a profile (ADR-0013)", () => {
+  const schema = (name: string) =>
+    JSON.parse(readFileSync(join(vendor, "schema", `${name}.schema.json`), "utf8")) as {
+      required: string[]
+      properties: Record<string, Record<string, unknown>>
+    }
+
+  it("is each schema's top-level properties, in its order, with its names, descriptions and requirements", () => {
+    for (const [kind, file] of [
+      ["route_policy", "route_policy"],
+      ["profile", "profile"],
+    ] as const) {
+      const { required, properties } = schema(file)
+      expect(FIELDS[kind].map((f) => f.name)).toEqual(Object.keys(properties))
+      for (const field of FIELDS[kind]) {
+        const property = properties[field.name]!
+        expect(field.required, field.name).toBe(required.includes(field.name))
+        expect(field.description, field.name).toBe(property["description"] ?? "")
+      }
+    }
+  })
+
+  it("says how each is edited: as a scalar, a choice, a fixed value, or JSON", () => {
+    const of = (kind: "route_policy" | "profile", name: string) =>
+      FIELDS[kind].find((f) => f.name === name)!
+    expect(of("route_policy", "route").kind).toBe("string")
+    expect(of("route_policy", "clock_skew_seconds").kind).toBe("integer")
+    expect(of("route_policy", "parser").kind).toBe("boolean")
+    expect(of("route_policy", "on_unresolved_instruction")).toMatchObject({ kind: "enum" })
+    expect(of("route_policy", "on_unresolved_instruction").values!.length).toBeGreaterThan(1)
+    expect(of("route_policy", "slots").kind).toBe("json")
+    expect(of("profile", "spec")).toMatchObject({ kind: "const", values: ["cwa/draft"] })
+    expect(of("profile", "placement").kind).toBe("json")
+    expect(of("profile", "model_family").kind).toBe("json")
   })
 })
