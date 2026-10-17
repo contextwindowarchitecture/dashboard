@@ -160,6 +160,11 @@ export const ROUTES: RouteObject[] = [
         handle: handle("Compliance", () => "Compliance"),
       },
       {
+        path: "authoring",
+        lazy: () => import("./pages/authoring"),
+        handle: handle("Authoring", () => "Authoring"),
+      },
+      {
         path: "shadow",
         lazy: () => import("./pages/shadow"),
         handle: handle("Shadow", () => "Shadow"),

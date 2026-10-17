@@ -802,3 +802,58 @@ test("the telemetry and about pages read in both themes and at a phone's width",
     await expectAccessible(page)
   }
 })
+
+test("an owner drafts a profile, saves it, finds it again and previews it, in both themes and at 400px", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium-api", "drafts are kept in PostgreSQL, with sign-in")
+  await page.goto("/authoring")
+  await expect(page.getByRole("region", { name: "Sign in to draft" })).toBeVisible()
+  await expectAccessible(page)
+  await page.getByRole("banner").getByRole("link", { name: "sign in" }).click()
+  await expect(page).toHaveURL(/\/authoring$/)
+  await page.getByRole("combobox", { name: "Start from" }).click()
+  await page.getByRole("option", { name: /^Profile policy-first-chat v1/ }).click()
+  await page.getByRole("button", { name: "Start a draft" }).click()
+  await expect(page).toHaveURL(/\/authoring\?draft=[0-9a-f-]{36}$/)
+  const version = page.getByLabel("version", { exact: true })
+  await version.fill("9")
+  await expect(page.getByRole("table", { name: "Changes" })).toContainText("/version")
+  await page.getByRole("button", { name: "Save" }).click()
+  await expect(page.getByRole("status").filter({ hasText: "Saved at" })).toBeVisible()
+  await expectAccessible(page)
+  // Kept in the service, not the browser: a reload reads it back.
+  await page.reload()
+  await expect(version).toHaveValue("9")
+  const replay = page.getByRole("region", { name: "Replay an event" })
+  await replay.getByRole("combobox", { name: "Event" }).click()
+  await page.getByRole("option").first().click()
+  await replay.getByRole("button", { name: "Replay" }).click()
+  await expect(
+    replay
+      .getByRole("table", { name: "Replay result" })
+      .getByRole("row", { name: /^With the draft/ }),
+  ).toContainText(/assembled|refused|rejected/)
+  const shadow = page.getByRole("region", { name: "Shadow a corpus" })
+  await shadow.getByRole("combobox", { name: "Corpus" }).click()
+  await page.getByRole("option", { name: new RegExp(`^${E2E_CORPUS}`) }).click()
+  await shadow.getByRole("button", { name: "Shadow" }).click()
+  await expect(shadow.getByRole("region", { name: "Shadow report" })).toBeVisible()
+  await expectAccessible(page)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.reload()
+  await expect(version).toHaveValue("9")
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+  // The list names it; deleting it takes it off.
+  await page.getByRole("link", { name: "All your drafts" }).click()
+  const drafts = page.getByRole("table", { name: "Your drafts" })
+  await expect(drafts.getByRole("link", { name: "support-chat" }).first()).toBeVisible()
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+  await page.goBack()
+  await page.getByRole("button", { name: "Delete", exact: true }).click()
+  await page.getByRole("button", { name: "Delete the draft for good" }).click()
+  await expect(page).toHaveURL(/\/authoring$/)
+})

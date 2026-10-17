@@ -42,6 +42,7 @@ const PAGES = [
   "/compliance",
   "/shadow",
   `/shadow?corpus=${E2E_CORPUS}`,
+  "/authoring",
   "/conflicts?event=01M4YZXVT0N9BECJFQPP1EDDVP",
   "/guardrails",
   "/guardrails/05",
