@@ -41,6 +41,14 @@ spec:
                   name: dashboard-ingest
                   key: token
                   optional: true
+            # The Ed25519 key compliance bundles are signed with (deploy/README.md); without the secret
+            # the service signs none and says so.
+            - name: SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-signing
+                  key: key.pem
+                  optional: true
           readinessProbe:
             httpGet:
               path: /healthz

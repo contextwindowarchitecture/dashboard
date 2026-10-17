@@ -65,3 +65,19 @@ describe("the deployment's route", () => {
     expect(route).toMatch(/^\s+haproxy\.router\.openshift\.io\/disable_cookies: "true"$/m)
   })
 })
+
+describe("the deployment's ingest service", () => {
+  it("signs with the key in the secret dashboard-signing when there is one, and runs without it", () => {
+    const ingest = readFileSync(
+      resolve(import.meta.dirname, "../../../deploy/base/ingest.yaml"),
+      "utf8",
+    )
+    const env = ingest.slice(
+      ingest.indexOf("- name: SIGNING_KEY"),
+      ingest.indexOf("- name: SIGNING_KEY") + 260,
+    )
+    expect(env).toMatch(/name: dashboard-signing/)
+    expect(env).toMatch(/key: key\.pem/)
+    expect(env).toMatch(/optional: true/)
+  })
+})

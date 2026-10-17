@@ -123,3 +123,26 @@ oc -n cwa-dashboard exec -i statefulset/dashboard-postgres -- pg_restore -U cwa 
 ```
 
 Keep the dumps off the cluster; the claim is node-local storage on a single node.
+
+## Compliance bundles
+
+`GET /api/bundles/<event id>.json` signs a compliance bundle for a stored event with an Ed25519 key, and `GET /api/signing-key.pem` serves the public key that checks it. Without a key both answer 503 and the compliance page says so. The key is the secret `dashboard-signing`, read as `SIGNING_KEY`:
+
+```sh
+openssl genpkey -algorithm ed25519 -out dashboard-signing.pem
+oc -n cwa-dashboard create secret generic dashboard-signing --from-file=key.pem=dashboard-signing.pem
+oc -n cwa-dashboard rollout restart deployment/dashboard-ingest
+```
+
+Keep the private key off the cluster only as long as it takes to create the secret. Locally, `SIGNING_KEY="$(cat dashboard-signing.pem)" podman compose up` passes one to the service.
+
+A reader checks a bundle without the dashboard, with Node and this repository's script, against the public key the dashboard served:
+
+```sh
+curl -sO https://dashboard.contextwindowarchitecture.io/api/bundles/<event id>.json
+curl -s https://dashboard.contextwindowarchitecture.io/api/signing-key.pem > signing-key.pem
+node deploy/verify-bundle.mjs <event id>.json signing-key.pem
+```
+
+**Rotating the key**: create a new secret value and restart the service. Every bundle names its key's id (the SHA-256 of the public key), so a bundle signed before the rotation still verifies against the old public key: keep each retired public key where readers can find it, beside the date it was retired.
+

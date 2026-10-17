@@ -27,6 +27,8 @@ services:
         condition: service_completed_successfully
     environment:
       INGEST_TOKEN: ${INGEST_TOKEN:-local-dev-token}
+      # An Ed25519 PKCS #8 PEM to sign compliance bundles with; unset, the service signs none.
+      SIGNING_KEY: ${SIGNING_KEY:-}
     ports:
       - "${INGEST_PORT:-8090}:8090"
     volumes:
