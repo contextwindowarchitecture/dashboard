@@ -1,0 +1,23 @@
+# dashboard.contextwindowarchitecture.io with its events in PostgreSQL (ADR-0007): the production overlay plus the
+# postgres component, the database's claim on the single node's storage class. `oc apply -k` this instead of
+# deploy/overlays/prod to switch; deploy/README.md says how, and how to seed and back up the store.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# The component's own objects take the namespace here; the production overlay's take it there.
+namespace: cwa-dashboard
+
+resources:
+  - ../prod
+
+components:
+  - ../../components/postgres
+
+patches:
+  - target:
+      kind: StatefulSet
+      name: dashboard-postgres
+    patch: |
+      - op: add
+        path: /spec/volumeClaimTemplates/0/spec/storageClassName
+        value: lvms-nvme-vg

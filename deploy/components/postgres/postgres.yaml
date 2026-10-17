@@ -1,0 +1,78 @@
+# PostgreSQL for the ingest service's store (ADR-0007): one instance, its data on a claim of its own. The Software
+# Collections image runs under any UID, as OpenShift's restricted policy requires; it is pinned to a weekly build by
+# its multi-architecture digest. User, password and database come from the secret dashboard-postgres, created by hand
+# (deploy/README.md).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dashboard-postgres
+  labels:
+    app.kubernetes.io/name: dashboard-postgres
+spec:
+  serviceName: dashboard-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dashboard-postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dashboard-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: quay.io/sclorg/postgresql-16-c9s:20260930@sha256:d33717fd33c1a4b11afef94568d0c20812a19d62fb8c633fadee1e491e2edd4a
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRESQL_USER
+              valueFrom: { secretKeyRef: { name: dashboard-postgres, key: user } }
+            - name: POSTGRESQL_PASSWORD
+              valueFrom: { secretKeyRef: { name: dashboard-postgres, key: password } }
+            - name: POSTGRESQL_DATABASE
+              valueFrom: { secretKeyRef: { name: dashboard-postgres, key: database } }
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-h", "127.0.0.1", "-p", "5432"]
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-h", "127.0.0.1", "-p", "5432"]
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/pgsql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-postgres
+  labels:
+    app.kubernetes.io/name: dashboard-postgres
+spec:
+  selector:
+    app.kubernetes.io/name: dashboard-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

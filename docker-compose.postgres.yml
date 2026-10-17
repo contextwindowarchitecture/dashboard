@@ -1,0 +1,50 @@
+# The local stack with its events in PostgreSQL (ADR-0007), layered on docker-compose.yml:
+#
+#   podman compose -f docker-compose.yml -f docker-compose.postgres.yml up --build
+#
+# PostgreSQL in a volume of its own; the ingest service keeps events there (DATABASE_URL) and serves the documents at
+# /api/data, which config.json points the app at; a first run posts the demo tree's events into it through
+# POST /events. POSTGRES_PASSWORD sets the database password.
+services:
+  postgres:
+    image: quay.io/sclorg/postgresql-16-c9s:20260930@sha256:d33717fd33c1a4b11afef94568d0c20812a19d62fb8c633fadee1e491e2edd4a
+    environment:
+      POSTGRESQL_USER: cwa
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-postgres}
+      POSTGRESQL_DATABASE: cwa
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432"]
+      interval: 2s
+      retries: 30
+    volumes:
+      - postgres:/var/lib/pgsql/data
+
+  dashboard-ingest:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://cwa:${POSTGRES_PASSWORD:-local-dev-postgres}@postgres:5432/cwa
+
+  # Posts the demo tree's events to the store once it answers; an event already there answers 409.
+  seed-postgres:
+    image: localhost/dashboard-ingest:dev
+    depends_on:
+      dashboard-ingest:
+        condition: service_started
+    environment:
+      INGEST_TOKEN: ${INGEST_TOKEN:-local-dev-token}
+    command:
+      - node
+      - /seed-events.mjs
+      - /app/packages/demo-traffic/fixtures/events
+      - http://dashboard-ingest:8090
+    volumes:
+      - ./deploy/seed-events.mjs:/seed-events.mjs:ro,Z
+
+  web:
+    volumes:
+      - ./deploy/components/postgres/config.json:/opt/app-root/src/config.json:ro,Z
+
+volumes:
+  postgres: {}

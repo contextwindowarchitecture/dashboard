@@ -89,3 +89,37 @@ The host must resolve to the cluster's router before cert-manager can answer Let
 ## Not here yet
 
 Phase 2's query API, collector and database (`dashboard-plan.md` 12) are not part of this stack. Nothing here sends real traffic: the deployment shows demo traffic only (D11).
+
+## Events in PostgreSQL
+
+The ingest service can keep events in PostgreSQL instead of the tree (`docs/adr/0007-store-and-query-api.md`). The pages read the same documents either way; only where they come from changes: `config.json`'s `dataRoot` is `/api/data`, served by the service from the database.
+
+On one machine, layer `docker-compose.postgres.yml` on the stack: it adds PostgreSQL (the Software Collections image, which runs under any UID, pinned by digest), gives the ingest service `DATABASE_URL`, points the app at `/api/data`, and on a first run posts the demo tree's events through `POST /events` (`deploy/seed-events.mjs`; an event already there answers 409):
+
+```sh
+podman compose -f docker-compose.yml -f docker-compose.postgres.yml up --build
+```
+
+On the cluster, `deploy/overlays/prod-postgres` is the production overlay plus `deploy/components/postgres`: a one-replica StatefulSet with its own claim, its Service, the ingest service's `DATABASE_URL` built from the secret `dashboard-postgres`, and the `/api/data` config. Switching to it:
+
+```sh
+# Once: the database's user, password and name. The password is hex, so DATABASE_URL needs no escaping.
+oc -n cwa-dashboard create secret generic dashboard-postgres \
+  --from-literal=user=cwa --from-literal=password="$(openssl rand -hex 24)" --from-literal=database=cwa
+oc apply -k deploy/overlays/prod-postgres
+oc -n cwa-dashboard rollout status statefulset/dashboard-postgres
+oc -n cwa-dashboard rollout status deployment/dashboard-ingest
+# The demo traffic, posted as a wrapper would, with the ingest token:
+node deploy/seed-events.mjs packages/demo-traffic/fixtures/events https://dashboard.contextwindowarchitecture.io/api --token "$INGEST_TOKEN"
+```
+
+Applying `deploy/overlays/prod` again switches back to the tree; the StatefulSet and its claim stay until deleted by hand.
+
+**Backups.** A custom-format dump, taken and restored inside the database's pod (or container, with `podman exec`), which the compose stack's round trip proved on 2026-10-17 (112 events dumped, the tables dropped, all 112 restored and served):
+
+```sh
+oc -n cwa-dashboard exec statefulset/dashboard-postgres -- pg_dump -U cwa -d cwa -Fc > cwa-$(date -u +%Y%m%d).dump
+oc -n cwa-dashboard exec -i statefulset/dashboard-postgres -- pg_restore -U cwa -d cwa --clean --if-exists < cwa-<day>.dump
+```
+
+Keep the dumps off the cluster; the claim is node-local storage on a single node.
