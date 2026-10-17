@@ -14,7 +14,7 @@
 // a dashboard that does not answer): a check that cannot run never passes.
 
 import { spawnSync } from "node:child_process"
-import { readdirSync, readFileSync } from "node:fs"
+import { mkdirSync, readdirSync, readFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 
@@ -35,6 +35,7 @@ const root = resolve(option("--root") ?? ".")
 const base = option("--base")
 if (!base) cannot("usage: policy-check.mjs --base <git ref> [--root .] [--config shadow.json]")
 const reportDir = option("--report-dir") ?? tmpdir()
+mkdirSync(reportDir, { recursive: true })
 
 const git = (...command) => {
   const run = spawnSync("git", command, { cwd: root, encoding: "utf8" })

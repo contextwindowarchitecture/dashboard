@@ -111,9 +111,12 @@ const PUBLISHED_PATH = `profiles/${PROFILE.id}/${PROFILE.version}.json`
 describe("the policy repository's check", () => {
   it("passes a new version that holds what its path names, shadowed within its limits", async () => {
     const root = repository({ [PUBLISHED_PATH]: PROFILE }, { [NEXT_PATH]: NEXT })
-    const { code, out } = await check(root)
+    const reports = join(mkdtempSync(join(tmpdir(), "cwa-reports-")), "not", "yet")
+    const { code, out } = await check(root, "--report-dir", reports)
     expect(out).toContain(`${NEXT_PATH}: shadowed over chat`)
     expect(code).toBe(0)
+    // Each route's report, for the workflow's artifact, in a directory made for it.
+    expect(readdirSync(reports)).toEqual([`shadow-report-${PROFILE.route}.json`])
   }, 60_000)
 
   it("shadows a route's changed route policy and profile together", async () => {
