@@ -12,7 +12,8 @@ import { COMPONENTS } from "@cwa-dashboard/contract/data"
 
 import { ReplayTimeoutError, type Runner } from "./runner.ts"
 import { buildBundle, type SigningKey } from "./bundle.ts"
-import type { EventStore as Store } from "./event-store.ts"
+import { CORPUS_NAME, type EventStore as Store } from "./event-store.ts"
+import { shadowReport, type Candidate } from "./shadow.ts"
 
 export interface IngestOptions {
   readonly runner: Runner
@@ -27,6 +28,9 @@ export interface IngestOptions {
   /** The Ed25519 key compliance bundles are signed with; without it none is signed. */
   readonly signingKey?: SigningKey
 }
+
+/** A corpus's most events (ADR-0008): a shadow run is two replays an event. */
+const MAX_CORPUS = 200
 
 function send(
   response: ServerResponse,
@@ -234,6 +238,144 @@ export function createIngestServer(options: IngestOptions): Server {
     }
   }
 
+  // Corpora (ADR-0008): frozen with the ingest token, at most MAX_CORPUS events, read by anyone.
+  async function corporaPost(request: IncomingMessage, response: ServerResponse) {
+    const { store, token } = options
+    if (store === undefined) {
+      return fail(response, 503, "not-configured", [
+        "No event store: set DATABASE_URL or EVENTS_DIR.",
+      ])
+    }
+    if (token === undefined || token === "") {
+      return fail(response, 503, "not-configured", ["No token: set INGEST_TOKEN to take writes."])
+    }
+    if (!authorised(request, token)) {
+      response.setHeader("www-authenticate", "Bearer")
+      return fail(response, 401, "unauthorised", ["Send the ingest token as a bearer token."])
+    }
+    const body = await readJsonBody(request, response, options.maxBodyBytes, "corpus")
+    if (!body.ok) return
+    const {
+      name,
+      event_ids: given,
+      from,
+    } = (body.value ?? {}) as {
+      name?: unknown
+      event_ids?: unknown
+      from?: { route?: unknown; outcome?: unknown; limit?: unknown }
+    }
+    if (typeof name !== "string" || !CORPUS_NAME.test(name)) {
+      return fail(response, 400, "invalid", [
+        "name must be lowercase letters, digits, dots, dashes or underscores, at most 64.",
+      ])
+    }
+    let ids: string[]
+    if (Array.isArray(given)) ids = given.map(String)
+    else {
+      const limit = typeof from?.limit === "number" ? Math.min(from.limit, MAX_CORPUS) : MAX_CORPUS
+      ids = (await store.index()).events
+        .filter((row) => from?.route === undefined || row.route === from.route)
+        .filter((row) => from?.outcome === undefined || row.outcome === from.outcome)
+        .slice(0, limit)
+        .map((row) => row.event_id)
+    }
+    if (ids.length === 0) return fail(response, 400, "invalid", ["The corpus names no event."])
+    if (ids.length > MAX_CORPUS) {
+      return fail(response, 400, "invalid", [`A corpus holds at most ${MAX_CORPUS} events.`])
+    }
+    const events = await Promise.all(ids.map((id) => store.event(id)))
+    const missing = ids.filter((_, i) => events[i] === undefined)
+    if (missing.length > 0) {
+      return fail(response, 400, "invalid", [`The store holds no event ${missing.join(", ")}.`])
+    }
+    const corpus = {
+      $schema: "cwa-dashboard/corpus/v1" as const,
+      name,
+      created_at: new Date().toISOString(),
+      events: events.map((event) => ({
+        event_id: event!.event_id,
+        ...(event!.trace ? { snapshot_digest: event!.trace.context.snapshot_digest } : {}),
+      })),
+    }
+    if ((await store.saveCorpus(corpus)) === "exists") {
+      return fail(response, 409, "duplicate", [
+        `A corpus ${name} exists; a corpus is never overwritten.`,
+      ])
+    }
+    return send(response, 201, { ok: true, name, events: corpus.events.length })
+  }
+
+  // One shadow run at a time: each is many replays, and a public deployment answers anyone.
+  let shadowing = false
+  async function shadowPost(request: IncomingMessage, response: ServerResponse) {
+    const { store } = options
+    if (store === undefined) {
+      return fail(response, 503, "not-configured", [
+        "No event store: set DATABASE_URL or EVENTS_DIR.",
+      ])
+    }
+    const body = await readJsonBody(request, response, options.maxBodyBytes, "shadow request")
+    if (!body.ok) return
+    const { corpus: name, candidate } = (body.value ?? {}) as {
+      corpus?: unknown
+      candidate?: Candidate
+    }
+    const isObject = (value: unknown) =>
+      typeof value === "object" && value !== null && !Array.isArray(value)
+    if (
+      !isObject(candidate) ||
+      (!isObject(candidate!.route_policy) && !isObject(candidate!.profile))
+    ) {
+      return fail(response, 400, "invalid", [
+        "candidate must hold a route_policy, a profile, or both.",
+      ])
+    }
+    const corpus = typeof name === "string" ? await store.corpus(name) : undefined
+    if (corpus === undefined)
+      return fail(response, 404, "not-found", [`No corpus ${String(name)}.`])
+    if (shadowing)
+      return fail(response, 503, "busy", ["A shadow run is under way; try again shortly."])
+    shadowing = true
+    try {
+      const report = await shadowReport(
+        { name: corpus.name, event_ids: corpus.events.map((e) => e.event_id) },
+        {
+          candidate: candidate!,
+          load: (id) => store.event(id),
+          run: (snapshot) => options.runner.run(snapshot),
+          generatedAt: new Date().toISOString(),
+        },
+      )
+      return send(response, 200, report)
+    } catch (error) {
+      if (error instanceof ReplayTimeoutError)
+        return fail(response, 504, "timeout", [error.message])
+      throw error
+    } finally {
+      shadowing = false
+    }
+  }
+
+  async function corporaGet(path: string, response: ServerResponse) {
+    const { store } = options
+    if (store === undefined) {
+      return fail(response, 503, "not-configured", [
+        "No event store: set DATABASE_URL or EVENTS_DIR.",
+      ])
+    }
+    if (path === "/corpora.json")
+      return send(
+        response,
+        200,
+        { corpora: await store.corpora() },
+        { "cache-control": "no-cache" },
+      )
+    const match = /^\/corpora\/([^/]+)\.json$/.exec(path)
+    const corpus = match === null ? undefined : await store.corpus(decodeURIComponent(match[1]!))
+    if (corpus === undefined) return fail(response, 404, "not-found", [`No corpus at ${path}.`])
+    return send(response, 200, corpus, { "cache-control": "no-cache" })
+  }
+
   return createServer((request, response) => {
     const path = new URL(request.url ?? "/", "http://localhost").pathname
     const route = async () => {
@@ -248,6 +390,18 @@ export function createIngestServer(options: IngestOptions): Server {
       if (path === "/events") {
         if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
         return eventsRoute(request, response)
+      }
+      if (path === "/corpora") {
+        if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
+        return corporaPost(request, response)
+      }
+      if (path === "/corpora.json" || path.startsWith("/corpora/")) {
+        if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
+        return corporaGet(path, response)
+      }
+      if (path === "/shadow") {
+        if (request.method !== "POST") return send(response, 405, { ok: false }, { allow: "POST" })
+        return shadowPost(request, response)
       }
       if (path === "/signing-key.pem") {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
