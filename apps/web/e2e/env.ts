@@ -22,3 +22,6 @@ export const SIGNING_KEY = generateKeyPairSync("ed25519")
 
 /** The corpus the shadow page's tests replay, frozen by e2e/corpus.setup.ts. */
 export const E2E_CORPUS = "e2e-chat"
+
+/** The operator token the ingest service resolves vaulted bodies with in the browser tests. */
+export const VAULT_TOKEN = "e2e-vault-token"

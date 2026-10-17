@@ -2,13 +2,13 @@
 // axe finds nothing, and nothing scrolls sideways at a phone's width. It grows with every page.
 
 import { spawnSync } from "node:child_process"
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs"
+import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 
 import type { Page } from "@playwright/test"
 
-import { E2E_CORPUS } from "./env"
+import { E2E_CORPUS, VAULT_TOKEN } from "./env"
 import { expect, expectAccessible, expectNoSidewaysScroll, test } from "./support"
 
 // The demo tree's event count, from its index, so the tests follow the tree when it grows.
@@ -345,6 +345,56 @@ test("a shadow run shows what a candidate profile changes, in both themes and at
   await page.getByRole("option", { name: /^Profile policy-first-chat v1/ }).click()
   await page.getByRole("button", { name: "Shadow" }).click()
   await expect(report.getByRole("table", { name: "Events" })).toContainText("changed")
+  await expectNoSidewaysScroll(page)
+  await expectAccessible(page)
+})
+
+test("an operator resolves a vaulted body with the token, in both themes and at 400px", async ({
+  page,
+  pageErrors: seen,
+}) => {
+  test.skip(!!process.env["PLAYWRIGHT_BASE_URL"], "the operator token is the deployment's")
+  const events = resolve(import.meta.dirname, "../../../packages/demo-traffic/fixtures/events")
+  const vaulted = readdirSync(events)
+    .filter((name) => name !== "index.json")
+    .map(
+      (name) =>
+        JSON.parse(readFileSync(join(events, name), "utf8")) as {
+          event_id: string
+          outcome: string
+          vault?: { base: string }
+        },
+    )
+    .find((event) => event.vault !== undefined && event.outcome === "assembled")!
+  const resolveOne = async () => {
+    await page.goto(`/traces/${vaulted.event_id}`)
+    const vault = page.getByRole("region", { name: "Vault" })
+    await expect(vault).toContainText(vaulted.vault!.base)
+    await vault.getByLabel("Operator token").fill(VAULT_TOKEN)
+    await vault.getByRole("button", { name: "Use the token" }).click()
+    await page.getByText("body redacted · digest_only").first().click()
+    await page.getByRole("button", { name: "Resolve from the vault" }).first().click()
+    await expect(page.getByRole("region", { name: "Resolved body" })).toContainText(
+      "SHA-256 checked",
+    )
+  }
+  await resolveOne()
+  await expectAccessible(page)
+  // A wrong token is refused by the service, and nothing is shown.
+  await page.goto(`/traces/${vaulted.event_id}`)
+  const vault = page.getByRole("region", { name: "Vault" })
+  await vault.getByLabel("Operator token").fill("not-the-token")
+  await vault.getByRole("button", { name: "Use the token" }).click()
+  await page.getByText("body redacted · digest_only").first().click()
+  await page.getByRole("button", { name: "Resolve from the vault" }).first().click()
+  await expect(page.getByRole("alert")).toContainText("refused the token")
+  // The refused request is logged as a failed load; that one error is expected, no other.
+  const refused = seen.filter((message) => /status of 401/.test(message))
+  expect(refused).toHaveLength(1)
+  seen.splice(seen.indexOf(refused[0]!), 1)
+  await page.addInitScript(() => window.localStorage.setItem("cwa-theme", "dark"))
+  await page.setViewportSize({ width: 400, height: 800 })
+  await resolveOne()
   await expectNoSidewaysScroll(page)
   await expectAccessible(page)
 })

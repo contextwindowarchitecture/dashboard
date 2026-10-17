@@ -8,13 +8,18 @@ import { join, resolve } from "node:path"
 
 import { defineConfig, devices } from "@playwright/test"
 
-import { INGEST_PORT, INGEST_TOKEN, SIGNING_KEY } from "./e2e/env.ts"
+import { INGEST_PORT, INGEST_TOKEN, SIGNING_KEY, VAULT_TOKEN } from "./e2e/env.ts"
 
 const port = 4173
 // The tree the preview serves and the service writes into: a copy of the committed demo tree, so a
 // test that posts an event never writes into the repository. Only the ingest project posts.
 const tree = mkdtempSync(join(tmpdir(), "cwa-e2e-tree-"))
 cpSync(resolve(import.meta.dirname, "../../packages/demo-traffic/fixtures"), tree, {
+  recursive: true,
+})
+// The vault beside the tree, never in it (ADR-0009): a copy of the demo's deposited bodies.
+const vault = mkdtempSync(join(tmpdir(), "cwa-e2e-vault-"))
+cpSync(resolve(import.meta.dirname, "../../packages/demo-traffic/vault"), vault, {
   recursive: true,
 })
 const external = process.env["PLAYWRIGHT_BASE_URL"]
@@ -53,7 +58,14 @@ export default defineConfig({
         {
           command: "pnpm --dir ../ingest start",
           url: `http://127.0.0.1:${INGEST_PORT}/healthz`,
-          env: { PORT: String(INGEST_PORT), EVENTS_DIR: tree, INGEST_TOKEN, SIGNING_KEY },
+          env: {
+            PORT: String(INGEST_PORT),
+            EVENTS_DIR: tree,
+            VAULT_DIR: vault,
+            INGEST_TOKEN,
+            SIGNING_KEY,
+            VAULT_TOKEN,
+          },
           reuseExistingServer: !process.env["CI"],
           timeout: 60_000,
         },

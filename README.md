@@ -8,7 +8,7 @@ It is not an assembler, not a gateway and not a policy store. It never decides w
 
 Phase 1 is built (DP-0 to DP-7 of the working plan), and Phase 2 is under way: events can be kept in PostgreSQL as well as the tree (`docs/adr/0007-store-and-query-api.md`), and the stream pages back through the closed days. Over the committed demo traffic (`packages/demo-traffic/fixtures`, produced by the real TypeScript assembler and labelled `demo`), the web app shows:
 
-- the overview and the trace stream, and each event in the trace inspector, with the stage walk;
+- the overview and the trace stream, and each event in the trace inspector, with the stage walk; for a route opted into the vault, the operator resolves a redacted body with the operator token, shown only when its bytes are the ones the event digests (`docs/adr/0009-body-vault.md`);
 - the sessions, each with its turn timeline, turn detail and the played session;
 - the registry's route policies and profiles, and the events that ran them pinned, drifted or unregistered;
 - the fleet: every implementation's conformance run, the services, their contract and latency;

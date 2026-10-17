@@ -1,15 +1,27 @@
 // The Items tab (dashboard-plan.md 7.3): every included occurrence in placement order, joined to its
 // candidate. The metadata is shown in every redaction mode (R-DASH-1); the body in the form the mode
-// left it, and a redacted body names the wrapper setting that would reveal it (R-DASH-2).
+// left it, and a redacted body names the wrapper setting that would reveal it (R-DASH-2). For a route
+// opted into the vault (ADR-0009), the operator resolves a redacted body with the operator token; the
+// service decides, and the body is shown only when its bytes are the ones the event digests.
 
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
-import type { ReactNode } from "react"
+import { createContext, type FormEvent, type ReactNode, useContext, useRef, useState } from "react"
 
 import { SlotBadge } from "../../../components/dashboard/slot-badge"
 import { planeStyle } from "../../../lib/plane"
 import { Badge } from "../../../components/ui/badge"
 import { formatCount, formatInstant, formatTokens } from "../../../lib/format"
+import { useData } from "../../../data/data-context"
+import { resolveBody, type VaultAnswer } from "../api/vault"
 import { type Body, type ItemRow, joinItems } from "../model/inspector"
+
+interface VaultAccess {
+  readonly base: string
+  readonly apiBase: string
+  /** The operator token, in this page's memory only; undefined until the reader gives one. */
+  readonly token: string | undefined
+}
+const VaultContext = createContext<VaultAccess | undefined>(undefined)
 
 const TIER_SOURCE = { item: "item", "slot-default": "slot default", route: "route" } as const
 
@@ -38,6 +50,131 @@ function RevealNote({ route }: { readonly route: string }) {
       <code>{`routes.${route}.redaction_mode`}</code> to <code>full</code> in the wrapper's
       configuration records bodies as they were emitted.
     </p>
+  )
+}
+
+function VaultPanel({
+  vault,
+  apiBase,
+  token,
+  onToken,
+}: {
+  readonly vault: NonNullable<AssemblyEventV1["vault"]>
+  readonly apiBase: string | undefined
+  readonly token: string | undefined
+  readonly onToken: (token: string | undefined) => void
+}) {
+  const [typed, setTyped] = useState("")
+  const submit = (event: FormEvent) => {
+    event.preventDefault()
+    if (typed !== "") onToken(typed)
+    setTyped("")
+  }
+  return (
+    <section aria-label="Vault" data-slot="panel" data-padded="">
+      <p data-label="">Vault</p>
+      <p>
+        This route keeps its bodies in the vault at <code data-mono="">{vault.base}</code>
+        {vault.kms_key_id ? (
+          <>
+            , under key <code data-mono="">{vault.kms_key_id}</code>
+          </>
+        ) : null}
+        . The operator resolves one with the operator token: the service decides, and a body is
+        shown only when its bytes are the ones the event digests.
+      </p>
+      {apiBase === undefined ? (
+        <p data-slot="cell-note">
+          The service is not configured: <code>config.json</code> names no apiBase, so nothing can
+          resolve a body.
+        </p>
+      ) : token === undefined ? (
+        <form data-slot="field-row" onSubmit={submit}>
+          <div data-slot="field">
+            <label htmlFor="vault-token" data-label="">
+              Operator token
+            </label>
+            <input
+              id="vault-token"
+              type="password"
+              autoComplete="off"
+              data-slot="input"
+              value={typed}
+              onChange={(event) => setTyped(event.target.value)}
+            />
+          </div>
+          <button type="submit" data-slot="ghost-button" disabled={typed === ""}>
+            Use the token
+          </button>
+        </form>
+      ) : (
+        <p data-slot="chip-row">
+          <span data-slot="cell-note">The token is held for this page only.</span>
+          <button type="button" data-slot="ghost-button" onClick={() => onToken(undefined)}>
+            Forget the token
+          </button>
+        </p>
+      )}
+    </section>
+  )
+}
+
+function Resolve({ sha256 }: { readonly sha256: string }) {
+  const access = useContext(VaultContext)
+  const { fetchFn = fetch } = useData()
+  const [answer, setAnswer] = useState<VaultAnswer | "running" | undefined>(undefined)
+  const inFlight = useRef<AbortController | null>(null)
+  if (access === undefined || access.token === undefined) return null
+  const { apiBase, base, token } = access
+  const resolve = async () => {
+    inFlight.current?.abort()
+    const controller = new AbortController()
+    inFlight.current = controller
+    setAnswer("running")
+    try {
+      const got = await resolveBody(apiBase, sha256, token, fetchFn, controller.signal)
+      if (!controller.signal.aborted) setAnswer(got)
+    } catch (error) {
+      if (!controller.signal.aborted) throw error
+    }
+  }
+  if (answer !== undefined && answer !== "running" && answer.kind === "ok") {
+    return (
+      <section aria-label="Resolved body" data-slot="stack">
+        <p data-label="">resolved from the vault · SHA-256 checked</p>
+        <pre>{answer.text}</pre>
+      </section>
+    )
+  }
+  const words: Record<Exclude<VaultAnswer["kind"], "ok">, () => string> = {
+    mismatch: () => "The vault returned other bytes than the event digests; nothing is shown.",
+    unauthorised: () => "The service refused the token.",
+    "not-found": () =>
+      `This dashboard's vault does not hold it; the event names ${base} as where it was deposited.`,
+    "not-configured": () =>
+      (answer as { problems: readonly string[] }).problems.join(" ") ||
+      "The service keeps no vault.",
+    failed: () => (answer as { message: string }).message,
+  }
+  return (
+    <div data-slot="stack">
+      <div>
+        <button
+          type="button"
+          data-slot="ghost-button"
+          onClick={() => void resolve()}
+          disabled={answer === "running"}
+          aria-busy={answer === "running"}
+        >
+          Resolve from the vault
+        </button>
+      </div>
+      {answer !== undefined && answer !== "running" ? (
+        <p role="alert" data-slot="note">
+          {words[answer.kind as Exclude<VaultAnswer["kind"], "ok">]()}
+        </p>
+      ) : null}
+    </div>
   )
 }
 
@@ -76,6 +213,7 @@ function BodyView({
             </div>
           </dl>
           <RevealNote route={route} />
+          <Resolve sha256={body.content_sha256} />
         </details>
       )
     case "digest":
@@ -95,6 +233,7 @@ function BodyView({
             </div>
           </dl>
           <RevealNote route={route} />
+          <Resolve sha256={body.content_sha256} />
         </details>
       )
     case "raw":
@@ -188,6 +327,13 @@ function Item({
 export function ItemsTab({ event }: { readonly event: AssemblyEventV1 }) {
   const rows = joinItems(event)
   const route = event.snapshot?.route_policy.route ?? ""
+  const { apiBase } = useData()
+  const [token, setToken] = useState<string | undefined>(undefined)
+  const vault = event.vault
+  const panel =
+    vault === undefined ? null : (
+      <VaultPanel vault={vault} apiBase={apiBase} token={token} onToken={setToken} />
+    )
   if (rows.length === 0) {
     return (
       <p data-slot="cell-note">
@@ -197,16 +343,25 @@ export function ItemsTab({ event }: { readonly event: AssemblyEventV1 }) {
     )
   }
   return (
-    <ol data-slot="item-list" aria-label="Included items">
-      {rows.map((row, i) => (
-        // An item placed twice is linked to at its first occurrence.
-        <Item
-          key={row.index}
-          row={row}
-          route={route}
-          anchor={rows.findIndex((r) => r.item_id === row.item_id) === i}
-        />
-      ))}
-    </ol>
+    <VaultContext.Provider
+      value={
+        vault === undefined || apiBase === undefined
+          ? undefined
+          : { base: vault.base, apiBase, token }
+      }
+    >
+      {panel}
+      <ol data-slot="item-list" aria-label="Included items">
+        {rows.map((row, i) => (
+          // An item placed twice is linked to at its first occurrence.
+          <Item
+            key={row.index}
+            row={row}
+            route={route}
+            anchor={rows.findIndex((r) => r.item_id === row.item_id) === i}
+          />
+        ))}
+      </ol>
+    </VaultContext.Provider>
   )
 }
