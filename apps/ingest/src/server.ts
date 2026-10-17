@@ -2,7 +2,9 @@
 // GET /healthz; GET /replay/components, the published tokenizers and renderers with whether each is
 // required and whether this assembler provides it; POST /replay, a JSON snapshot in, the replay's
 // result out, which writes nothing; and POST /events, an assembly event in, written into the tree
-// for a caller with the bearer token. Bodies are size-limited and the replay queue bounded.
+// for a caller with the bearer token; and the vault's /bodies/<sha256> (ADR-0009), deposited with
+// that token and read or erased with the operator's. Bodies are size-limited and the replay queue
+// bounded.
 
 import { timingSafeEqual } from "node:crypto"
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http"
@@ -14,6 +16,7 @@ import { ReplayTimeoutError, type Runner } from "./runner.ts"
 import { buildBundle, type SigningKey } from "./bundle.ts"
 import { CORPUS_NAME, type EventStore as Store } from "./event-store.ts"
 import { shadowReport, type Candidate } from "./shadow.ts"
+import { type BodyVault, checkDeposit, SHA256 } from "./vault.ts"
 
 export interface IngestOptions {
   readonly runner: Runner
@@ -27,6 +30,10 @@ export interface IngestOptions {
   readonly token?: string
   /** The Ed25519 key compliance bundles are signed with; without it none is signed. */
   readonly signingKey?: SigningKey
+  /** Where deposited bodies are kept (ADR-0009); without it PUT /bodies takes none. */
+  readonly vault?: BodyVault
+  /** The operator token GET and DELETE /bodies require; never the ingest token. */
+  readonly vaultToken?: string
 }
 
 /** A corpus's most events (ADR-0008): a shadow run is two replays an event. */
@@ -51,7 +58,10 @@ const fail = (response: ServerResponse, status: number, kind: string, problems: 
 
 class TooLargeError extends Error {}
 
-function readBody(request: IncomingMessage, limit: number): Promise<string> {
+const readBody = async (request: IncomingMessage, limit: number) =>
+  (await readBytes(request, limit)).toString("utf8")
+
+function readBytes(request: IncomingMessage, limit: number): Promise<Buffer> {
   const declared = Number(request.headers["content-length"])
   if (Number.isFinite(declared) && declared > limit) return Promise.reject(new TooLargeError())
   return new Promise((resolve, reject) => {
@@ -66,7 +76,7 @@ function readBody(request: IncomingMessage, limit: number): Promise<string> {
       }
       chunks.push(chunk)
     })
-    request.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")))
+    request.on("end", () => resolve(Buffer.concat(chunks)))
     request.on("error", reject)
   })
 }
@@ -119,7 +129,82 @@ async function readJsonBody(
 }
 
 export function createIngestServer(options: IngestOptions): Server {
+  // A wrapper holds the ingest token; reading every body with it would make every wrapper an operator.
+  if (options.vaultToken !== undefined && options.vaultToken === options.token) {
+    throw new Error("VAULT_TOKEN must differ from INGEST_TOKEN: a wrapper holds the ingest token.")
+  }
   let inFlight = 0
+
+  // The vault (ADR-0009): a deposit with the ingest token; a read or an erasure with the operator's.
+  async function bodiesRoute(request: IncomingMessage, response: ServerResponse, path: string) {
+    const { vault, token, vaultToken } = options
+    const match = /^\/bodies\/([^/]+)$/.exec(path)
+    const sha256 = match?.[1]
+    if (vault === undefined) {
+      return fail(response, 503, "not-configured", [
+        "No vault: set DATABASE_URL, or VAULT_DIR outside EVENTS_DIR, to keep bodies.",
+      ])
+    }
+    const writing = request.method === "PUT"
+    const needed = writing ? token : vaultToken
+    if (needed === undefined || needed === "") {
+      return fail(response, 503, "not-configured", [
+        writing
+          ? "No token: set INGEST_TOKEN to take deposits."
+          : "No operator token: set VAULT_TOKEN to resolve and erase bodies.",
+      ])
+    }
+    if (!authorised(request, needed)) {
+      response.setHeader("www-authenticate", "Bearer")
+      return fail(response, 401, "unauthorised", [
+        writing
+          ? "Send the ingest token as a bearer token."
+          : "Send the operator token as a bearer token.",
+      ])
+    }
+    if (writing) {
+      let bytes: Buffer
+      try {
+        bytes = await readBytes(request, options.maxBodyBytes)
+      } catch (error) {
+        if (error instanceof TooLargeError) {
+          response.setHeader("connection", "close")
+          return fail(response, 413, "too-large", [
+            `The body is over ${options.maxBodyBytes} bytes.`,
+          ])
+        }
+        throw error
+      }
+      const checked = checkDeposit(
+        sha256 ?? "",
+        new Uint8Array(bytes),
+        request.headers["content-type"],
+      )
+      if (!checked.ok) return fail(response, 400, "invalid", checked.problems)
+      const kept = await vault.put(sha256!, checked.deposit)
+      return send(response, kept === "stored" ? 201 : 200, { ok: true, sha256, kept })
+    }
+    if (sha256 === undefined || !SHA256.test(sha256)) {
+      return fail(response, 404, "not-found", [`No body at ${path}.`])
+    }
+    if (request.method === "DELETE") {
+      if (!(await vault.delete(sha256)))
+        return fail(response, 404, "not-found", [`No body ${sha256}.`])
+      response.writeHead(204, { "cache-control": "no-store" })
+      return void response.end()
+    }
+    const held = await vault.get(sha256)
+    if (held === undefined)
+      return fail(response, 404, "not-found", [`The vault holds no body ${sha256}.`])
+    response.writeHead(200, {
+      "content-type": held.mediaType,
+      "content-length": String(held.bytes.byteLength),
+      "cache-control": "no-store",
+      "x-content-type-options": "nosniff",
+      "content-security-policy": "default-src 'none'; sandbox",
+    })
+    return void response.end(Buffer.from(held.bytes))
+  }
 
   async function eventsRoute(request: IncomingMessage, response: ServerResponse) {
     const { store, token } = options
@@ -418,6 +503,12 @@ export function createIngestServer(options: IngestOptions): Server {
       if (path.startsWith("/bundles/")) {
         if (request.method !== "GET") return send(response, 405, { ok: false }, { allow: "GET" })
         return bundleRoute(path, response)
+      }
+      if (path.startsWith("/bodies/")) {
+        if (!["GET", "PUT", "DELETE"].includes(request.method ?? "")) {
+          return send(response, 405, { ok: false }, { allow: "GET, PUT, DELETE" })
+        }
+        return bodiesRoute(request, response, path)
       }
       if (path.startsWith("/data/")) {
         // HEAD as GET: Node's server sends the headers and leaves the body out.

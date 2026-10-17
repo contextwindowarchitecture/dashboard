@@ -1,13 +1,14 @@
 // Starts the ingest service: PORT (8090), REPLAY_TIMEOUT_MS (5000), MAX_BODY_BYTES (4 MiB, the
 // sandbox's snapshot limit, dashboard-plan.md 9), and, to keep and serve events, a store
 // (open-store.ts: DATABASE_URL for PostgreSQL, else EVENTS_DIR for the tree) and, to take writes,
-// INGEST_TOKEN, and, to sign compliance bundles, SIGNING_KEY (an Ed25519 PKCS #8 PEM), from the
-// environment.
+// INGEST_TOKEN, to sign compliance bundles, SIGNING_KEY (an Ed25519 PKCS #8 PEM), and, to keep
+// redacted bodies (ADR-0009), a vault (DATABASE_URL's database, or VAULT_DIR) with VAULT_TOKEN, the
+// operator's, to read them, from the environment.
 
 import { createWorkerRunner } from "./runner.ts"
 import { createIngestServer } from "./server.ts"
 import { signingKeyFrom } from "./bundle.ts"
-import { openStore } from "./open-store.ts"
+import { openStore, openVault } from "./open-store.ts"
 
 const number = (name: string, fallback: number) => {
   const value = Number(process.env[name] ?? fallback)
@@ -20,6 +21,8 @@ const runner = createWorkerRunner({ timeoutMs: number("REPLAY_TIMEOUT_MS", 5000)
 const opened = await openStore(process.env)
 const store = opened?.store
 const token = process.env["INGEST_TOKEN"]
+const vault = openVault(process.env, opened)
+const vaultToken = process.env["VAULT_TOKEN"]
 // A compliance bundle's signing key, a PKCS #8 PEM; a key that is not Ed25519 stops the service.
 const signingPem = process.env["SIGNING_KEY"]
 const signingKey =
@@ -29,11 +32,15 @@ const server = createIngestServer({
   ...(store === undefined ? {} : { store }),
   ...(token === undefined || token === "" ? {} : { token }),
   ...(signingKey === undefined ? {} : { signingKey }),
+  ...(vault === undefined ? {} : { vault }),
+  ...(vaultToken === undefined || vaultToken === "" ? {} : { vaultToken }),
   maxBodyBytes: number("MAX_BODY_BYTES", 4 * 1024 * 1024),
   maxQueue: number("MAX_QUEUE", 8),
 })
 server.listen(port, () =>
-  process.stdout.write(`ingest: listening on ${port}, store: ${opened?.kind ?? "none"}\n`),
+  process.stdout.write(
+    `ingest: listening on ${port}, store: ${opened?.kind ?? "none"}, vault: ${vault === undefined ? "none" : "on"}\n`,
+  ),
 )
 
 const stop = () => {

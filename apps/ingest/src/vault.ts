@@ -95,9 +95,13 @@ const EXTENSION: Record<MediaType, string> = { [TEXT_TYPE]: "txt", [JSON_TYPE]: 
  * web server serves (open-store.ts refuses one inside the event tree).
  */
 export function directoryVault(dir: string): BodyVault {
-  const path = (sha256: string, mediaType: MediaType) =>
-    join(dir, sha256.slice(0, 2), `${sha256}.${EXTENSION[mediaType]}`)
+  // A digest names a file here, so nothing else may: the routes check, and so does the vault.
+  const path = (sha256: string, mediaType: MediaType) => {
+    if (!SHA256.test(sha256)) throw new Error(`${JSON.stringify(sha256)} is not a SHA-256 digest`)
+    return join(dir, sha256.slice(0, 2), `${sha256}.${EXTENSION[mediaType]}`)
+  }
   async function get(sha256: string): Promise<Deposit | undefined> {
+    path(sha256, TEXT_TYPE)
     for (const mediaType of [TEXT_TYPE, JSON_TYPE] as const) {
       try {
         return { bytes: new Uint8Array(await readFile(path(sha256, mediaType))), mediaType }
@@ -109,6 +113,7 @@ export function directoryVault(dir: string): BodyVault {
   }
   return {
     async put(sha256, deposit) {
+      path(sha256, deposit.mediaType)
       if ((await get(sha256)) !== undefined) return "held"
       const target = path(sha256, deposit.mediaType)
       await mkdir(join(dir, sha256.slice(0, 2)), { recursive: true })

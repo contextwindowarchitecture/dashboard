@@ -26,6 +26,25 @@ vaultContract("the PostgreSQL store's vault (PGlite)", async () => {
   return { vault: store.vault, done: () => store.close() }
 })
 
+describe("the directory vault", () => {
+  it("names no file for anything but a digest, whoever asks", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "cwa-vault-"))
+    try {
+      const vault = directoryVault(join(dir, "vault"))
+      for (const name of ["...", "../x", "A".repeat(64)]) {
+        await expect(vault.get(name), name).rejects.toThrow(/not a SHA-256/)
+        await expect(vault.delete(name), name).rejects.toThrow(/not a SHA-256/)
+        await expect(
+          vault.put(name, { bytes: utf8("x"), mediaType: TEXT_TYPE }),
+          name,
+        ).rejects.toThrow(/not a SHA-256/)
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+})
+
 describe("checkDeposit", () => {
   it("takes a demo body as a wrapper deposits it", () => {
     for (const { sha256, deposit } of DEMO_DEPOSITS) {
