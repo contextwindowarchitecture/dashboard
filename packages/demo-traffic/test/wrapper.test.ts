@@ -6,7 +6,7 @@ import { BUILT_ASSEMBLER, TOKENIZERS } from "@cwa-dashboard/assembler"
 import { validateAssemblyEventV1 } from "@cwa-dashboard/telemetry/validators"
 import { describe, expect, it } from "vitest"
 
-import { record, type Recording, ulid } from "../src/wrapper.ts"
+import { bodyDeposits, record, type Recording, ulid } from "../src/wrapper.ts"
 
 const vendor = resolve(import.meta.dirname, "../../contract/vendor/cwa")
 const read = (path: string): unknown => JSON.parse(readFileSync(join(vendor, path), "utf8"))
@@ -254,6 +254,80 @@ describe("record: redaction (R-DASH-1, R-DASH-2)", () => {
     for (const item of items(event.rejection!.snapshot) as Item[]) {
       expect((item["body"] as Item)["redacted"]).toBe("digest_only")
     }
+  })
+})
+
+describe("the vault (ADR-0009)", () => {
+  const VAULT = { base: "https://dashboard.example/api" }
+  // Every content_sha256 a redacted snapshot holds, bodies and variant bodies, in order.
+  const object = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value)
+  const digests = (snapshot: unknown) =>
+    items(snapshot)
+      .filter(object)
+      .flatMap((item) => [
+        item["body"],
+        ...(Array.isArray(item["variants"]) ? item["variants"] : [])
+          .filter(object)
+          .map((v) => v["body"]),
+      ])
+      .filter(object)
+      .map((body) => body["content_sha256"] as string)
+
+  it("names the vault in an event of a route opted into it, under either redaction", () => {
+    const snapshot = read("conformance/cases/budget-variant-choice/snapshot.json")
+    for (const mode of ["digest_only", "pii_scrubbed"] as const) {
+      const event = record(snapshot, { ...RECORDING, redaction: { mode }, vault: VAULT })
+      expectValid(event)
+      expect(event.vault).toEqual(VAULT)
+    }
+    expect(
+      record(snapshot, { ...RECORDING, redaction: { mode: "digest_only" } }).vault,
+    ).toBeUndefined()
+  })
+
+  it("refuses the vault for a route under full, whose bodies are in its events", () => {
+    const snapshot = read("conformance/cases/budget-variant-choice/snapshot.json")
+    expect(() => record(snapshot, { ...RECORDING, vault: VAULT })).toThrow(/full/)
+  })
+
+  it("deposits exactly the bytes each digest covers, every body and variant body once", () => {
+    for (const path of [
+      ...dirs("conformance/cases").map((id) => `conformance/cases/${id}`),
+      ...dirs("conformance/rejections").map((id) => `conformance/rejections/${id}`),
+    ]) {
+      const snapshot = read(`${path}/snapshot.json`)
+      const deposits = bodyDeposits(snapshot)
+      for (const deposit of deposits) {
+        expect(sha256(Buffer.from(deposit.text, "utf8")), path).toBe(deposit.sha256)
+        expect(["text/plain; charset=utf-8", "application/json"]).toContain(deposit.media_type)
+      }
+      const event = record(snapshot, { ...RECORDING, redaction: { mode: "digest_only" } })
+      const redacted = event.snapshot ?? event.rejection?.snapshot
+      expect(
+        deposits.map((d) => d.sha256),
+        path,
+      ).toEqual([...new Set(digests(redacted))])
+    }
+  })
+
+  it("deposits a body that is not a string as its RFC 8785 serialization, and a repeated one once", () => {
+    const snapshot = {
+      tokenizer: "estimate-utf8",
+      batches: [
+        {
+          items: [
+            { id: "a", body: { b: 1, a: [2, "x"] } },
+            { id: "b", body: "text" },
+            { id: "c", body: "text", variants: [{ body: { a: [2, "x"], b: 1 } }] },
+          ],
+        },
+      ],
+    }
+    expect(bodyDeposits(snapshot).map(({ media_type, text }) => ({ media_type, text }))).toEqual([
+      { media_type: "application/json", text: '{"a":[2,"x"],"b":1}' },
+      { media_type: "text/plain; charset=utf-8", text: "text" },
+    ])
   })
 })
 

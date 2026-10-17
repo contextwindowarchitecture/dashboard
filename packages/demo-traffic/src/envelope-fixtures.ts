@@ -1,5 +1,6 @@
 // Writes packages/telemetry/fixtures/envelope/: for a handful of vendored cases, the envelope inputs
-// (recording.json) and the event a wrapper must emit for them in each redaction mode. They are the
+// (recording.json), the event a wrapper must emit for them in each redaction mode, and the bodies a
+// route opted into the vault deposits (deposits.json, ADR-0009). They are the
 // oracle every wrapper, in every language, reproduces, so wrappers never disagree on a digest, a
 // count, a part or a redacted form (dashboard-plan.md 3). This wrapper is the first to pass them.
 //
@@ -14,7 +15,13 @@ import { fileURLToPath } from "node:url"
 
 import type { AssemblyEventV1 } from "@cwa-dashboard/telemetry/types"
 
-import { type Recording, record, type RedactionMode } from "./wrapper.ts"
+import {
+  bodyDeposits,
+  type BodyDeposit,
+  type Recording,
+  record,
+  type RedactionMode,
+} from "./wrapper.ts"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
 const VENDOR = join(ROOT, "packages/contract/vendor/cwa")
@@ -73,6 +80,13 @@ export function expectedEvent(recording: FixtureRecording, mode: RedactionMode):
   return { ...event, ...(trace === undefined ? {} : { trace }), timings_ms: { total: 0 } }
 }
 
+/** What a route opted into the vault deposits for the recording's snapshot, in any mode but full. */
+export function expectedDeposits(recording: FixtureRecording): BodyDeposit[] {
+  return bodyDeposits(
+    JSON.parse(readFileSync(join(VENDOR, recording.case, "snapshot.json"), "utf8")),
+  )
+}
+
 // An assembler's own per-stage timings are measurements too; the fixtures leave them out.
 function withoutTimings<T extends object>(trace: T): T {
   const copy = { ...trace } as Record<string, unknown>
@@ -89,6 +103,7 @@ function outputs(): Map<string, string> {
     const dir = path.split("/").at(-1)!
     files.set(`${dir}/recording.json`, text(recording))
     for (const mode of MODES) files.set(`${dir}/${mode}.json`, text(expectedEvent(recording, mode)))
+    files.set(`${dir}/deposits.json`, text(expectedDeposits(recording)))
   })
   return files
 }

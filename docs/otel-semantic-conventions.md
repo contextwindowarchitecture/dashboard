@@ -81,8 +81,8 @@ One row per event field. A field path uses dots between properties and `[]` for 
 | `cwa.payload.part.sha256` | `payload.parts[].sha256` | string[] | |
 | `cwa.payload.part.bytes` | `payload.parts[].bytes` | int[] | |
 | `cwa.rejection.problems` | `rejection.problems` | string[] | The assembler's checks in words; only when rejected |
-| `cwa.vault.base` | `vault.base` | string | Phase 2 |
-| `cwa.vault.kms_key_id` | `vault.kms_key_id` | string | Phase 2 |
+| `cwa.vault.base` | `vault.base` | string | Absent unless the route is opted into the vault |
+| `cwa.vault.kms_key_id` | `vault.kms_key_id` | string | Reserved; this dashboard keeps bodies as deposited |
 
 The snapshot and the trace are carried whole in the event, not as attributes: they are too large for a span, and the inspector joins them item by item.
 
@@ -104,7 +104,9 @@ Bodies can carry personal data; everything else about an item cannot be hidden, 
 - `token_counts` holds one entry, keyed by the snapshot's `tokenizer`, counting the original body with that tokenizer as the assembler would. It is empty when the body is not a string.
 - A full event carries no object of either form as a body; the schema refuses one.
 
-From Phase 2 a route may also deposit original bodies in a content-addressed vault (`vault`), so that revealing a body becomes an access decision rather than a data loss.
+**The vault** (`docs/adr/0009-body-vault.md`): a route under `pii_scrubbed` or `digest_only` may also keep its original bodies, for the operator to resolve later. The setting is `routes.<route>.vault: true`, with the vault's `base` (the dashboard's API) and the ingest token in the wrapper's configuration; a route under `full` refuses it. Before it sends the event, the wrapper puts every body and variant body, once each, at `PUT <base>/bodies/<content_sha256>` with the ingest token: a string body as its UTF-8 bytes, `text/plain; charset=utf-8`; any other as its RFC 8785 serialization, `application/json`; exactly the bytes `content_sha256` digests. The event carries `"vault": {"base": "<base>"}` and is otherwise the mode's. The envelope fixtures' `deposits.json` holds what each case deposits.
+
+So revealing a body becomes an access decision, the operator's, rather than a loss; a route that must not keep bodies anywhere stays off the vault.
 
 ## Payload parts
 

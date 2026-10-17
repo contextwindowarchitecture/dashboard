@@ -30,10 +30,18 @@ export interface Recording {
   readonly redaction: { readonly mode: RedactionMode; readonly scrub?: readonly string[] }
   /** The trace's id; the assembler picks a random one when absent (R-23). */
   readonly traceId?: string
+  /**
+   * For a route opted into the vault (ADR-0009): where its bodies are deposited. The event names it;
+   * the bodies are bodyDeposits(snapshot), put there before the event is sent.
+   */
+  readonly vault?: { readonly base: string }
 }
 
 /** Records one assemble() call over `snapshot` as an assembly event. */
 export function record(snapshot: unknown, recording: Recording): AssemblyEventV1 {
+  if (recording.vault !== undefined && recording.redaction.mode === "full") {
+    throw new Error("A route under full sends its bodies in its events; it takes no vault.")
+  }
   const start = performance.now()
   let assembly: ReturnType<typeof assemble> | undefined
   let problems: string[] | undefined
@@ -66,6 +74,7 @@ export function record(snapshot: unknown, recording: Recording): AssemblyEventV1
     ...(recording.session === undefined ? {} : { session: recording.session }),
     redaction_mode: recording.redaction.mode,
     timings_ms: { total },
+    ...(recording.vault === undefined ? {} : { vault: { base: recording.vault.base } }),
   }
 
   if (assembly === undefined) {
@@ -128,6 +137,47 @@ export function payloadParts(renderer: string, payload: Uint8Array): Part[] | un
     ...request.tools.map((entry) => part("tools", entry.text, entry.id)),
     ...content,
   ]
+}
+
+// --- the vault -----------------------------------------------------------------------------------
+
+export interface BodyDeposit {
+  readonly sha256: string
+  readonly media_type: "text/plain; charset=utf-8" | "application/json"
+  /** The bytes deposited, as UTF-8 text: the body itself, or its RFC 8785 serialization. */
+  readonly text: string
+}
+
+/**
+ * What a route opted into the vault deposits for a snapshot (ADR-0009): every body and variant body,
+ * as the bytes its content_sha256 covers, once each, in the snapshot's order.
+ */
+export function bodyDeposits(snapshot: unknown): BodyDeposit[] {
+  const deposits = new Map<string, BodyDeposit>()
+  const add = (body: unknown) => {
+    const isText = typeof body === "string"
+    const text = isText ? body : canonicalJson(body)
+    const digest = sha256(text)
+    // Keyed by digest: a repeated body keeps its first place.
+    deposits.set(digest, {
+      sha256: digest,
+      media_type: isText ? "text/plain; charset=utf-8" : "application/json",
+      text,
+    })
+  }
+  if (!isRecord(snapshot) || !Array.isArray(snapshot["batches"])) return []
+  for (const batch of snapshot["batches"]) {
+    if (!isRecord(batch) || !Array.isArray(batch["items"])) continue
+    for (const item of batch["items"]) {
+      if (!isRecord(item)) continue
+      if ("body" in item) add(item["body"])
+      if (!Array.isArray(item["variants"])) continue
+      for (const variant of item["variants"]) {
+        if (isRecord(variant) && "body" in variant) add(variant["body"])
+      }
+    }
+  }
+  return [...deposits.values()]
 }
 
 // --- redaction -----------------------------------------------------------------------------------
