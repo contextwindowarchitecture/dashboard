@@ -1,6 +1,12 @@
 import "@testing-library/jest-dom/vitest"
-import { cleanup } from "@testing-library/react"
+import { cleanup, configure } from "@testing-library/react"
 import { afterEach, vi } from "vitest"
+
+// A findBy or waitFor waits for its condition to hold, never for time to pass, so its limit only
+// bounds a hung test. Testing Library's one second is too short on a shared CI runner while other
+// packages' suites run beside it: the played session's turns, on GSAP's real clock, and two pages'
+// first renders ran past it there.
+configure({ asyncUtilTimeout: 10_000 })
 
 afterEach(() => {
   cleanup()
