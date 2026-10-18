@@ -74,7 +74,7 @@ A rollout:
 2. Set both `newTag`s in `deploy/overlays/prod/kustomization.yaml` to that SHA, and commit.
 3. `oc apply -k deploy/overlays/prod`, then `oc -n cwa-dashboard rollout status deployment/dashboard` and `deployment/dashboard-ingest`. A rollback is `oc rollout undo`.
 
-After every install the build runs `deploy/check-native.mjs`, which fails it when pnpm skipped this platform's native binding of an optional dependency, as it does without failing when a download times out; build again (with `--no-cache` if the install layer was cached without it).
+The base images are pinned by digest, with the version beside it (`node:24.22.0-bookworm-slim@sha256:…`, `ubi9/nginx-124:1-1791969177@sha256:…`), so a build is the same build later; a test fails on a `FROM` without one. Moving one is a deliberate change: find the new release's tag, take its multi-architecture index digest (`curl -sI -H 'Accept: application/vnd.oci.image.index.v1+json' https://registry.access.redhat.com/v2/ubi9/nginx-124/manifests/<tag>`, or Docker Hub's registry with a token for `node`), set both, build, and commit them together. After every install the build runs `deploy/check-native.mjs`, which fails it when pnpm skipped this platform's native binding of an optional dependency, as it does without failing when a download times out; build again (with `--no-cache` if the install layer was cached without it).
 
 To fill the volume with the demo tree (or any tree the generator wrote):
 
