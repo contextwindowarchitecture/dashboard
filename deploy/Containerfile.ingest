@@ -3,13 +3,14 @@
 # 8090, takes events into EVENTS_DIR (a volume at /srv/data) with INGEST_TOKEN, and replays snapshots. Runs under any
 # UID with GID 0. Build from the repository root:
 #   podman build -f deploy/Containerfile.ingest -t dashboard-ingest:dev .
+# deploy/check-native.mjs fails the build if pnpm skipped this platform's native binding of an optional dependency.
 FROM docker.io/library/node:24-bookworm-slim AS build
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 COPY . .
 RUN --mount=type=cache,target=/root/.local/share/pnpm,sharing=locked \
     npm install -g "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")" \
-    && pnpm install --frozen-lockfile
+    && pnpm install --frozen-lockfile && node deploy/check-native.mjs
 
 FROM docker.io/library/node:24-bookworm-slim
 # The whole installed workspace: the service imports the contract, the telemetry derivation and the built assembler

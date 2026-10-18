@@ -74,6 +74,8 @@ A rollout:
 2. Set both `newTag`s in `deploy/overlays/prod/kustomization.yaml` to that SHA, and commit.
 3. `oc apply -k deploy/overlays/prod`, then `oc -n cwa-dashboard rollout status deployment/dashboard` and `deployment/dashboard-ingest`. A rollback is `oc rollout undo`.
 
+After every install the build runs `deploy/check-native.mjs`, which fails it when pnpm skipped this platform's native binding of an optional dependency, as it does without failing when a download times out; build again (with `--no-cache` if the install layer was cached without it).
+
 To fill the volume with the demo tree (or any tree the generator wrote):
 
 ```sh

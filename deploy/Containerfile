@@ -8,9 +8,10 @@ WORKDIR /src
 COPY . .
 # The web app needs no assembler (it never assembles, AGENTS.md), so the install skips the workspace's postinstall,
 # which builds it. pnpm at the version package.json pins; its store lives in a build cache mount.
+# deploy/check-native.mjs then fails the build if pnpm skipped this platform's native binding of an optional dependency.
 RUN --mount=type=cache,target=/root/.local/share/pnpm,sharing=locked \
     npm install -g "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")" \
-    && pnpm install --frozen-lockfile --ignore-scripts
+    && pnpm install --frozen-lockfile --ignore-scripts && node deploy/check-native.mjs
 ARG BUILD_COMMIT=image
 RUN BUILD_COMMIT="$BUILD_COMMIT" pnpm --filter @cwa-dashboard/web build
 
