@@ -1,8 +1,25 @@
-# Started by hand only, like the organisation's other repositories: no push or schedule triggers.
+# Started by hand only, like the organisation's other repositories: no push or schedule triggers. The fast checks
+# always run; the browser suites run by default and the performance suites when asked, each in a job of its own, so
+# they run side by side on runners of their own instead of competing for one runner's cores. The performance budgets
+# are timings, which a shared runner measures more than it measures the app, so they are left to a run that asks for
+# them (before a release, or after a change to the stream, the store or the replay path).
 name: ci
 
 on:
   workflow_dispatch:
+    inputs:
+      browser:
+        description: The browser tests over the event tree (smoke, accessibility, visual)
+        type: boolean
+        default: true
+      browser-api:
+        description: The browser tests again, every document read from PostgreSQL through the query API
+        type: boolean
+        default: true
+      performance:
+        description: The performance budgets, over the tree and over the query API
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -28,21 +45,7 @@ jobs:
           ref: ${{ steps.lock.outputs.commit }}
           path: contextwindowarchitecture
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          package_json_file: dashboard/package.json
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: dashboard/pnpm-lock.yaml
-
-      - name: Install
-        working-directory: dashboard
-        run: pnpm install --frozen-lockfile
+      - uses: ./dashboard/.github/actions/setup-dashboard
 
       - name: Vendor check
         working-directory: dashboard
@@ -78,26 +81,6 @@ jobs:
         working-directory: dashboard
         run: pnpm --filter web budgets
 
-      - name: Install Playwright's browser
-        working-directory: dashboard/apps/web
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Browser tests
-        working-directory: dashboard
-        run: pnpm --filter web test:e2e
-
-      - name: Browser tests over the query API
-        working-directory: dashboard
-        run: pnpm --filter web test:e2e:api
-
-      - name: Performance tests
-        working-directory: dashboard
-        run: pnpm --filter web test:perf
-
-      - name: Performance tests over the query API
-        working-directory: dashboard
-        run: pnpm --filter web test:perf:api
-
       # The manifests render: the production overlay, the one with PostgreSQL and the one with sign-in, as `oc apply -k` would build them.
       - name: Render the deployment
         working-directory: dashboard
@@ -105,3 +88,50 @@ jobs:
           kubectl kustomize deploy/overlays/prod > /dev/null
           kubectl kustomize deploy/overlays/prod-postgres > /dev/null
           kubectl kustomize deploy/overlays/prod-sign-in > /dev/null
+
+  browser:
+    if: inputs.browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: dashboard
+      - uses: ./dashboard/.github/actions/setup-dashboard
+        with:
+          browser: "true"
+      - name: Browser tests
+        working-directory: dashboard
+        run: pnpm --filter web test:e2e
+
+  browser-api:
+    if: inputs.browser-api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: dashboard
+      - uses: ./dashboard/.github/actions/setup-dashboard
+        with:
+          browser: "true"
+      - name: Browser tests over the query API
+        working-directory: dashboard
+        run: pnpm --filter web test:e2e:api
+
+  performance:
+    if: inputs.performance
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [test:perf, test:perf:api]
+    name: performance (${{ matrix.suite }})
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: dashboard
+      - uses: ./dashboard/.github/actions/setup-dashboard
+        with:
+          browser: "true"
+      - name: Performance tests
+        working-directory: dashboard
+        run: pnpm --filter web ${{ matrix.suite }}
