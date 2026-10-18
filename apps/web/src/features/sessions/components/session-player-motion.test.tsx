@@ -128,10 +128,13 @@ describe("the played session", () => {
   it("leaves nothing on GSAP's clock after a route change, under Strict Mode", async () => {
     prefer(false)
     const user = userEvent.setup()
-    const { button, turn, router } = await openPlayer("/sessions/refund-7", true)
+    const { button, router } = await openPlayer("/sessions/refund-7", true)
+    // Mid-play however slow the machine: the clock barely moves, so the first turn's tweens and the
+    // beat that would end it are still on it when the route changes. (Waiting for a given turn raced
+    // a slow runner, whose sparse ticks could carry the play past that turn before anything saw it.)
+    gsap.globalTimeline.timeScale(0.001)
     await user.click(button("Play"))
     await waitFor(() => expect(running().length).toBeGreaterThan(0))
-    await waitFor(() => expect(turn()).toBe("1"))
     await act(() => router.navigate("/sessions"))
     await screen.findByRole("table", { name: "Sessions" })
     expect(running()).toHaveLength(0)
